@@ -197,6 +197,8 @@ public struct WhisperModelPreparer: Sendable {
 
     /// 揃っていて manifest と一致すれば何もしない。そうでなければ取得し、manifest を書き、検証する。
     /// 食い違うファイルは消してから取り直す（Hub は `.metadata` が一致するとファイルを取り直さないため）。
+    /// ファイルは揃っているが manifest だけ無い（`.unmanifested`）ときは、取得元の commit が固定 revision と
+    /// 食い違うと分かる場合を除き、**取り直さずに** `adoptExisting` で manifest だけ作る（ネットワーク不要）。
     public func prepare(progress: ProgressHandler? = nil) async throws -> Outcome {
         switch try verify(level: .sha256) {
         case .ready(let manifest):
@@ -207,9 +209,36 @@ public struct WhisperModelPreparer: Sendable {
         case .missing:
             try await download(progress: progress)
         case .unmanifested:
-            // ファイルはあるが、取得元が分からない。固定 revision で取り直して（同じなら Hub が省く）から manifest を作る
+            if canAdoptExisting() { return try adoptExisting(progress: progress) }
+            // 別の commit の取得物。固定 revision で取り直して（同じファイルは Hub が省く）から manifest を作る
             try await download(progress: progress)
         }
+        return try writeManifestAndVerify(progress: progress)
+    }
+
+    /// 既存のファイルを取り直さずに採用できるか: 読み込みに要るファイルが揃っていて、Hub の `.metadata` に残る
+    /// 取得元の commit が固定 revision と食い違わない（記録が無い・決められないときは採用する。スパイクの取得物など）。
+    public func canAdoptExisting(fileManager: FileManager = .default) -> Bool {
+        guard missingRequiredFiles(fileManager: fileManager).isEmpty else { return false }
+        if let rev = downloadedRevision(repoFolder: modelFolder.deletingLastPathComponent(), relativePrefix: variant + "/"),
+           rev != modelRevision { return false }
+        if let rev = downloadedRevision(repoFolder: tokenizerFolder, relativePrefix: ""), rev != tokenizerRevision {
+            return false
+        }
+        return true
+    }
+
+    /// 今あるファイルをそのまま採用し、manifest を作って書く（**ネットワークを使わない**。sha256 の計算で 1.5GB を読む）。
+    /// 読み込みに要るファイルが無ければ `WhisperModelPreparerError.downloadIncomplete`。
+    /// ⚠️ manifest.json を書き込むので、読み取り専用として扱う置き場（`CC_MODELS_DIR` でスパイクを指したとき等）では呼ばないこと。
+    @discardableResult
+    public func adoptExisting(progress: ProgressHandler? = nil) throws -> Outcome {
+        let missing = missingRequiredFiles()
+        guard missing.isEmpty else { throw WhisperModelPreparerError.downloadIncomplete(missing) }
+        return try writeManifestAndVerify(progress: progress)
+    }
+
+    private func writeManifestAndVerify(progress: ProgressHandler?) throws -> Outcome {
         progress?("manifest", 0)
         let manifest = try buildManifest()
         try writeManifest(manifest)
