@@ -20,6 +20,9 @@ public actor D1IntentClassifier: IntentClassifying, ModelUnloadable {
     public nonisolated let modelIdentifier: String
 
     private var loaded: Loaded?
+    /// 最終位置だけ語彙へ射影するか（false なら全位置の logits を作る。スパイクと同じ経路。比較・診断用）。
+    var lastPositionOnly = true
+    func setLastPositionOnly(_ v: Bool) { lastPositionOnly = v }
     /// 直近のロードの計測値（ロードしたことが無ければ nil）。
     public private(set) var lastLoadMetrics: D1LoadMetrics?
 
@@ -116,7 +119,7 @@ public actor D1IntentClassifier: IntentClassifying, ModelUnloadable {
         let x = MLXArray(ids.map { Int32($0) }).reshaped([1, ids.count])
         let flat = Array(Set(groups.flatMap { $0 })).sorted()
         let logits: MLXArray
-        if let head = l.lmHead {
+        if lastPositionOnly, let head = l.lmHead {
             // 最終位置だけ語彙へ射影する（全位置の 128000 次元 logits を作らない）
             let h = l.model.model(x, cache: nil)[0, ids.count - 1]
             logits = head.asLinear(h).asType(.float32)

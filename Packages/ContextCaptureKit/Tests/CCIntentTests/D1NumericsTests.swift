@@ -118,3 +118,37 @@ final class D1NumericsTests: XCTestCase {
 
     private func argmax(_ p: [Double]) -> Int { p.indices.max { p[$0] < p[$1] }! }
 }
+
+/// 診断（CC_D1_DIAG=1 のときだけ）: 最終位置だけの射影と全位置 logits（スパイク経路）の数値差・速度、トークン化の時間。
+final class D1DiagnosticsTests: XCTestCase {
+    func testLastPositionHeadVsFullLogits() async throws {
+        guard ProcessInfo.processInfo.environment["CC_D1_DIAG"] == "1" else { throw XCTSkip("CC_D1_DIAG=1 のときだけ") }
+        guard let dir = D1TestSupport.modelDirectory() else { throw XCTSkip("d1 モデルが無い") }
+        let ref = try D1TestSupport.reference()
+        let clf = D1IntentClassifier(modelDirectory: dir)
+        try await clf.load()
+        let tok = try D1Tokenizer(tokenizerJSON: dir.appendingPathComponent("tokenizer.json"))
+        let prompt = D1Prompt(tokenizer: tok)
+        var t = Date()
+        for row in ref.rows { for (name, _) in row.q { _ = try prompt.encode(state: row.text, question: D1TestSupport.question(name)) } }
+        let encodeMs = Date().timeIntervalSince(t) * 1000 / Double(ref.rows.count)
+        var out: [String: Any] = ["encode_ms_per_row_2q": encodeMs]
+        for last in [true, false] {
+            await clf.setLastPositionOnly(last)
+            var maxd = 0.0
+            var lats: [Double] = []
+            for row in ref.rows {
+                t = Date()
+                for (name, q) in row.q {
+                    let p = try await clf.answer(ids: q.ids, question: D1TestSupport.question(name))
+                    maxd = max(maxd, zip(p, q.chain_probs).map { abs($0 - $1) }.max()!)
+                }
+                lats.append(Date().timeIntervalSince(t))
+            }
+            lats.sort()
+            out[last ? "last_position" : "full_logits"] = ["max_abs_dp_vs_chain": maxd, "p50_s": lats[lats.count / 2]]
+        }
+        out["at"] = ISO8601DateFormatter().string(from: Date())
+        print("D1DIAG " + String(data: try JSONSerialization.data(withJSONObject: out, options: [.sortedKeys]), encoding: .utf8)!)
+    }
+}
