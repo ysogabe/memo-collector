@@ -174,12 +174,14 @@ final class SearchIndexMaintainer {
             readiness = .failed
             return
         }
+        // 先に resumePending（埋め込みの無い記録・未処理のガードや意図）を積み、そのあと全件の reindex を積む。
+        // キューは未着手の同じ id のジョブを 1 つにまとめるので、同じ記録を 2 回埋め込まない。
+        await resume()
         // list は新しい順。新しいものから埋め込む（検索で先に見つかってほしいのは最近のもの）。
         for id in ids {
             guard isCurrent(gen) else { return }
             await queue.reindex(id: id)
         }
-        await resume()
         await queue.waitUntilIdle()
         guard isCurrent(gen) else { return }
         var ready = rebuilding
