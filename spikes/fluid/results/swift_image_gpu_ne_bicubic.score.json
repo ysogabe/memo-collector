@@ -1,0 +1,56 @@
+{
+ "cos_vs_torch": {
+  "text_docs": {
+   "min": 0.99973,
+   "mean": 0.99992
+  },
+  "text_queries": {
+   "min": 0.99993,
+   "mean": 0.99995
+  },
+  "image_queries": {
+   "min": 0.9999,
+   "mean": 0.99994
+  },
+  "images": {
+   "min": 0.99817,
+   "mean": 0.99955
+  },
+  "fused": {
+   "min": 0.99951,
+   "mean": 0.99977
+  }
+ },
+ "fused_ids_match_hf": "30/30",
+ "soft_tokens_match_hf": "14/14",
+ "retrieval": {
+  "768": {
+   "text→capture(text+meta)": {
+    "recall@3": 0.933,
+    "mrr": 0.9
+   },
+   "text→capture(fused)": {
+    "recall@3": 0.883,
+    "mrr": 0.95
+   },
+   "image_query→screenshot": {
+    "recall@3": 0.8,
+    "mrr": 0.733
+   }
+  },
+  "256": {
+   "text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.85
+   },
+   "text→capture(fused)": {
+    "recall@3": 0.933,
+    "mrr": 0.95
+   },
+   "image_query→screenshot": {
+    "recall@3": 0.65,
+    "mrr": 0.712
+   }
+  }
+ }
+}

@@ -1,0 +1,10 @@
+vendor/
+models/
+.build/
+**/.build/
+.venv/
+*.mlmodelc/
+__pycache__/
+# 再生成できる中間データ（scripts/dump_st_inputs.py・coreml_eval.py が作る）
+data/*.npz
+results/*.npz

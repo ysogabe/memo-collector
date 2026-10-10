@@ -1,0 +1,69 @@
+{
+  "bench" : {
+    "batch_all_per_item_s" : 0.0079464149475097657,
+    "batch_all_s_each_rep" : [
+      8.4839792251586914,
+      0.39732074737548828,
+      0.38457512855529785
+    ],
+    "doc" : {
+      "median_s" : 0.036251544952392578,
+      "median_s_each_rep" : [
+        0.020678043365478516,
+        0.036251544952392578,
+        0.042848110198974609
+      ],
+      "n" : 30
+    },
+    "finished_at" : "2026-10-10T07:33:09Z",
+    "image_query" : {
+      "median_s" : 0.015984058380126953,
+      "median_s_each_rep" : [
+        0.016199946403503418,
+        0.015984058380126953,
+        0.015344381332397461
+      ],
+      "n" : 10
+    },
+    "started_at" : "2026-10-10T07:32:55Z",
+    "text_query" : {
+      "median_s" : 0.027335524559020996,
+      "median_s_each_rep" : [
+        0.027335524559020996,
+        0.027359485626220703,
+        0.017394900321960449
+      ],
+      "n" : 10
+    }
+  },
+  "compute_units" : "CPU_AND_GPU",
+  "first_predict_s" : 16.44487476348877,
+  "footprint_after_load_mb" : 362.20368000000002,
+  "footprint_end_mb" : 850.90608799999995,
+  "footprint_peak_mb" : 864.66864799999996,
+  "footprint_start_mb" : 5.7350719999999997,
+  "load_s" : 31.717359066009521,
+  "started_at" : "2026-10-10T07:32:02Z",
+  "tokenizer_match" : "50\/50",
+  "tokenizer_mismatches" : [
+
+  ]
+}
+       66.88 real        38.98 user         2.95 sys
+          2617147392  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              300355  page reclaims
+              355745  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                3382  voluntary context switches
+               42184  involuntary context switches
+        419919671743  instructions retired
+        115770092031  cycles elapsed
+           864668648  peak memory footprint

@@ -23,7 +23,7 @@ Packages/ContextCaptureKit/           # SwiftPM。ロジックはすべてここ
 │   ├── CCCapture/     # ホットキー、前面アプリ/ウインドウ（AX）、URL（AppleScript）、ScreenCaptureKit、録音
 │   ├── CCSTT/         # WhisperKit
 │   ├── CCIntent/      # d1-3B on MLX Swift（プロンプト組み立て・readout・トークナイザ修正）
-│   ├── CCEmbedding/   # EmbeddingGemma 2 on MLX Swift（テキスト・画像・融合）
+│   ├── CCEmbedding/   # EmbeddingGemma 2 on **Core ML**（FluidInference/embeddinggemma-2-coreml、テキスト・画像・融合。2026-10-10 変更）
 │   ├── CCGuard/       # Vision OCR + 秘密情報パターン、マスク画像生成
 │   ├── CCTriage/      # 非同期トリアージキュー、モデルのロード/解放
 │   ├── CCModels/      # モデルの取得・変換・検証（HF ダウンロード、d1 抽出+8bit 量子化、チェックサム）
@@ -87,10 +87,17 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 | 1 | intent | CCIntent（d1 MLX Swift 8bit、トークナイザ修正）、cc-models の d1 準備 | 参照確率との最大差 ≤ 0.05、未見 22 件で ≥ 20/22、トークン列が HF と 104/104 一致 |
 | 2 | ui | Inbox・詳細・HUD・トースト・設定・オンボーディング（F-01, F-06〜F-08, F-13 の UI） | 主要状態のスクショ、フェイク実装で動作 |
 | 2 | wiring | AppCoordinator: ホットキー → 撮影+録音 → STT → 保存 → トースト（M1 の縦串） | **M1 動作確認（ユーザー実機）** |
-| 3 | embedding | CCEmbedding（テキスト + 画像塔移植 + 融合）、cc-models の embedding 準備 | 参照コサイン ≥ 0.995、融合 256 の R@3 ≥ 0.9 |
+| 3 | embedding | CCEmbedding を Core ML 版で（テキスト・画像前処理 bicubic・融合列の組み立て）、cc-models の embedding 準備（取得 → sha256 検証 → コンパイル）。ANE の初回特殊化はアプリ本体のプロセスで行う | 参照コサイン ≥ 0.995、融合 256 の R@3 ≥ 0.9 |
 | 3 | guard+triage | CCGuard（OCR + パターン、マスク）、CCTriage（キュー・d1 解放）、検索 UI・意図ラベル UI | 14 画面で 4/4 検出・誤検知 0、トリアージの結合テスト |
 | 4 | mcp | CCMCP + cc-mcp（6 ツール、needs_review 画像は返さない、削除不可） | MCP の結合テスト、Claude Code から list_inbox |
 | 4 | e2e | 3 モデル同時常駐の実測、M2/M3 の受け入れ確認 | PRD §10 の非機能要件の実測表 |
+
+## 5.1 埋め込みの決定（2026-10-10、[fluid-inference.md](../research/fluid-inference.md)）
+
+- MLX Swift 手書き移植ではなく、`FluidInference/embeddinggemma-2-coreml`（revision `3f978dd` 固定、全ファイル sha256 検証）を Core ML で使う。実測: テキスト ANE 5ms・コサイン ≥0.9997、融合 256 R@3 0.933 / MRR 0.950（参照と同値）、融合 1 件 0.94 秒
+- 画像トークンは参照と同じ 280 を既定とし、設定値にする（70 にすると 0.15 秒。変更時は索引の作り直しが要る）
+- 実装上の必須事項: 画像縮小は HF と同じ bicubic を自前実装（CoreGraphics 補間ではコサイン 0.9938 で不合格）、推論ループは 1 件ごとに `autoreleasepool`（無いと 2.2GB まで膨張）、ANE キャッシュは実行バイナリ単位なので温めはアプリ本体で行う（`cc-models` で温めても効かない）
+- FluidUse はライブラリ依存にしない（EmbeddingGemma 2 の Swift 実装は Apache-2.0 なので帰属表示付きで写してよい）
 
 ## 6. 持ち越し事項
 

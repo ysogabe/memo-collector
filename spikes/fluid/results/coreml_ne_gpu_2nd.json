@@ -1,0 +1,192 @@
+{
+ "started_at": "2026-10-10T07:10:17.298079+00:00",
+ "text_cu": "CPU_AND_NE",
+ "vision_cu": "CPU_AND_GPU",
+ "rss_start_mb": 93.3,
+ "load_text_s": 16.71,
+ "load_vision_s": 1.04,
+ "rss_after_load_mb": 591.7,
+ "first_text_predict_s": 0.029,
+ "first_image_predict_s": 1.777,
+ "token_lengths": {
+  "text_docs": [
+   86,
+   85,
+   37,
+   34,
+   38,
+   40,
+   46,
+   44,
+   52,
+   52,
+   39,
+   40,
+   38,
+   68,
+   34,
+   39,
+   78,
+   85,
+   54,
+   40,
+   37,
+   31,
+   70,
+   72,
+   80,
+   33,
+   36,
+   47,
+   40,
+   37
+  ],
+  "text_queries": [
+   16,
+   15,
+   13,
+   12,
+   14,
+   17,
+   16,
+   16,
+   14,
+   15
+  ],
+  "image_queries": [
+   14,
+   16,
+   14,
+   13,
+   13,
+   19,
+   17,
+   15,
+   12,
+   14
+  ]
+ },
+ "cos_vs_torch": {
+  "text_docs": {
+   "min": 0.99973,
+   "mean": 0.99992
+  },
+  "text_queries": {
+   "min": 0.99993,
+   "mean": 0.99995
+  },
+  "image_queries": {
+   "min": 0.9999,
+   "mean": 0.99994
+  },
+  "images": {
+   "min": 0.9985,
+   "mean": 0.99957
+  },
+  "fused": {
+   "min": 0.99947,
+   "mean": 0.99976
+  }
+ },
+ "retrieval": {
+  "768": {
+   "coreml text→capture(text+meta)": {
+    "recall@3": 0.933,
+    "mrr": 0.9
+   },
+   "coreml text→capture(fused)": {
+    "recall@3": 0.883,
+    "mrr": 0.95
+   },
+   "coreml image_query→screenshot": {
+    "recall@3": 0.8,
+    "mrr": 0.733
+   },
+   "torch_ref text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.9
+   },
+   "torch_ref text→capture(fused)": {
+    "recall@3": 0.883,
+    "mrr": 0.9
+   },
+   "torch_ref image_query→screenshot": {
+    "recall@3": 0.8,
+    "mrr": 0.731
+   }
+  },
+  "256": {
+   "coreml text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.85
+   },
+   "coreml text→capture(fused)": {
+    "recall@3": 0.933,
+    "mrr": 0.95
+   },
+   "coreml image_query→screenshot": {
+    "recall@3": 0.65,
+    "mrr": 0.712
+   },
+   "torch_ref text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.85
+   },
+   "torch_ref text→capture(fused)": {
+    "recall@3": 0.933,
+    "mrr": 0.95
+   },
+   "torch_ref image_query→screenshot": {
+    "recall@3": 0.65,
+    "mrr": 0.712
+   }
+  }
+ },
+ "bench": {
+  "started_at": "2026-10-10T07:11:24.081599+00:00",
+  "text_doc": {
+   "median_s_each_rep": [
+    0.0129,
+    0.0112,
+    0.0127
+   ],
+   "median_s": 0.0127
+  },
+  "query": {
+   "median_s_each_rep": [
+    0.0083,
+    0.0086,
+    0.0082
+   ],
+   "median_s": 0.0083
+  },
+  "vision_only": {
+   "median_s_each_rep": [
+    0.9626,
+    0.9425,
+    0.9394
+   ],
+   "median_s": 0.9425
+  },
+  "image_embed": {
+   "median_s_each_rep": [
+    1.0131,
+    1.0209,
+    1.0007
+   ],
+   "median_s": 1.0131
+  },
+  "fused_embed": {
+   "median_s_each_rep": [
+    0.9283,
+    0.9517,
+    0.9604
+   ],
+   "median_s": 0.9517
+  },
+  "finished_at": "2026-10-10T07:14:15.388897+00:00"
+ },
+ "rss_end_mb": 455.4,
+ "peak_rss_mb": 894.8,
+ "phys_footprint_mb": 104.3
+}

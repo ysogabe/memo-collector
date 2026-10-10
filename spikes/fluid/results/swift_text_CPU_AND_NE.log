@@ -1,0 +1,69 @@
+{
+  "bench" : {
+    "batch_all_per_item_s" : 0.0032808589935302735,
+    "batch_all_s_each_rep" : [
+      0.16788291931152344,
+      0.16404199600219727,
+      0.16404294967651367
+    ],
+    "doc" : {
+      "median_s" : 0.0052940845489501953,
+      "median_s_each_rep" : [
+        0.0051285028457641602,
+        0.0052940845489501953,
+        0.0055669546127319336
+      ],
+      "n" : 30
+    },
+    "finished_at" : "2026-10-10T07:31:54Z",
+    "image_query" : {
+      "median_s" : 0.0049799680709838867,
+      "median_s_each_rep" : [
+        0.0049799680709838867,
+        0.0049710273742675781,
+        0.0049990415573120117
+      ],
+      "n" : 10
+    },
+    "started_at" : "2026-10-10T07:31:53Z",
+    "text_query" : {
+      "median_s" : 0.0049644708633422852,
+      "median_s_each_rep" : [
+        0.0049799680709838867,
+        0.004946589469909668,
+        0.0049644708633422852
+      ],
+      "n" : 10
+    }
+  },
+  "compute_units" : "CPU_AND_NE",
+  "first_predict_s" : 0.084860086441040039,
+  "footprint_after_load_mb" : 59.442208000000001,
+  "footprint_end_mb" : 63.620344000000003,
+  "footprint_peak_mb" : 302.31884000000002,
+  "footprint_start_mb" : 5.7350719999999997,
+  "load_s" : 133.97866702079773,
+  "started_at" : "2026-10-10T07:29:38Z",
+  "tokenizer_match" : "50\/50",
+  "tokenizer_mismatches" : [
+
+  ]
+}
+      136.76 real        44.02 user         1.18 sys
+           719192064  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              142180  page reclaims
+               18232  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                7156  voluntary context switches
+               18175  involuntary context switches
+        517921229366  instructions retired
+        123568608793  cycles elapsed
+           302318840  peak memory footprint
