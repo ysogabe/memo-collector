@@ -117,9 +117,14 @@ protocol TriageQueuing: Sendable {
     /// 索引だけ作り直し、キューが空になるまで待って、**索引できなかった記録の id** を返す（索引の作り直しの完了判定）。
     /// 本物は `TriageQueue.reindexAndWait(ids:)`。既定実装は `reindex` を順に積んで待つだけで、失敗を報告しない（空配列）。
     func reindexAll(ids: [String]) async -> [String]
+    /// キャプチャ中（true）は次のステップを始めない / 終わった（false）ら再開する。進行中のステップは止めない。
+    /// 本物は `TriageQueue.pause()` / `resume()`。既定実装は何もしない。
+    func setCapturing(_ capturing: Bool) async
 }
 
 extension TriageQueuing {
+    func setCapturing(_ capturing: Bool) async {}
+
     func reindexAll(ids: [String]) async -> [String] {
         for id in ids { await reindex(id: id) }
         await waitUntilIdle()

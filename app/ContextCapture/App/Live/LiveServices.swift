@@ -135,6 +135,11 @@ final class LiveServices {
             CCLog.capture.debug("saved \(id, privacy: .public)")
             triage.recordSaved(id: id)
         }
+        // 録音〜保存の間はトリアージの次のステップを始めない（Whisper とガード・索引が ANE を取り合うと STT が約 2 倍。
+        // docs/e2e/report.md §7）。AppCoordinator は取り消し・失敗でも必ず false を送る。
+        coordinator.onCaptureActivityChanged = { active in
+            triage.captureActivityChanged(active)
+        }
         coordinator.onRecordRemoved = { id in
             // キューから外す API は無いが、TriageQueue は処理時に消えた記録を .recordMissing で飛ばす。
             CCLog.capture.debug("removed \(id, privacy: .public)")
@@ -180,8 +185,14 @@ final class LiveServices {
             if whisperPresent {
                 let t0 = Date()
                 do {
+                    // 読み込み + 温め（合成音で 1 回推論）。温めないと起動後の最初の文字起こしが 5〜8 秒かかる（report §7 問題 3）。
+                    // 温めの間に録音されたら、その文字起こしは温めの完了を待ってから普通に処理される（キャプチャは待たせない）。
                     try await transcriber.prepare()
-                    CCLog.models.notice("whisper ready in \(Date().timeIntervalSince(t0), format: .fixed(precision: 1), privacy: .public)s")
+                    let warm = await transcriber.lastWarmUpDuration
+                    CCLog.models.notice("""
+                        whisper ready in \(Date().timeIntervalSince(t0), format: .fixed(precision: 1), privacy: .public)s \
+                        (warm-up \(warm ?? -1, format: .fixed(precision: 2), privacy: .public)s)
+                        """)
                 } catch {
                     CCLog.models.error("whisper prepare failed: \(String(describing: error), privacy: .public)")
                 }
