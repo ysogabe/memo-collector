@@ -64,7 +64,8 @@ final class E2EHarnessTests: XCTestCase {
                     + "StoreScreenshotLoader, TriageQueue(Configuration() 既定)",
                 "キャプチャ経路は AppCoordinator.save と同じ並び: 符号化（detached）と STT を並行 → スクショ書き込み → 音声（WAV を読んで）書き込み → insert。"
                     + "実機の解放→保存トーストにはさらに録音停止（recorder.stop）と撮影タスクの待ち・トースト表示が入る（このハーネスでは測れない）",
-                "with_triage は保存直後に enqueue して間を空けずに次の件を始める（直前の記録のトリアージが裏で動いている状態。実使用より厳しい）",
+                "with_triage は保存直後に enqueue して間を空けずに次の件を始める（直前の記録のトリアージが裏で動いている状態。実使用より厳しい）。"
+                    + "with_triage_paced は次の件の前に音声の長さだけ待つ（録音中に前の記録のトリアージが進む）。without_triage はキャプチャ後にまとめてトリアージ",
             ],
         ]
         XCTAssertEqual(E2EScreenshotEncoder.writableFormats.first?.fileExtension, "heic", "アプリと同じ HEIC になる前提")
@@ -143,16 +144,22 @@ final class E2EHarnessTests: XCTestCase {
         let sampler = FootprintSampler(mlxActive: { Memory.activeMemory })
         sampler.start()
         var roundsOut: [[String: Any]] = []
-        var captureTotals: [String: [[Double]]] = ["with_triage": [], "without_triage": []]
-        var captureParts: [String: [String: [Double]]] = ["with_triage": [:], "without_triage": [:]]
-        var triageSteps: [String: [TriageStep: [[Double]]]] = ["with_triage": [:], "without_triage": [:]]
-        var saveToTriaged: [String: [Double]] = ["with_triage": [], "without_triage": []]
+        // with_triage: 保存直後に enqueue し、間を空けずに次の件（最悪に近い）。
+        // with_triage_paced: 次の件の前にその音声の長さだけ待つ（話している間 = 録音中に前の記録のトリアージが進む。実使用に近い）。
+        // without_triage: キャプチャ中はトリアージを走らせない（全件の後にまとめて流す = トリアージ単独の値）。
+        let conditions = ["with_triage", "with_triage_paced", "without_triage"]
+        var captureTotals: [String: [[Double]]] = [:]
+        var captureParts: [String: [String: [Double]]] = [:]
+        var triageSteps: [String: [TriageStep: [[Double]]]] = [:]
+        var saveToTriaged: [String: [Double]] = [:]
+        var busyAtStart: [String: Int] = [:]
+        for c in conditions { captureTotals[c] = []; captureParts[c] = [:]; triageSteps[c] = [:]; saveToTriaged[c] = []; busyAtStart[c] = 0 }
         let embedForQueries = coreML
         for r in 0..<rounds {
             // 条件の順は周ごとに入れ替える（順序の偏りを避ける）
-            let order = r % 2 == 0 ? ["with_triage", "without_triage"] : ["without_triage", "with_triage"]
+            let order = (0..<conditions.count).map { conditions[($0 + r) % conditions.count] }
             for cond in order {
-                let withTriage = cond == "with_triage"
+                let withTriage = cond != "without_triage"
                 let dataRoot = tempRoot.appendingPathComponent("r\(r)-\(cond)", isDirectory: true)
                 let store = try SQLiteRecordStore(paths: CCPaths(dataRoot: dataRoot, modelsRoot: modelPaths.modelsRoot))
                 let clock = StepClock()
@@ -174,12 +181,18 @@ final class E2EHarnessTests: XCTestCase {
                 var cerErr = 0, cerLen = 0
                 for c in items {
                     let s = screens[c.screen]!
+                    if cond == "with_triage_paced" {
+                        try await Task.sleep(for: .seconds(Double(samples[c.id]!.count) / 16_000))
+                    }
+                    let busy = await queue.isBusy
+                    if busy { busyAtStart[cond]! += 1 }
                     let timing = try await captureOne(
                         capture: c, screen: s, samples: samples[c.id]!, image: images[s.id]!,
                         transcriber: transcriber, store: store
                     )
                     var row = timing.json
                     row["capture_id"] = c.id
+                    row["triage_busy_at_start"] = busy
                     if let id = timing.recordID {
                         idToCapture[id] = c.id
                         if withTriage {
@@ -237,7 +250,7 @@ final class E2EHarnessTests: XCTestCase {
 
         // ---- まとめ
         var summary: [String: Any] = [:]
-        for cond in ["with_triage", "without_triage"] {
+        for cond in conditions {
             var parts: [String: Any] = [:]
             for (k, v) in captureParts[cond]! { parts[k] = Stats.summary(v) }
             var steps: [String: Any] = [:]
@@ -247,6 +260,7 @@ final class E2EHarnessTests: XCTestCase {
                 "capture_parts_s": parts,
                 "triage_step_s": steps,
                 "save_to_triaged_s": Stats.summary(saveToTriaged[cond]!),
+                "captures_started_while_triage_busy": busyAtStart[cond]!,
             ]
         }
         out["summary"] = summary
