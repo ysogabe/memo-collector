@@ -1,4 +1,5 @@
 import CCCore
+import CoreML
 import Foundation
 import XCTest
 @testable import CCSTT
@@ -182,6 +183,35 @@ final class WhisperKitIntegrationTests: XCTestCase {
         }
     }
 
+    /// エンコーダ / デコーダの載せ先ごとの所要時間（`CC_STT_EXPERIMENT=compute`）。
+    func testComputeUnitsExperiment() async throws {
+        guard ProcessInfo.processInfo.environment["CC_STT_EXPERIMENT"] == "compute" else {
+            throw XCTSkip("CC_STT_EXPERIMENT=compute のときだけ走る調査用テスト")
+        }
+        let layout = try requireModel()
+        let audio = try STTTestSupport.loadWav(STTTestSupport.audioURL(id: 2))
+        let cases: [(String, MLComputeUnits, MLComputeUnits)] = [
+            ("enc-ane/dec-ane", .cpuAndNeuralEngine, .cpuAndNeuralEngine),
+            ("enc-gpu/dec-ane", .cpuAndGPU, .cpuAndNeuralEngine),
+            ("enc-ane/dec-ane(again)", .cpuAndNeuralEngine, .cpuAndNeuralEngine),
+        ]
+        for (label, enc, dec) in cases {
+            let t = WhisperKitTranscriber(layout: layout, configuration: .init(audioEncoderCompute: enc, textDecoderCompute: dec))
+            let l0 = Date()
+            try await t.prepare()
+            let load = Date().timeIntervalSince(l0)
+            var lines: [String] = []
+            for _ in 0..<6 {
+                let t0 = Date()
+                let r = try await t.debugTranscribe(samples: audio, promptTokens: nil)
+                let wall = Date().timeIntervalSince(t0)
+                lines.append(String(format: "%.2f(enc %.2f)", wall, r.first?.timings.encoding ?? -1))
+            }
+            print("[ccstt] compute \(label) load=\(String(format: "%.1f", load))s: \(lines.joined(separator: " "))")
+            await t.unload()
+        }
+    }
+
     /// 前文脈トークンが実際にプレフィルへ入っているかをログで確かめる（`CC_STT_EXPERIMENT=prefill`）。
     func testPrefillLogExperiment() async throws {
         guard ProcessInfo.processInfo.environment["CC_STT_EXPERIMENT"] == "prefill" else {
@@ -205,6 +235,18 @@ final class WhisperKitIntegrationTests: XCTestCase {
                 let toks = r.flatMap { $0.segments.flatMap(\.tokens) }
                 print("[ccstt] c\(id) \(name): loops=\(loops) text=\(r.map(\.text).joined()) tokens=\(toks.prefix(40))")
             }
+        }
+        // 所要時間の内訳（どこに時間が掛かっているか）
+        let audio = try STTTestSupport.loadWav(STTTestSupport.audioURL(id: 2))
+        for _ in 0..<3 {
+            let t0 = Date()
+            let r = try await t.debugTranscribe(samples: audio, promptTokens: nil)
+            let wall = Date().timeIntervalSince(t0)
+            guard let tm = r.first?.timings else { continue }
+            print(String(format: "[ccstt] timing wall=%.3f full=%.3f mel=%.3f enc=%.3f loop=%.3f pred=%.3f filt=%.3f samp=%.3f kv=%.3f nonpred=%.3f win=%.3f loops=%.0f fallbacks=%.0f",
+                         wall, tm.fullPipeline, tm.logmels, tm.encoding, tm.decodingLoop, tm.decodingPredictions,
+                         tm.decodingFiltering, tm.decodingSampling, tm.decodingKvCaching, tm.decodingNonPrediction,
+                         tm.decodingWindowing, tm.totalDecodingLoops, tm.totalDecodingFallbacks))
         }
     }
 }

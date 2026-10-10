@@ -1,4 +1,5 @@
 import CCCore
+import CoreML
 import Foundation
 import WhisperKit
 
@@ -45,6 +46,10 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         /// 最初のトークンの対数確率がこれ未満なら、その窓を打ち切る（WhisperKit の既定 -1.5。nil で無効）。
         /// 前文脈（`.prompt`）を付けると最初のトークンの確信度が下がり、これに引っかかって空文字になることがある。
         public var firstTokenLogProbThreshold: Float?
+        /// 音声エンコーダ（処理時間の大半）を載せる先。既定は ANE（GPU を d1 / 埋め込みの MLX と取り合わない）。
+        public var audioEncoderCompute: MLComputeUnits
+        /// テキストデコーダを載せる先。
+        public var textDecoderCompute: MLComputeUnits
         /// WhisperKit のログを出すか（調査用）。
         public var verboseLogging: Bool
 
@@ -55,6 +60,8 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             biasStart: Float = 1.0,
             biasContinuation: Float = 3.0,
             firstTokenLogProbThreshold: Float? = -1.5,
+            audioEncoderCompute: MLComputeUnits = .cpuAndNeuralEngine,
+            textDecoderCompute: MLComputeUnits = .cpuAndNeuralEngine,
             verboseLogging: Bool = false
         ) {
             self.variant = variant
@@ -63,6 +70,8 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             self.biasStart = biasStart
             self.biasContinuation = biasContinuation
             self.firstTokenLogProbThreshold = firstTokenLogProbThreshold
+            self.audioEncoderCompute = audioEncoderCompute
+            self.textDecoderCompute = textDecoderCompute
             self.verboseLogging = verboseLogging
         }
     }
@@ -197,9 +206,9 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         if let whisperKit { return whisperKit }
         if let loading { return try await loading.value.kit }
         let layout = self.layout
-        let verbose = configuration.verboseLogging
+        let configuration = self.configuration
         let task = Task { () throws -> KitBox in
-            KitBox(try await Self.load(layout: layout, verbose: verbose))
+            KitBox(try await Self.load(layout: layout, configuration: configuration))
         }
         loading = task
         let myGeneration = generation
@@ -221,7 +230,8 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         }
     }
 
-    static func load(layout: WhisperModelLayout, verbose: Bool) async throws -> WhisperKit {
+    static func load(layout: WhisperModelLayout, configuration: Configuration) async throws -> WhisperKit {
+        let verbose = configuration.verboseLogging
         let missing = layout.missingFiles()
         guard missing.isEmpty else {
             throw STTError.modelNotFound(path: layout.modelFolder.path + " (missing: \(missing.joined(separator: ", ")))")
@@ -232,6 +242,10 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             modelFolder: layout.modelFolder.path,
             // tokenizer は <root>/models/openai/whisper-large-v3/ に置く（Hub のレイアウト）。見つかるのでネットワークへは出ない
             tokenizerFolder: layout.root,
+            computeOptions: ModelComputeOptions(
+                audioEncoderCompute: configuration.audioEncoderCompute,
+                textDecoderCompute: configuration.textDecoderCompute
+            ),
             verbose: verbose,
             logLevel: verbose ? .debug : .error,
             prewarm: false,
