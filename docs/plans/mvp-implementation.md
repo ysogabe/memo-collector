@@ -102,7 +102,13 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 ## 6. 持ち越し事項
 
 - CCCore: 日時はミリ秒精度で保存されるため、`capturedAt` 等を生成時にミリ秒へ丸める（store 担当の提案。往復後の `==` を保証するため）
-- Package.swift: CCStoreTests に GRDB を明示依存、CCCore の Fixtures 共有（任意）
+- Package.swift: CCStoreTests に GRDB を明示依存、CCCore の Fixtures 共有、CCIntentTests の Fixtures を resources/exclude に（警告解消）
+- cc-models: `prepare` グループは main が持ち、各担当は葉コマンドだけ足す（stt マージ時に整理）
+- モデル manifest を CCCore の共通型 `ModelManifest` にまとめる（d1 / whisper / embedding）
+- CCTriage: 注釈中の特殊トークン文字列（`<|im_end|>` 等）は分類前に除去する（main 決定）。長い注釈の切り詰め、d1 の `load()` 3〜4 秒を非同期化するか
+- CCModels: HF から取得した元モデル（5.8GB）を変換後に `Models/.downloads/` から消す
+- アプリ本体（xcodebuild）でも d1 数値テストを回す（MLX カーネルの差で誤差が 0.05 に近づく恐れ。余裕 0.007）
+- 調査書 runtime-coreml-mlx.md §4.2 のトークナイザ原因を更新（ignore_merges ではなく、swift-transformers の前分割が書記素クラスタ単位で照合し単独 LF に `[\r\n]` が一致しない）
 
 ## 7. 進捗（main が Wave ごとに更新）
 
@@ -112,7 +118,8 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 0 scaffold（check.sh green、`swift test` で MLX が Metal 実行できることを確認）
 - [x] 追加調査: FluidUse / embeddinggemma-2-coreml → 埋め込みは Core ML 版に切替（§5.1）
 - [x] Wave 1 store（21 テスト成功、検索 1 万件 中央値 19.6ms。アプリは SQLiteRecordStore を 1 プロセス 1 インスタンスで持つこと。保持期間の削除はアプリ側が定期実行）
-- [ ] Wave 1 stt / intent（dispatch 済み。worktree: ../memo-collector-worktrees/{store,stt,intent}、ブランチ wave1/*）
+- [x] Wave 1 intent（トークン 104/104 一致、意図最大誤差 0.043、未見 21/22、p50 0.85 秒、8bit 2.9GB、Swift のみの変換が Python 版とビット一致）
+- [ ] Wave 1 stt（dispatch 済み。worktree: ../memo-collector-worktrees/{store,stt,intent}、ブランチ wave1/*）
 - [ ] Wave 1 capture（dispatch 済み。FluidUse 調査の結論: 計画どおり、AX の読み方のみ参考）
 - [ ] Wave 2 ui / wiring → M1 動作確認
 - [ ] Wave 3 embedding / guard+triage

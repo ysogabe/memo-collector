@@ -122,6 +122,8 @@ bf16 は 1 周目が最速で周を追うごとに遅くなる（共有 GPU の�
 
 ### 4.2 Swift トークナイザの不一致（d1 の Go 条件）
 
+> **2026-10-10 追記（実装で判明した根本原因）**: 下記の `ignore_merges` 仮説は誤り。swift-transformers 1.3.4 は前分割を `String.range(of:options:.regularExpression)` で行い、macOS 27 の Foundation ではこれが書記素クラスタ単位で照合するため、文字クラス `[\r\n]` が単独の LF に一致しない（CRLF にのみ一致）。製品では `CCIntent/D1Tokenizer.swift`（NSRegularExpression で UTF-16 単位に照合する自前実装）で解決し、参照 104/104 と追加 94 入力で HF と一致した。
+
 - swift-transformers 1.3.4 の `AutoTokenizer` で d1 のプロンプトを encode すると **104/104 件で HF と不一致**。状態テキストだけなら 52/52 一致する。
 - 原因箇所: テンプレート内の `"\n\n\n"`（状態ブロック末尾 + `\nQUESTION:`）。HF は 1 トークン `ĊĊĊ`、Swift は `ĊĊ` + `Ċ` に分ける。同じ前分割パターンを NSRegularExpression 単体で試すと HF と同じ分割（`"\n\n\n"` が 1 片）になったので、差は **BPE マージ段と推定**する（このトークナイザは `ignore_merges: true`。swift-transformers の Split 前分割が実際に同じ経路を通るかは未確認。根本原因の特定は未完了）。
 - 影響: Swift トークン列で推論すると確率差が最大 0.24（accuracy は今回の 52 件では不変）。**放置不可**。
