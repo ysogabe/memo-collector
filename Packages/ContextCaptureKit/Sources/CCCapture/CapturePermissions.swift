@@ -36,6 +36,10 @@ public enum CapturePermissions {
         case .microphone:
             return microphoneState(from: AVCaptureDevice.authorizationStatus(for: .audio))
         case .screenRecording:
+            // `.denied` は返さない（返せない）。公開 API の `CGPreflightScreenCaptureAccess` は Bool だけで、
+            // 「拒否した」と「まだ尋ねていない」を区別しない（TCC の状態を直接読むのは非公開 API なので使わない）。
+            // 許可していなければ常に `.notGranted`。UI は「システム設定で許可 → アプリを再起動」を案内すること
+            // （許可直後もこのプロセスでは false のまま。結果がプロセス内でキャッシュされるため）。
             return CGPreflightScreenCaptureAccess() ? .granted : .notGranted
         case .accessibility:
             return AXIsProcessTrusted() ? .granted : .notGranted

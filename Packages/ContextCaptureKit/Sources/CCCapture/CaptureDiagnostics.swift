@@ -118,6 +118,9 @@ public enum CaptureDiagnostics {
 
     /// ホットキーの確認: `seconds` 秒間、押下 / 解放を記録して JSON で返す。
     /// **メインスレッドの run loop が回っている環境（アプリ内）で呼ぶこと。**
+    /// ⚠️ アプリが使っているのと**同じ組み合わせを別に登録する**（新しい `GlobalPushToTalkHotKey` を作る）。
+    /// Carbon は同じ組み合わせの二重登録を拒否する（または一方にしかイベントが来ない）ので、
+    /// 呼ぶ側はアプリのホットキーを止めてから呼び、終わったら登録し直すこと。
     @MainActor
     @discardableResult
     public static func runHotKeyCheck(

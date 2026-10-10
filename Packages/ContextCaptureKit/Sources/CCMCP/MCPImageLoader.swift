@@ -45,26 +45,15 @@ public struct MCPImageLoader: Sendable {
     ]
 
     /// データルートからの相対パスを、データルート内の実在する通常ファイルの URL にする。
+    /// 検査は `CCPaths.resolveRegularFileInsideDataRoot` に任せ、エラーをこの型の `LoadError` に読み替える。
     public static func resolveInsideDataRoot(_ relativePath: String, paths: CCPaths) throws -> URL {
-        let url: URL
         do {
-            url = try paths.url(forRelativePath: relativePath)
+            return try paths.resolveRegularFileInsideDataRoot(relativePath)
+        } catch CCPathError.notRegularFile {
+            throw LoadError.notFound
         } catch {
             throw LoadError.outsideDataRoot
         }
-        // シンボリックリンクを解いた実体がデータルートの中にあること（両側を解く。/var → /private/var 対策）。
-        let root = paths.dataRoot.resolvingSymlinksInPath().standardizedFileURL.path
-        let real = url.resolvingSymlinksInPath().standardizedFileURL.path
-        let rootPrefix = root.hasSuffix("/") ? root : root + "/"
-        guard real.hasPrefix(rootPrefix) else { throw LoadError.outsideDataRoot }
-
-        var isDir: ObjCBool = false
-        guard FileManager.default.fileExists(atPath: real, isDirectory: &isDir), !isDir.boolValue else {
-            throw LoadError.notFound
-        }
-        let attrs = try? FileManager.default.attributesOfItem(atPath: real)
-        guard (attrs?[.type] as? FileAttributeType) == .typeRegular else { throw LoadError.notFound }
-        return URL(fileURLWithPath: real)
     }
 
     /// 相対パスの画像を読む。大きすぎる・そのまま渡せない形式なら縮小・変換する。

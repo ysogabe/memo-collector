@@ -26,7 +26,7 @@ actor SharedEmbeddingModel {
         let e = CoreMLEmbedder(configuration: .init(modelDirectory: dir, textComputeUnits: units, visionComputeUnits: units))
         metric("model dir: \(dir.path), compute units: \(units.rawValue), load average: \(loadAverage())")
         let start = Date()
-        firstPrepare = try await e.prepare()
+        firstPrepare = try await e.prepare(includeVision: true)
         metric(String(format: "first prepare (load + first inference): %.1f s at %@ %@", Date().timeIntervalSince(start),
                       ISO8601DateFormatter().string(from: start), String(describing: firstPrepare!)))
         embedder = e
@@ -78,7 +78,7 @@ final class EmbeddingModelIntegrationTests: XCTestCase {
         let afterUnload = await e.isLoaded
         XCTAssertFalse(afterUnload)
         let start = Date()
-        let second = try await e.prepare()
+        let second = try await e.prepare(includeVision: true)
         metric(String(format: "second prepare after unload (same process): %.1f s %@", Date().timeIntervalSince(start),
                       String(describing: second)))
         // 2 回目は ANE のキャッシュが効く（初回の数分に対して数十秒以内）

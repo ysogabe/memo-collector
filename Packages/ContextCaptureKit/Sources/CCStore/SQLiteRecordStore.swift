@@ -159,14 +159,21 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
     }
 
     /// 全埋め込みとの内積（ベクトルは L2 正規化済みなのでコサイン類似度）を vDSP で計算し、上位 `limit` 件を返す。
-    /// 状態（archived 等）では絞らない（呼び出し側で絞る）。同点は id の新しい順。
+    /// 状態（archived 等）では絞らない（絞るなら `search(vector:limit:statuses:)`）。同点は id の新しい順。
     public func search(vector: [Float], limit: Int) async throws -> [SearchHit] {
+        try await search(vector: vector, limit: limit, statuses: [])
+    }
+
+    /// `statuses` の状態のレコードだけを対象に、上位 `limit` 件を返す。空集合なら全状態（`InboxFilter.statuses` と同じ）。
+    /// 状態での絞り込みは上位を選ぶ**前**に効くので、archived が多くても `limit` 件まで埋まる。同点は id の新しい順。
+    public func search(vector: [Float], limit: Int, statuses: Set<RecordStatus>) async throws -> [SearchHit] {
         guard vector.count == dimension else {
             throw CCStoreError.dimensionMismatch(expected: dimension, actual: vector.count)
         }
         guard limit > 0 else { return [] }
         let dim = dimension
         let cache = embeddingCache
+        let statusValues = statuses.map(\.rawValue).sorted()
         return try await pool.read { db in
             // 1. 全ベクトル（連続バッファ）。埋め込みが変わっていなければキャッシュを使う。
             let snapshot = try cache.snapshot(db: db, dimension: dim)
@@ -178,10 +185,22 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
             var scores = [Float](repeating: 0, count: n)
             vDSP_mmul(snapshot.matrix, 1, vector, 1, &scores, 1, vDSP_Length(n), 1, vDSP_Length(dim))
 
-            // 3. 上位 k 件（k は小さい前提の挿入法）。
-            let top = Self.topK(scores: scores, ids: ids, k: min(limit, n))
+            // 3. 状態で絞る（上位を選ぶ前）。
+            var candidates: [Int]?
+            if !statusValues.isEmpty {
+                let allowed = try Set(String.fetchAll(
+                    db,
+                    sql: "SELECT id FROM records WHERE status IN (\(Self.placeholders(statusValues.count)))",
+                    arguments: StatementArguments(statusValues)
+                ))
+                candidates = ids.indices.filter { allowed.contains(ids[$0]) }
+            }
 
-            // 4. 該当レコードだけ読む。
+            // 4. 上位 k 件（k は小さい前提の挿入法）。
+            let top = Self.topK(scores: scores, ids: ids, k: min(limit, candidates?.count ?? n), candidates: candidates)
+            guard !top.isEmpty else { return [] }
+
+            // 5. 該当レコードだけ読む。
             let topIDs = top.map { ids[$0] }
             let rowsByID = try Dictionary(
                 uniqueKeysWithValues: Row.fetchAll(
@@ -194,15 +213,37 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
         }
     }
 
+    /// 埋め込みを持たないレコードの id（SQL で引く。起動時のインデックス再開用）。
+    public func idsWithoutEmbedding() async throws -> Set<String> {
+        try await pool.read { db in
+            try Set(String.fetchAll(
+                db,
+                sql: """
+                SELECT r.id FROM records r
+                LEFT JOIN embeddings e ON e.record_id = r.id
+                WHERE e.record_id IS NULL
+                """
+            ))
+        }
+    }
+
+    /// 埋め込みを持つレコードの id（SQL で引く）。
+    public func idsWithEmbedding() async throws -> Set<String> {
+        try await pool.read { db in
+            try Set(String.fetchAll(db, sql: "SELECT e.record_id FROM embeddings e JOIN records r ON r.id = e.record_id"))
+        }
+    }
+
     /// スコア降順（同点は id 降順）の上位 k 件の添字。
-    static func topK(scores: [Float], ids: [String], k: Int) -> [Int] {
+    /// `candidates` を渡せばその添字だけから選ぶ（nil なら全件）。
+    static func topK(scores: [Float], ids: [String], k: Int, candidates: [Int]? = nil) -> [Int] {
         guard k > 0 else { return [] }
         func better(_ a: Int, _ b: Int) -> Bool {
             scores[a] != scores[b] ? scores[a] > scores[b] : ids[a] > ids[b]
         }
         var top: [Int] = []
         top.reserveCapacity(k + 1)
-        for i in scores.indices {
+        for i in candidates ?? Array(scores.indices) {
             if top.count == k, !better(i, top[k - 1]) { continue }
             var pos = top.count
             while pos > 0, better(i, top[pos - 1]) { pos -= 1 }
@@ -335,5 +376,19 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
         }
         removeFiles(files)
         return count
+    }
+}
+
+// MARK: - CCCore の追加プロトコルへの準拠
+
+extension SQLiteRecordStore: RecordModifying, EmbeddingPresenceChecking, StatusFilteredSearching {
+    /// SQL で引く（零ベクトルの全件検索は使わない）。`dimension` は使わない。
+    public func idsWithEmbedding(dimension: Int) async throws -> Set<String> {
+        try await idsWithEmbedding()
+    }
+
+    /// SQL で引く。`dimension` は使わない。
+    public func idsWithoutEmbedding(dimension: Int) async throws -> Set<String> {
+        try await idsWithoutEmbedding()
     }
 }

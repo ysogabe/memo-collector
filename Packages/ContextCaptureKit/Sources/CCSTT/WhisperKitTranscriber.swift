@@ -296,3 +296,5 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         )
     }
 }
+
+extension WhisperKitTranscriber: ModelPreparable {}

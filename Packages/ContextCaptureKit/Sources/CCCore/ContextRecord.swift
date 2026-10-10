@@ -7,6 +7,8 @@ import Foundation
 public struct ContextRecord: Codable, Sendable, Equatable, Identifiable {
     /// ULID 文字列（`ULID.generate().string`）。
     public var id: String
+    /// 撮影時刻。保存はミリ秒精度なので、**生成する側で `Date.roundedToMilliseconds` を通してから入れる**
+    /// （丸めないと保存→読み直しで `==` にならない）。`Note.at`・`Handoff.at` も同じ。
     public var capturedAt: Date
     public var app: AppInfo
     /// 取れなかったときは nil。
