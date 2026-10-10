@@ -159,7 +159,10 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 1 capture（47 テスト成功。権限・実機の経路は未検証 → docs/manual-tests/capture.md で M1 時にユーザー確認）
 - [x] Wave 2 ui（check.sh green、スナップショット 12 枚 docs/ui-snapshots/。組み立て点は app/ContextCapture/App/AppEnvironment.swift の `// WIRING:`）
 - [x] Wave 2 wiring（check.sh green、アプリのテスト 25 件、署名 Apple Development / Team PJH36NNFL6 + Hardened Runtime、metallib 同梱）
-- [ ] M1 実機確認（ユーザー。手順 docs/manual-tests/m1.md）
+- [x] M1〜M3 実機確認（ユーザー、2026-10-11 0:45〜1:30、記録 11 件）: ホットキー（Carbon）・撮影・ウインドウ名・URL（Safari 7/9）・STT・保存・トリアージ・索引・3 モデルの取得と変換・d1 の 10 分解放が動作。押下→録音開始 p50 48ms / p90 55ms（≤150ms 合格）。解放→保存 10.2 秒（n=1）は、旧 e2e ハーネスのアプリが同じデータ置き場でモデル取得・変換・ANE コンパイル中だったため参考値 → 単独起動で再計測。アプリの挙動に問題なし（ユーザー評価）
+  - 意図: 11 件中 7 件が未分類（note と research の間で迷う）→ Issue #2 で実データから調整
+  - 観測性: キャプチャ 1 件ごとのログ（保存・所要時間・エラー）が debug レベルで保存されない → notice 以上に（注釈本文は出さない）
+  - STT: 固有名詞の誤り（コンテクトキャプチャー、デシオン、スピーチCPP）→ 設定の固有名詞辞書で補正できるか確認
 - [x] Wave 3 guard+triage（14 画面 4/4・誤検知 0、PEM・重なり・余白のマスク漏れ 4 件をセキュリティレビュー指摘で修正、56 テスト、本物の d1 で結合テスト）
 - [x] Wave 3 embedding（コサイン最小 0.9988、融合 256 R@3 0.933 / MRR 0.950、release で融合 0.59 秒・テキスト 6ms、ピーク 375MB。HF の縮小は torchvision の uint8 bicubic とビット一致させた）
 - [x] Wave 4 mcp（27 テスト、stdio 往復の結合テストあり。画像は clear/masked のみ・データルート外を読まない。cc-mcp の埋め込みは Wave 5/6 で `makeQueryEmbedder` → `WarmingQueryEmbedder`（.cpuAndGPU、起動時に裏で温める）に置き換え済み）
