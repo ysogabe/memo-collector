@@ -86,7 +86,11 @@ struct InboxView: View {
         .padding(.vertical, 12)
         .background {
             // ⌘F で検索欄へ。
-            Button("") { searchFocused = true }.keyboardShortcut("f").hidden()
+            Button("") { searchFocused = true }
+                .keyboardShortcut("f")
+                .frame(width: 0, height: 0)
+                .opacity(0)
+                .accessibilityHidden(true)
         }
     }
 

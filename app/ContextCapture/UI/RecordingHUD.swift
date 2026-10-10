@@ -14,7 +14,8 @@ final class OverlayPanel: NSPanel {
         isOpaque = false
         backgroundColor = .clear
         hasShadow = true
-        ignoresMouseEvents = clickThrough
+        // false を明示すると透明部分のクリック素通しが効かなくなるので、素通しのときだけ設定する。
+        if clickThrough { ignoresMouseEvents = true }
         isReleasedWhenClosed = false
         becomesKeyOnlyIfNeeded = true
         animationBehavior = .utilityWindow
