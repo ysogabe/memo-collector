@@ -176,11 +176,10 @@ final class WhisperAdoptExistingTests: XCTestCase {
         XCTAssertEqual(try p.verify(level: .size), .unmanifested)
         XCTAssertTrue(p.canAdoptExisting())
 
-        var stages: [String] = []
-        let lock = NSLock()
-        let outcome = try await p.prepare { stage, _ in lock.lock(); stages.append(stage); lock.unlock() }
+        let stages = StageRecorder()
+        let outcome = try await p.prepare { stage, _ in stages.append(stage) }
         guard case .prepared(let m) = outcome else { return XCTFail("\(outcome)") }
-        XCTAssertEqual(Set(stages), ["manifest"])  // model / tokenizer の取得は無い
+        XCTAssertEqual(Set(stages.values), ["manifest"])  // model / tokenizer の取得は無い
         XCTAssertEqual(m.revision, "unknown")
         XCTAssertEqual(m.files.count, 4)
         XCTAssertTrue(m.files.allSatisfy { !$0.path.hasPrefix("/") })
@@ -207,4 +206,12 @@ final class WhisperAdoptExistingTests: XCTestCase {
         XCTAssertFalse(q.canAdoptExisting())
         XCTAssertThrowsError(try q.adoptExisting())
     }
+}
+
+/// 進捗コールバックの段階名を記録する（コールバックは別スレッドから呼ばれうる）。
+private final class StageRecorder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var stored: [String] = []
+    func append(_ s: String) { lock.lock(); stored.append(s); lock.unlock() }
+    var values: [String] { lock.lock(); defer { lock.unlock() }; return stored }
 }
