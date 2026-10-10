@@ -69,9 +69,11 @@ final class D1ModelPreparerTests: XCTestCase {
         defer {
             if ProcessInfo.processInfo.environment["CC_D1_PREPARE_OUT"] == nil { try? FileManager.default.removeItem(at: outRoot) }
         }
+        Memory.peakMemory = 0  // 変換だけのピークを測る（setter はリセット）
         let t0 = Date()
         let manifest = try D1ModelPreparer(destination: dest).convert(source: Self.hfSnapshot)
         let seconds = Date().timeIntervalSince(t0)
+        let convertPeakMB = Memory.peakMemory / 1_000_000
         XCTAssertEqual(manifest.tensorCount, 600)
         XCTAssertEqual(manifest.revision, D1ModelPreparer.revision)
         XCTAssertEqual(try D1ModelPreparer.verify(directory: dest), [])
@@ -103,7 +105,7 @@ final class D1ModelPreparerTests: XCTestCase {
             if x.shape != y.shape || x.dtype != y.dtype || !arrayEqual(x, y).item(Bool.self) { differing.append(key) }
         }
         XCTAssertEqual(differing, [], "\(differing.count) tensors differ")
-        print("D1PREPARE converted in \(String(format: "%.1f", seconds)) s, peak MLX \(Memory.peakMemory / 1_000_000) MB, "
+        print("D1PREPARE converted in \(String(format: "%.1f", seconds)) s, conversion peak MLX \(convertPeakMB) MB, "
               + "tensors \(a.count), differing \(differing.count), config diff \(configDiff.count)")
     }
 

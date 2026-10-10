@@ -160,6 +160,13 @@ public struct D1ModelPreparer: Sendable {
 
     /// 言語モデル部の抽出・改名・conv 転置・量子化。
     static func convertWeights(url: URL, groupSize: Int, bits: Int, progress: (Double) -> Void = { _ in }) throws -> [String: MLXArray] {
+        // 解放したバッファを MLX のキャッシュに溜めない（溜めると変換中のフットプリントが元重みの数倍に膨らむ）
+        let oldCacheLimit = Memory.cacheLimit
+        Memory.cacheLimit = 64 << 20
+        defer {
+            Memory.cacheLimit = oldCacheLimit
+            Memory.clearCache()
+        }
         var src = try loadArrays(url: url)
         let keys = src.keys.filter { $0.hasPrefix(languageModelPrefix) }.sorted()
         guard !keys.isEmpty else { throw D1PrepareError.noLanguageModelWeights }
@@ -227,9 +234,12 @@ public struct D1ModelPreparer: Sendable {
         let h = try FileHandle(forReadingFrom: url.resolvingSymlinksInPath())
         defer { try? h.close() }
         var hasher = SHA256()
-        while let chunk = try h.read(upToCount: 16 << 20), !chunk.isEmpty {
+        // read(upToCount:) の Data は autorelease されるので、1 チャンクごとにプールを抜ける（抜けないとファイル全体が溜まる）
+        while try autoreleasepool(invoking: {
+            guard let chunk = try h.read(upToCount: 16 << 20), !chunk.isEmpty else { return false }
             hasher.update(data: chunk)
-        }
+            return true
+        }) {}
         return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 
