@@ -8,7 +8,7 @@ struct CCModelsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "cc-models",
         abstract: "Context Capture のモデルを取得・変換・検証する",
-        subcommands: [Paths.self]
+        subcommands: [Paths.self, Prepare.self]
     )
 
     /// 解決された保存先を表示する（CC_DATA_DIR / CC_MODELS_DIR の確認用）。
