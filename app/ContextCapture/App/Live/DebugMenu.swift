@@ -1,5 +1,34 @@
 import AppKit
+import Observation
 import SwiftUI
+
+/// デバッグメニューに出す各モデルの状態（`LiveServices.refreshDebugStatus()` が 5 秒ごとに更新。メニューを出しているときだけ）。
+/// d1 の無使用解放（既定 10 分）が効いているかをここで確かめる。
+@Observable
+@MainActor
+final class ModelDebugStatus {
+    private(set) var whisper = "-"
+    private(set) var d1 = "-"
+    private(set) var embedding = "-"
+    private(set) var triage = "-"
+    private(set) var mlxActive = "-"
+    private(set) var resident = "-"
+
+    func update(whisper: String, d1: String, embedding: String, triage: String, mlxActiveBytes: Int, residentBytes: Int) {
+        let f = ByteCountFormatter()
+        f.countStyle = .memory
+        self.whisper = whisper
+        self.d1 = d1
+        self.embedding = embedding
+        self.triage = triage
+        mlxActive = f.string(fromByteCount: Int64(mlxActiveBytes))
+        resident = residentBytes >= 0 ? f.string(fromByteCount: Int64(residentBytes)) : "-"
+    }
+
+    var report: String {
+        "whisper: \(whisper)\nd1: \(d1)\nembedding: \(embedding)\ntriage: \(triage)\nMLX active: \(mlxActive)\nRSS: \(resident)"
+    }
+}
 
 /// メニューバーのメニューに足すデバッグ項目（`--debug` 起動か、⌥ を押しながらメニューを開いたときだけ）。
 /// M1 の実機確認用: CaptureDiagnostics の 3 関数・計測値（直近 20 件の p50/p90）・データフォルダ。
@@ -10,6 +39,17 @@ struct DebugMenu: View {
     var body: some View {
         Menu("デバッグ") {
             Text("ホットキー: \(model.hotKeyStatus.debugDescription)")
+            Divider()
+            Text("文字起こし: \(live.debugStatus.whisper)")
+            Text("意図（d1）: \(live.debugStatus.d1)")
+            Text("検索: \(live.debugStatus.embedding)")
+            Text("トリアージ: \(live.debugStatus.triage)")
+            Text("MLX アクティブ: \(live.debugStatus.mlxActive)・RSS: \(live.debugStatus.resident)")
+            Button("モデルの状態を更新") { Task { await live.refreshDebugStatus() } }
+            Button("モデルの状態をコピー") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(live.debugStatus.report, forType: .string)
+            }
             Divider()
             ForEach(CaptureLatencyMonitor.Metric.allCases, id: \.self) { m in
                 Text("\(m.title): \(live.latency.summary(m))")

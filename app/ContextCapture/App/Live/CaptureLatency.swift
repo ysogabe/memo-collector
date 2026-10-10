@@ -9,6 +9,7 @@ enum CCLog {
     static let hotKey = Logger(subsystem: subsystem, category: "hotkey")
     static let models = Logger(subsystem: subsystem, category: "models")
     static let store = Logger(subsystem: subsystem, category: "store")
+    static let triage = Logger(subsystem: subsystem, category: "triage")
     /// Instruments の「os_signpost」で区間を見る（押下→録音開始、解放→保存）。
     static let signposter = OSSignposter(subsystem: subsystem, category: "latency")
 }

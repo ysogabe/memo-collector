@@ -1,5 +1,6 @@
 import AppKit
 import CCCore
+import CCTriage
 import Observation
 
 @Observable
@@ -7,6 +8,7 @@ import Observation
 final class DetailViewModel {
     private let store: any RecordStore
     private let guardReview: any GuardReviewing
+    private let triage: any TriageQueuing
     private let onChange: @MainActor () -> Void
 
     private(set) var record: ContextRecord
@@ -22,11 +24,13 @@ final class DetailViewModel {
     private(set) var isClosed = false
 
     init(record: ContextRecord, store: any RecordStore, guardReview: any GuardReviewing,
+         triage: any TriageQueuing = NoopTriageQueue(),
          onChange: @escaping @MainActor () -> Void = {}) {
         self.record = record
         self.draftText = record.annotation.text
         self.store = store
         self.guardReview = guardReview
+        self.triage = triage
         self.onChange = onChange
     }
 
@@ -52,34 +56,26 @@ final class DetailViewModel {
 
     func saveAnnotation() async {
         guard isAnnotationChanged else { return }
-        var r = record
-        r.annotation.text = draftText
-        r.annotation.edited = true
-        await commit(r, flash: "注釈を保存しました")
+        let text = draftText
+        if await commit(flash: "注釈を保存しました", { RecordEdits.setAnnotation(text, on: &$0) }) {
+            // 意図と索引をやり直す（手で変えた意図は上書きされない）。
+            let triage = triage, id = record.id
+            Task { await triage.annotationEdited(id: id) }
+        }
     }
 
     func revertAnnotation() {
         draftText = record.annotation.text
     }
 
-    /// 意図ラベルを付け替える（nil は未分類）。
+    /// 意図ラベルを付け替える（nil は未分類）。`TriageResult.manual`（model == "user"）を書くので、自動推定は以後上書きしない。
     func setIntent(_ intent: Intent?) async {
-        guard record.triage?.intent != intent || record.triage == nil else { return }
-        var r = record
-        if var t = r.triage {
-            t.intent = intent
-            r.triage = t
-        } else {
-            r.triage = TriageResult(intent: intent, intentConfidence: 1, mentionsDatetime: false, model: "user")
-        }
-        await commit(r, flash: nil)
+        guard record.triage?.intent != intent || record.triage == nil || record.triage?.isManual == false else { return }
+        await commit(flash: nil) { RecordEdits.setManualIntent(intent, on: &$0) }
     }
 
     func markDone() async {
-        var r = record
-        r.status = .done
-        await commit(r, flash: "完了にしました")
-        if errorMessage == nil { isClosed = true }
+        if await commit(flash: "完了にしました", { $0.status = .done }) { isClosed = true }
     }
 
     func delete() async {
@@ -121,16 +117,22 @@ final class DetailViewModel {
         }
     }
 
-    private func commit(_ r: ContextRecord, flash: String?) async {
+    /// 最新の記録を読み直して `change` だけを当てて保存する（開いている間にトリアージが書いたガード・意図を巻き戻さない）。
+    @discardableResult
+    private func commit(flash: String?, _ change: (inout ContextRecord) -> Void) async -> Bool {
         do {
+            var r = try await store.get(id: record.id) ?? record
+            change(&r)
             try await store.update(r)
             record = r
             draftText = r.annotation.text
             errorMessage = nil
             onChange()
             if let flash { showFlash(flash) }
+            return true
         } catch {
             errorMessage = "保存できませんでした。"
+            return false
         }
     }
 

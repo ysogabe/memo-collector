@@ -5,7 +5,7 @@ import Foundation
 /// UI が使う依存の組み立て点（ここ 1 か所）。
 ///
 /// - `--fake` 起動引数か環境変数 `CC_UI_FAKE=1` → `fake()`（メモリ上のストア・サンプル 10 件・偽の録音イベント）
-/// - それ以外 → `live()`（本物。部品の組み立ては `LiveServices`）。M2 で差し替える箇所に `// M2:` / `// WIRING(M2):` を付けてある
+/// - それ以外 → `live()`（本物。部品の組み立ては `LiveServices`）
 @MainActor
 struct AppEnvironment {
     var store: any RecordStore
@@ -15,6 +15,8 @@ struct AppEnvironment {
     var settings: any SettingsStore
     var permissions: any PermissionsProviding
     var models: any ModelPreparationProviding
+    /// 保存後の処理（注釈の編集で意図・索引をやり直す）。フェイクでは何もしない。
+    var triage: any TriageQueuing = NoopTriageQueue()
     /// フェイクで動いているか（メニューに「フェイク操作」を出す）。
     var isFake: Bool
     /// フェイク時だけ。メニューから偽の録音・失敗を流す。
@@ -57,7 +59,7 @@ struct AppEnvironment {
         return env
     }
 
-    /// 本番の組み立て（M1: 撮影 + 録音 → STT → 保存。トリアージ・ガード・埋め込み検索は M2）。
+    /// 本番の組み立て（撮影 + 録音 → STT → 保存 → トリアージ（ガード・意図・索引）、埋め込み検索、ガードの確認）。
     static func live() -> AppEnvironment {
         let settings = UserDefaultsSettingsStore()
         let services: LiveServices
@@ -76,15 +78,16 @@ struct AppEnvironment {
         let store = services.store
         var env = AppEnvironment(
             store: store,
-            search: SubstringSearchService(store: store),          // M2: Embedder.embedQuery → RecordStore.search に替える
+            search: services.search,
             capture: services.coordinator,
-            guardReview: FakeGuardReviewer(store: store),          // WIRING(M2): CCGuard のマスク生成 + store.update
+            guardReview: services.guardReviewer,
             settings: settings,
             permissions: SystemPermissions(),
-            models: services.models,                               // M2: d1・EmbeddingGemma を足す
+            models: services.models,
             isFake: false,
             fakeCapture: nil
         )
+        env.triage = services.triageQueue
         env.live = services
         return env
     }

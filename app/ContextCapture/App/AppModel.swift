@@ -22,6 +22,8 @@ final class AppModel {
     private(set) var hotKeyStatus: HotKeyStatus = .notRegistered
     /// ⌥ を押しながらメニューを開いたらデバッグメニューを出す（このプロセスの間ずっと）。
     private(set) var debugMenuRevealed = false
+    /// 見た目での検索（埋め込み）の状態。メニューバーに「検索の準備中」などを出す。フェイクでは nil（出さない）。
+    private(set) var searchReadiness: SearchReadiness?
 
     @ObservationIgnored let hud = HUDController()
     @ObservationIgnored private(set) lazy var toast = ToastController(model: self)
@@ -56,6 +58,10 @@ final class AppModel {
     var showsDebugMenu: Bool {
         guard let live = env.live else { return false }
         return live.debugLaunch || debugMenuRevealed
+    }
+
+    func setSearchReadiness(_ r: SearchReadiness) {
+        searchReadiness = r
     }
 
     func revealDebugMenu() {

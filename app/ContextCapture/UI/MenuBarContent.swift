@@ -32,6 +32,9 @@ struct MenuBarContent: View {
         Button("Inbox を開く") { model.windows.showInbox() }
             .keyboardShortcut("i")
         Text("今日の記録 \(model.todayCount) 件・未処理 \(model.unprocessedCount) 件")
+        if let text = model.searchReadiness?.menuText {
+            Text(text)
+        }
         if let issue = model.hotKeyIssue {
             Divider()
             Text(issue.message)

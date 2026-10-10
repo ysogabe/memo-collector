@@ -2,16 +2,24 @@ import AppKit
 import AVFoundation
 import CCCapture
 import CCCore
+import CCEmbedding
+import CCGuard
+import CCIntent
 import CCModels
 import CCSTT
 import CCStore
+import CCTriage
 import Foundation
+import MLX
 
 /// 本番の部品一式と、起動時・設定変更時の配線（`AppEnvironment.live()` が 1 つだけ作る）。
 ///
 /// - ストア: `SQLiteRecordStore`（**1 プロセス 1 インスタンス**。`CC_DATA_DIR` を尊重）
 /// - キャプチャ: `AppCoordinator`（ホットキー → 撮影 + 録音 → STT → 保存 → トースト）
-/// - モデル: `WhisperModelPreparation`（`CC_MODELS_DIR` を尊重）。STT と同じ `WhisperKitTranscriber` を共有する
+/// - モデル: `ModelPreparationPipeline`（文字起こし → 検索 → 意図。`CC_MODELS_DIR` を尊重）。STT と同じ `WhisperKitTranscriber` を共有する
+/// - 保存後: `TriageQueue`（ガード → 意図 → 索引）。d1・埋め込みは揃っていなければそのステップだけ失敗で残り、揃ってから
+///   `resumePending()` で拾う（記録は残る）
+/// - 検索: `EmbeddingSearchService`（埋め込みの準備中・失敗時は文字の一致へ）。索引の整合は `SearchIndexMaintainer`
 @MainActor
 final class LiveServices {
     let paths: CCPaths
@@ -21,7 +29,17 @@ final class LiveServices {
     let recorder: PushToTalkRecorder
     let transcriber: WhisperKitTranscriber
     let coordinator: AppCoordinator
-    let models: WhisperModelPreparation
+    let whisper: WhisperModelSlot
+    let models: ModelPreparationPipeline
+    let classifier: D1IntentClassifier
+    let embedder: SwitchableEmbedder
+    let triageQueue: TriageQueue
+    let triage: TriageWiring
+    let searchIndex: SearchIndexMaintainer
+    let search: EmbeddingSearchService
+    let guardReviewer: LiveGuardReviewer
+    /// デバッグメニューに出す各モデルの読み込み状態とメモリ。
+    let debugStatus = ModelDebugStatus()
     let hotKeys = HotKeyController()
     let latency = CaptureLatencyMonitor()
     /// `--debug` 起動（または `CC_DEBUG=1`）。⌥ を押しながらメニューを開いたときもデバッグメニューを出す（AppModel 側）。
@@ -30,6 +48,7 @@ final class LiveServices {
     private weak var model: AppModel?
     private var settingsObserver: NSObjectProtocol?
     private var retentionTask: Task<Void, Never>?
+    private var debugStatusTask: Task<Void, Never>?
     private var started = false
     /// 診断の実行中（二重起動を防ぐ）。
     private(set) var isRunningDiagnostics = false
@@ -47,8 +66,47 @@ final class LiveServices {
         ))
         recorder = PushToTalkRecorder()
         transcriber = WhisperKitTranscriber(paths: paths)
-        models = WhisperModelPreparation(preparer: WhisperModelPreparer(paths: paths), transcriber: transcriber)
         let settingsRef = settings
+        let store = store
+
+        // 保存後の処理（ガード → 意図 → 索引）。モデルの場所は `paths` から明示的に渡す（部品の既定は CCPaths.resolve() を読み直す）。
+        classifier = D1IntentClassifier(modelDirectory: paths.modelDirectory(.d1))
+        embedder = SwitchableEmbedder()
+        triageQueue = TriageQueue(store: store, classifier: classifier, scanner: VisionSecretScanner(), embedder: embedder,
+                                  screenshots: StoreScreenshotLoader(store: store))
+        triage = TriageWiring(queue: triageQueue)
+
+        let embeddingPreparer = EmbeddingModelPreparer(paths: paths)
+        let embeddingDirectory = paths.modelDirectory(.embedding)
+        let maintainer = SearchIndexMaintainer(
+            embedder: embedder, queue: triageQueue, store: store,
+            stateURL: SearchIndexState.url(dataRoot: paths.dataRoot)
+        ) { imageTokens in
+            switch try? embeddingPreparer.verify(level: .size) {
+            case .ready?, .unmanifested?:
+                return CoreMLEmbedder(configuration: .app(modelDirectory: embeddingDirectory, imageTokens: imageTokens))
+            default:
+                return nil
+            }
+        }
+        searchIndex = maintainer
+        search = EmbeddingSearchService(embedder: embedder, store: store, readiness: { await maintainer.readiness })
+        guardReviewer = LiveGuardReviewer(store: store, modify: { id, transform in try await store.modify(id: id, transform) })
+
+        whisper = WhisperModelSlot(preparer: WhisperModelPreparer(paths: paths), transcriber: transcriber)
+        let modelsRoot = paths.modelsRoot
+        models = ModelPreparationPipeline(
+            slots: [
+                whisper,
+                EmbeddingModelSlot(preparer: embeddingPreparer),
+                D1ModelSlot(preparer: D1ModelPreparer(destination: paths.modelDirectory(.d1))),
+            ],
+            availableBytes: { ModelPreparationPipeline.availableCapacity(at: modelsRoot) },
+            onPrepared: { @MainActor in
+                // 揃ったモデルで、後回しにしていたステップを拾う（検索モデルは裏で初回最適化を始める）。
+                maintainer.modelsPrepared(imageTokens: settingsRef.load().imageTokenBudget)
+            }
+        )
         coordinator = AppCoordinator(
             dependencies: CaptureDependencies(
                 capturer: capturer,
@@ -70,14 +128,22 @@ final class LiveServices {
         started = true
         self.model = model
 
+        let triage = triage
+        triage.onRecordsChanged = { [weak model] in model?.recordsDidChange() }
+        triage.onClassifierUnloaded = { [weak self] in self?.refreshDebugStatusSoon() }
         coordinator.onRecordSaved = { id in
-            // M2: TriageQueue.enqueue(id: id)（意図・秘密情報ガード・検索索引）をここに差す。
             CCLog.capture.debug("saved \(id, privacy: .public)")
+            triage.recordSaved(id: id)
         }
         coordinator.onRecordRemoved = { id in
-            // M2: TriageQueue.cancel(id: id) をここに差す。
+            // キューから外す API は無いが、TriageQueue は処理時に消えた記録を .recordMissing で飛ばす。
             CCLog.capture.debug("removed \(id, privacy: .public)")
         }
+        searchIndex.onReadinessChange = { [weak model] r in
+            CCLog.models.notice("search readiness: \(String(describing: r), privacy: .public)")
+            model?.setSearchReadiness(r)
+        }
+        model.setSearchReadiness(searchIndex.readiness)
 
         hotKeys.onEvent = { [weak self] e in self?.coordinator.handle(e) }
         hotKeys.willReset = { [weak self] in self?.coordinator.endActiveRecordingForHotKeyReset() }
@@ -102,11 +168,16 @@ final class LiveServices {
             }
         }
 
-        // モデルが揃っていれば、このプロセスで読み込んでおく（初回は ANE 特殊化で約 1 分。冪等）。
-        // オンボーディングの「モデルの準備」も同じ読み込みを待つ。
-        if models.filesPresent() {
-            let transcriber = transcriber
-            Task.detached(priority: .utility) {
+        // 1) トリアージの進捗の購読 → 2) Whisper の読み込み（初回は ANE 特殊化で約 1 分。冪等。オンボーディングの準備も同じ読み込みを待つ）
+        // → 3) 埋め込みの準備（ANE の初回特殊化で数分）と、未完了のトリアージの再開。2 と 3 はどちらも ANE を使うので順に。
+        let transcriber = transcriber, whisperPresent = whisper.filesPresent(), queue = triageQueue
+        let imageTokens = settings.load().imageTokenBudget
+        if !whisperPresent {
+            CCLog.models.notice("whisper model not found under \(self.paths.modelsRoot.path, privacy: .public)")
+        }
+        Task { [weak self] in
+            triage.observe(await queue.events())
+            if whisperPresent {
                 let t0 = Date()
                 do {
                     try await transcriber.prepare()
@@ -115,8 +186,14 @@ final class LiveServices {
                     CCLog.models.error("whisper prepare failed: \(String(describing: error), privacy: .public)")
                 }
             }
-        } else {
-            CCLog.models.notice("whisper model not found under \(self.paths.modelsRoot.path, privacy: .public)")
+            self?.searchIndex.activate(imageTokens: imageTokens)
+        }
+
+        debugStatusTask = Task { [weak self, weak model] in
+            while !Task.isCancelled {
+                if model?.showsDebugMenu == true { await self?.refreshDebugStatus() }
+                try? await Task.sleep(for: .seconds(5))
+            }
         }
 
         // 保持期間: 起動時と 1 日 1 回。
@@ -131,6 +208,7 @@ final class LiveServices {
     private func applySettings() {
         let s = settings.load()
         capturer.configuration.excludedBundleIDs = Set(s.excludedApps.map(\.bundleID))
+        searchIndex.settingsChanged(imageTokens: s.imageTokenBudget)
         if s.hotkey != hotKeys.combo {
             hotKeys.register(s.hotkey)
         } else {
@@ -206,6 +284,28 @@ final class LiveServices {
             CCLog.capture.error("diagnostics write failed: \(String(describing: error), privacy: .public)")
             return nil
         }
+    }
+
+    // MARK: - モデルの状態（デバッグメニュー）
+
+    func refreshDebugStatus() async {
+        let whisperLoaded = await transcriber.isLoaded
+        let d1Loaded = await classifier.isLoaded
+        let embedding = await embedder.loadDescription()
+        let busy = await triageQueue.isBusy
+        let pending = await triageQueue.pendingCount
+        debugStatus.update(
+            whisper: whisperLoaded ? "読み込み済み" : "未読み込み",
+            d1: d1Loaded ? "読み込み済み" : "未読み込み（解放済み）",
+            embedding: "\(embedding)・\(searchIndex.readiness)",
+            triage: busy ? "処理中（待ち \(pending) 件）" : "待機",
+            mlxActiveBytes: Memory.activeMemory,
+            residentBytes: D1IntentClassifier.residentBytes()
+        )
+    }
+
+    private func refreshDebugStatusSoon() {
+        Task { await refreshDebugStatus() }
     }
 
     func revealDataFolder() {

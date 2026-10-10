@@ -115,7 +115,14 @@ struct InboxView: View {
                         InboxRow(record: hit.record, showsDate: true).tag(hit.record.id)
                     }
                 } header: {
-                    Text("「\(vm.searchedQuery ?? "")」に近い記録 \(hits.count) 件")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("「\(vm.searchedQuery ?? "")」に近い記録 \(hits.count) 件")
+                        if let notice = vm.searchNotice {
+                            Label(notice, systemImage: "info.circle")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
             } else {
                 ForEach(vm.sections) { section in
@@ -154,7 +161,8 @@ struct InboxView: View {
         if let q = vm.searchedQuery {
             MessageView(systemImage: "magnifyingglass",
                         title: "「\(q)」に近い記録は見つかりませんでした",
-                        detail: "言い方を変えるか、画面に写っていたものの見た目で探してください。")
+                        detail: vm.searchNotice.map { "\($0)。言い方を変えて探してください。" }
+                            ?? "言い方を変えるか、画面に写っていたものの見た目で探してください。")
         } else if vm.scope != .all {
             MessageView(systemImage: "tray",
                         title: "「\(vm.scope.title)」の記録はありません",

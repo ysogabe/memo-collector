@@ -189,16 +189,16 @@ actor FakePermissions: PermissionsProviding {
 
 // MARK: - モデルの準備
 
-/// 約 5GB を数秒でダウンロードしたふりをして、最適化の段階も見せる。
+/// 約 8GB（3 モデル）を数秒でダウンロードしたふりをして、最適化の段階も見せる。
 struct FakeModelPreparation: ModelPreparationProviding {
-    static let totalBytes: Int64 = 5_100_000_000
+    static let totalBytes: Int64 = 8_300_000_000
 
     func isPrepared() async -> Bool { false }
 
     func prepare() -> AsyncThrowingStream<ModelPreparationProgress, Error> {
         AsyncThrowingStream { c in
             let task = Task {
-                let items = ["文字起こしモデル", "意図の推定モデル", "検索モデル"]
+                let items = ["文字起こしモデル", "検索モデル", "意図の推定モデル"]
                 let steps = 60
                 for i in 0...steps {
                     let f = Double(i) / Double(steps)

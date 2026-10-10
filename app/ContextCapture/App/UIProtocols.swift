@@ -56,6 +56,69 @@ protocol CaptureControlling: Sendable {
 protocol SearchServing: Sendable {
     /// 近い順。該当なしなら空配列。
     func search(_ query: String, limit: Int) async throws -> [SearchHit]
+    /// 結果と、添えて見せる一言（埋め込みが使えず文字の一致で探したときなど）。既定は `search` の結果だけ。
+    func searchWithNotice(_ query: String, limit: Int) async throws -> SearchResponse
+}
+
+extension SearchServing {
+    func searchWithNotice(_ query: String, limit: Int) async throws -> SearchResponse {
+        SearchResponse(hits: try await search(query, limit: limit), notice: nil)
+    }
+}
+
+/// 検索の結果。`notice` は結果の見出しの下に出す（nil なら何も出さない）。
+struct SearchResponse: Sendable {
+    var hits: [SearchHit]
+    var notice: String?
+}
+
+/// 見た目での検索（埋め込み）が使えるか。メニューバーに出す。
+enum SearchReadiness: Sendable, Equatable {
+    /// 検索モデルのファイルが無い（モデルの準備がまだ）。
+    case unavailable
+    /// 読み込みと初回の最適化中（初回は数分）。
+    case preparing
+    /// 索引を作っている（初回・画像トークン数の変更後）。
+    case rebuilding
+    case ready
+    /// 読み込めなかった。
+    case failed
+
+    /// メニューバーのメニューに出す一言（使えるときは出さない）。
+    var menuText: String? {
+        switch self {
+        case .unavailable: return "検索: モデルが未準備のため文字の一致で探します"
+        case .preparing: return "検索の準備中…（初回は数分かかります）"
+        case .rebuilding: return "検索の索引を作っています…"
+        case .ready: return nil
+        case .failed: return "検索: 見た目での検索を使えません（文字の一致で探します）"
+        }
+    }
+}
+
+// MARK: - 保存後の処理（トリアージ: 秘密情報ガード → 意図 → 検索索引）
+
+/// 保存後の非同期処理への依頼口。本物は CCTriage の `TriageQueue`（直列・1 件ずつ）。
+protocol TriageQueuing: Sendable {
+    /// 新しく保存した記録を全ステップで処理する。
+    func enqueue(id: String) async
+    /// 注釈を編集した → 意図と索引をやり直す（手で変えた意図は上書きされない）。
+    func annotationEdited(id: String) async
+    /// 索引だけ作り直す（埋め込みの設定が変わったとき）。
+    func reindex(id: String) async
+    /// 未完了のステップが残っている記録を古い順に投入し、件数を返す。
+    func resumePending() async throws -> Int
+    /// キューが空になるまで待つ。
+    func waitUntilIdle() async
+}
+
+/// 何もしないキュー（フェイク起動・スナップショット用）。
+struct NoopTriageQueue: TriageQueuing {
+    func enqueue(id: String) async {}
+    func annotationEdited(id: String) async {}
+    func reindex(id: String) async {}
+    func resumePending() async throws -> Int { 0 }
+    func waitUntilIdle() async {}
 }
 
 // MARK: - 秘密情報ガードの確認（F-10）
@@ -127,7 +190,7 @@ struct ModelPreparationProgress: Sendable, Equatable {
 }
 
 protocol ModelPreparationProviding: Sendable {
-    /// 全モデルが使える状態か。
+    /// 全モデルが使える状態か（検索モデルの初回最適化は含めない。それはバックグラウンドで続き、メニューバーに出す）。
     func isPrepared() async -> Bool
     /// 準備を始めて進捗を流す。終わると `.finished` を流して閉じる。失敗は throw。
     func prepare() -> AsyncThrowingStream<ModelPreparationProgress, Error>

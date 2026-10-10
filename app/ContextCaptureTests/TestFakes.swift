@@ -170,8 +170,34 @@ final class TestStore: RecordStore, @unchecked Sendable {
         }
     }
 
-    func setEmbedding(id: String, vector: [Float]) async throws {}
-    func search(vector: [Float], limit: Int) async throws -> [SearchHit] { [] }
+    /// 埋め込み（id → ベクトル）。`search` は内積の大きい順に返す（埋め込みの無い記録は対象外。本物と同じ）。
+    let embeddings = Box<[String: [Float]]>([:])
+    let searchCalls = Box<[[Float]]>([])
+
+    func setEmbedding(id: String, vector: [Float]) async throws {
+        embeddings.update { $0[id] = vector }
+    }
+
+    func search(vector: [Float], limit: Int) async throws -> [SearchHit] {
+        searchCalls.update { $0.append(vector) }
+        let recs = records.get()
+        let hits = embeddings.get().compactMap { id, v -> SearchHit? in
+            guard let r = recs[id] else { return nil }
+            return SearchHit(record: r, score: zip(v, vector).reduce(0) { $0 + $1.0 * $1.1 })
+        }
+        return Array(hits.sorted { $0.score > $1.score }.prefix(limit))
+    }
+
+    /// `SQLiteRecordStore.modify` と同じ read-modify-write（transform が throw したら書かない）。
+    @discardableResult
+    func modify(id: String, _ transform: @escaping @Sendable (inout ContextRecord) throws -> Void) async throws -> ContextRecord {
+        try records.update { r in
+            guard var rec = r[id] else { throw CocoaError(.fileNoSuchFile) }
+            try transform(&rec)
+            r[id] = rec
+            return rec
+        }
+    }
 
     func writeAttachment(_ data: Data, id: String, kind: AttachmentKind, ext: String, capturedAt: Date) async throws -> String {
         let rel = CCPaths.attachmentRelativePath(id: id, kind: kind, ext: ext, capturedAt: capturedAt)
