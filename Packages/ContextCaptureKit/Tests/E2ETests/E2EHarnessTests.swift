@@ -15,6 +15,7 @@ import XCTest
 ///
 /// - `CC_RUN_E2E=1` のときだけ走る（それ以外は XCTSkip）。モデルは `CC_MODELS_DIR`（読み取りのみ）。データは一時ディレクトリ
 /// - 結果は `docs/e2e/results/<timestamp>-<config>.json`（`CC_E2E_OUT` で上書き）
+/// - `CC_E2E_MLX_CACHE_LIMIT_MB`: 実験用。MLX のキャッシュ上限を設定して測る（製品の挙動とは異なる。config 名を変えること）
 /// - `CC_E2E_ROUNDS`（既定 3）、`CC_E2E_LIMIT`（1 周の件数、既定 30）。動作確認だけなら `CC_E2E_ROUNDS=1 CC_E2E_LIMIT=3`
 /// - 入口は `scripts/e2e.sh`
 final class E2EHarnessTests: XCTestCase {
@@ -113,6 +114,11 @@ final class E2EHarnessTests: XCTestCase {
         ]
         snap("3_after_embedding_prepare")
 
+        // 実験用: MLX のバッファキャッシュの上限（製品は設定していない = 無制限）。`CC_E2E_MLX_CACHE_LIMIT_MB` があるときだけ設定する。
+        if let mb = env["CC_E2E_MLX_CACHE_LIMIT_MB"].flatMap(Int.init) {
+            Memory.cacheLimit = mb << 20
+            out["mlx_cache_limit_mb_experiment"] = mb
+        }
         let d1 = D1IntentClassifier(modelDirectory: d1Dir)
         let d1Load = try await d1.load()
         loads["d1_load_s"] = d1Load.loadSeconds

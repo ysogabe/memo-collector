@@ -18,12 +18,14 @@
 #   CC_E2E_LOAD_WAIT    上の待ちの上限秒（既定 600）
 #   CC_E2E_IDLE_SETTLE  (c) モデル準備の後に待つ秒（既定 60）
 #   CC_E2E_IDLE_SAMPLES (c) 取る回数（1 秒ごと、既定 60）
+#   CC_E2E_CONFIG       (a) の結果ファイル名の構成名（既定 swiftpm-release）
+#   CC_E2E_MLX_CACHE_LIMIT_MB  (a) の実験: MLX のキャッシュ上限（製品は未設定）。CC_E2E_CONFIG も変えること
 set -euo pipefail
 
 root=${0:A:h:h}
 pkg=$root/Packages/ContextCaptureKit
 results=$root/docs/e2e/results
-work=${TMPDIR:-/tmp}/cc-e2e-work
+work=${${TMPDIR:-/tmp}%/}/cc-e2e-work
 mkdir -p $results $work
 
 export CC_MODELS_DIR=${CC_MODELS_DIR:-/Users/yoshio/works/60-misc/memo-collector/spikes/dev-models}
@@ -66,8 +68,9 @@ if (( ${steps[(Ie)a]} )); then
   step "(a) E2ETests（swift test -c release）"
   (cd $pkg && swift build $swift_test_flags --build-tests >| $work/a-build.log 2>&1) || { tail -n 30 $work/a-build.log; exit 1 }
   wait_for_quiet
-  out=$results/$stamp-swiftpm-release.json
-  if ! (cd $pkg && CC_RUN_E2E=1 CC_E2E_OUT=$out swift test $swift_test_flags --filter 'E2ETests' >| $work/a-test.log 2>&1); then
+  a_config=${CC_E2E_CONFIG:-swiftpm-release}
+  out=$results/$stamp-$a_config.json
+  if ! (cd $pkg && CC_RUN_E2E=1 CC_E2E_CONFIG=$a_config CC_E2E_OUT=$out swift test $swift_test_flags --filter 'E2ETests' >| $work/a-test.log 2>&1); then
     grep -E "error|failed" $work/a-test.log | tail -n 30
     print "(a) failed. log: $work/a-test.log"; exit 1
   fi
@@ -176,6 +179,21 @@ if (( ${steps[(Ie)c]} )); then
   done
   [[ -n $pid ]] || { kill $log_pid; print "アプリが起動しない"; exit 1 }
   print "  pid $pid（データ: $data）"
+  # 環境変数が本当に渡ったか確かめる（渡っていないと既定のデータ置き場 ~/Library/Application Support/ContextCapture を使ってしまう）。
+  # ps eww の環境と、アプリ自身が起動時にログへ書く「data: <dataRoot>」の両方を見る。どちらでも確かめられなければ計測をやめる。
+  env_ok=0
+  if ps eww -o command= -p $pid | grep -q "CC_DATA_DIR=$data"; then env_ok=1; fi
+  for _ in {1..20}; do
+    grep -qF -e "data: $data " $log_file && { env_ok=$(( env_ok + 2 )); break }
+    sleep 0.5
+  done
+  if (( env_ok == 0 )); then
+    print "⚠️ 起動したプロセスに CC_DATA_DIR が渡っていない。計測をやめて、このプロセス（$pid）だけを終了する"
+    kill -TERM $pid 2>/dev/null || true
+    kill $log_pid 2>/dev/null || true
+    exit 1
+  fi
+  print "  CC_DATA_DIR の確認: ps eww=$(( env_ok & 1 )) log=$(( env_ok >> 1 ))"
 
   # モデル準備の完了 = 「search readiness: ready」（Whisper の読み込み → 埋め込みの準備の後に出る）。上限 10 分。
   ready=0
@@ -205,15 +223,17 @@ if (( ${steps[(Ie)c]} )); then
   kill $log_pid 2>/dev/null || true
 
   /usr/bin/python3 - $results/$stamp-app-idle.json "$ready" "$ready_after" "$settle" "$t0" "$t1" "$w0" "$w1" "$footprint_out" "$rss_kb" \
-      "$(uptime)" "$app" $log_file ${cpu_samples[@]} <<'PY'
+      "$(uptime)" "$app" $log_file "$pid:$env_ok" ${cpu_samples[@]} <<'PY'
 import json, sys, re
-(out, ready, ready_after, settle, t0, t1, w0, w1, footprint, rss_kb, up, app, log_file), samples = sys.argv[1:14], [float(x) for x in sys.argv[14:]]
+(out, ready, ready_after, settle, t0, t1, w0, w1, footprint, rss_kb, up, app, log_file, pid_env), samples = sys.argv[1:15], [float(x) for x in sys.argv[15:]]
 cpu_time = float(t1) - float(t0); wall = float(w1) - float(w0)
 log = open(log_file, errors="replace").read()
 interesting = [l for l in log.splitlines() if re.search(r"whisper ready|embedder (ready|prepared)|search readiness|hotkey|failed|error", l)]
 res = {
     "schema": "cc-e2e-app-idle/1",
     "app": app, "uptime": up,
+    "pid": int(pid_env.split(":")[0]),
+    "cc_data_dir_verified": {"ps_eww": bool(int(pid_env.split(":")[1]) & 1), "app_log": bool(int(pid_env.split(":")[1]) & 2)},
     "models_ready": ready == "1", "ready_after_launch_s": int(ready_after), "settle_s": int(settle),
     "ps_pcpu_samples": samples,
     "ps_pcpu_mean": sum(samples) / len(samples) if samples else None,
