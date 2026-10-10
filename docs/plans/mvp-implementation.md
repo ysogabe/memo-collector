@@ -115,6 +115,9 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - wiring: `CaptureDiagnostics` の 3 関数をデバッグメニューから呼べるようにする
 - UI: `InboxFilter.matches(_:)` を app から CCCore へ移す。MCP の `get_capture` は `RecordMarkdown.handoffScreenshotPath(_:)`（渡してよい画像の規則）を共有する
 - UI: 除外アプリでスクショを撮らなかったときのトースト文言は出さない（PRD §6.3 に無い。現状維持）
+- triage の契約: 手動で意図を変えたら `TriageResult.manual(...)`（model == "user"）を書く、注釈編集後は `reprocess(id:)`、起動時に `resumePending()`
+- CCStore に `idsWithoutEmbedding()` を追加（現状は零ベクトルで全件 search して代用、O(N)）。`modify(id:_:)` を CCCore の RecordStore に移す
+- guard: 初回 OCR が 24 秒かかることがある（インストール後の最初のガード処理）。横並びのログインフォームのラベル右の値は未対応
 - 調査書 runtime-coreml-mlx.md §4.2 のトークナイザ原因を更新（ignore_merges ではなく、swift-transformers の前分割が書記素クラスタ単位で照合し単独 LF に `[\r\n]` が一致しない）
 
 ## 7. 進捗（main が Wave ごとに更新）
@@ -129,8 +132,8 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 1 stt（CER 6.75%（語彙の後処理）、空いた状態で p90 1.69 秒・負荷時 2.4〜6.6 秒。語彙プロンプトは CER を悪化させるため不採用）
 - [x] Wave 1 capture（47 テスト成功。権限・実機の経路は未検証 → docs/manual-tests/capture.md で M1 時にユーザー確認）
 - [x] Wave 2 ui（check.sh green、スナップショット 12 枚 docs/ui-snapshots/。組み立て点は app/ContextCapture/App/AppEnvironment.swift の `// WIRING:`）
-- [ ] Wave 2 wiring → M1 動作確認
-- [ ] Wave 3 guard+triage（dispatch 済み。worktree ../memo-collector-worktrees/guard-triage）
+- [ ] Wave 2 wiring（dispatch 済み。worktree ../memo-collector-worktrees/wiring。署名を Apple Development に切替）→ M1 動作確認
+- [x] Wave 3 guard+triage（14 画面 4/4・誤検知 0、PEM・重なり・余白のマスク漏れ 4 件をセキュリティレビュー指摘で修正、56 テスト、本物の d1 で結合テスト）
 - [ ] Wave 3 embedding（stt 完了後に dispatch。ANE の取り合いを避ける）
 - [ ] Wave 4 mcp / e2e
 - [ ] PR
