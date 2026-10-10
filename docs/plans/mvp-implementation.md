@@ -135,5 +135,6 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [ ] Wave 2 wiring（dispatch 済み。worktree ../memo-collector-worktrees/wiring。署名を Apple Development に切替）→ M1 動作確認
 - [x] Wave 3 guard+triage（14 画面 4/4・誤検知 0、PEM・重なり・余白のマスク漏れ 4 件をセキュリティレビュー指摘で修正、56 テスト、本物の d1 で結合テスト）
 - [ ] Wave 3 embedding（stt 完了後に dispatch。ANE の取り合いを避ける）
-- [ ] Wave 4 mcp / e2e
+- [ ] Wave 4 mcp（前倒しで dispatch 済み。cc-mcp の埋め込みは CPU/GPU で遅延ロード、無ければ文字列一致にフォールバック）
+- [ ] Wave 4 e2e
 - [ ] PR
