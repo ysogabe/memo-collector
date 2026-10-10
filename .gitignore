@@ -19,3 +19,4 @@ build/
 # 変換済みモデル・ダウンロード物（大容量）
 spikes/runtime/models/
 spikes/runtime/swift/*/Packages/
+spikes/dev-models/

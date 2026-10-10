@@ -47,6 +47,7 @@ scripts/check.sh                      # 全 QA コマンドの入口
 
 - 添付: `captures/YYYY/MM/DD/<id>.<ext>`（スクショ・マスク版・音声）。DB にはデータルートからの相対パスで持つ
 - モデル配置: `Models/d1-3b-text-q8/`、`Models/embeddinggemma-2/`、`Models/whisperkit/`。各ディレクトリに `manifest.json`（元リポジトリ・revision・sha256・変換手順の版）
+- 開発用に 3 モデルをまとめた置き場 `spikes/dev-models/`（git 管理外。d1 と whisper はスパイクへのシンボリックリンク、埋め込みは HF から取得した実物）を `CC_MODELS_DIR` で指す
 - 開発中はスパイクの変換済みモデル `spikes/runtime/models/`（git 管理外・読み取り専用）を `CC_MODELS_DIR` で指してよい
 
 ## 3. 型とプロトコル（CCCore、契約の骨子）
@@ -122,6 +123,8 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - 署名の Team ID は PJH36NNFL6（証明書名の括弧内 3H5DM2CR45 は Team ID ではない）
 - 保存形式: スクショ HEIC（ImageIO が WebP を書けない）、音声 WAV 16kHz/16bit
 - wiring 所見: `WhisperModelPreparer.prepare()` が manifest 無しの既存モデルを取り直そうとする（既存採用の経路を足す）、`roundedToMilliseconds` を CCCore へ、`runHotKeyCheck` が同じ組み合わせを別登録する旨をコメントに、`AttachmentKind.screenshot` のコメントが .webp 前提、画面収録の権限状態が `.denied` を返さない、オンボーディングの容量表記
+- 埋め込み: cc-mcp はテキスト塔を `.cpuAndGPU` で遅延ロード（案 A、main 決定。ANE は実行ファイルごとに約 2 分のコンパイルが要るため）。アプリでは `CoreMLEmbedder.prepare()` をモデル準備後にバックグラウンドで（初回 2.5〜3 分）。`indexSignature` を保存し、変わったら全件再埋め込み。ANE キャッシュの鍵は「実行ファイル + モデルのパス」と推測
+- `Embedder` に `prepare()` を足す（または `ModelPreparable`）。`ModelSlot.embedding` のコメントを Core ML に直す。fluid-inference.md に torchvision 縮小の件を追記
 - 調査書 runtime-coreml-mlx.md §4.2 のトークナイザ原因を更新（ignore_merges ではなく、swift-transformers の前分割が書記素クラスタ単位で照合し単独 LF に `[\r\n]` が一致しない）
 
 ## 7. 進捗（main が Wave ごとに更新）
@@ -139,7 +142,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 2 wiring（check.sh green、アプリのテスト 25 件、署名 Apple Development / Team PJH36NNFL6 + Hardened Runtime、metallib 同梱）
 - [ ] M1 実機確認（ユーザー。手順 docs/manual-tests/m1.md）
 - [x] Wave 3 guard+triage（14 画面 4/4・誤検知 0、PEM・重なり・余白のマスク漏れ 4 件をセキュリティレビュー指摘で修正、56 テスト、本物の d1 で結合テスト）
-- [ ] Wave 3 embedding（stt 完了後に dispatch。ANE の取り合いを避ける）
+- [x] Wave 3 embedding（コサイン最小 0.9988、融合 256 R@3 0.933 / MRR 0.950、release で融合 0.59 秒・テキスト 6ms、ピーク 375MB。HF の縮小は torchvision の uint8 bicubic とビット一致させた）
 - [x] Wave 4 mcp（27 テスト、stdio 往復の結合テストあり。画像は clear/masked のみ・データルート外を読まない。cc-mcp の埋め込みは `makeEmbedderProvider()` が nil → embedding マージ後に CoreMLEmbedder(.cpuAndGPU) を差す）
 - [ ] Wave 4 e2e
 - [ ] PR
