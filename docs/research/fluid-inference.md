@@ -232,7 +232,7 @@ $B/ax-probe
 ## 5.1 製品実装（Wave 3 embedding）で分かったこと（追記）
 
 - **HF の画像縮小は PIL ではなく torchvision の uint8 bicubic**: HF の `Gemma4ImageProcessor` は `torchvision.transforms.v2.functional.resize(uint8, BICUBIC, antialias=True)` で縮小しており、その積和は torchvision の uint8 経路（`_compute_indices_int16_weights_aa`）の **int16 固定小数点**（軸ごとに最大の重みが int16 に収まる最大の精度 ≤ 22bit を選ぶ）。PIL（22bit 固定小数点）とは実画像で 1 段ずれる画素がある（s01 で 298 値）。本調査の §3.4 の「bicubic」比較はこの差を区別していない。製品（`CCEmbedding/ImagePreprocessor.swift`）は torchvision の重み計算・丸めを写し、**ビット一致**させた
-- **ANE キャッシュの鍵は「実行ファイル + モデルのパス」と推測**: §3.3 の「同じバイナリを別名にすると再コンパイル」に加え、製品実装でもモデルの置き場を変えると初回と同じ時間がかかった。鍵が実行ファイルのパスとモデルのパスの組と見ている（公式の記述は無く、推測）。このため cc-mcp（別の実行ファイル）はテキスト塔を `.cpuAndGPU` で遅延ロードし、アプリはモデル準備後に**アプリのプロセス内で** `CoreMLEmbedder.prepare()` を呼んで温める（計画書 §6）
+- **ANE キャッシュの鍵は「実行ファイル + モデルのパス」と推測**: §3.3 の「同じ中身のバイナリでも別名にすると再コンパイルされる」ことから、キャッシュは実行ファイルのパスとモデル（`.mlmodelc`）のパスの組で引かれていると推測している（公式の記述は無く、モデルのパスを変えた場合は未検証）。このため cc-mcp（別の実行ファイル）はテキスト塔を `.cpuAndGPU` で遅延ロードし、アプリはモデル準備後に**アプリのプロセス内で** `CoreMLEmbedder.prepare()` を呼んで温める（計画書 §6）
 - **release ビルドで融合 1 件 0.59 秒**（テキストのみ 6ms、ピーク 375MB）。§3.2 の値は debug / スパイク実装のもの。融合 256 R@3 0.933 / MRR 0.950、参照とのコサイン最小 0.9988
 
 ## 6. 未検証事項
