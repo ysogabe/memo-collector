@@ -9,6 +9,9 @@ public struct SecretPattern: Sendable {
     public enum Mode: Sendable, Equatable {
         case value
         case label
+        /// 複数行のブロックの見出し（PEM の `-----BEGIN … PRIVATE KEY-----`）。`SecretDetector` が対応する END 行まで
+        /// （END が画面外なら、縦に連続する base64 らしい行の塊の終わりまで）を 1 件の秘密として覆う。
+        case blockStart
     }
 
     /// `SecretFinding.kind` に入る名前（PoC `exp05_baselines.py` の `SECRET_PATTERNS` のキーを踏襲）。
@@ -41,19 +44,25 @@ extension SecretPattern {
     /// - 追加: `slack_token`、`google_api_key`、`private_key`（PEM の見出し）、`secret_assignment`（`FOO_SECRET=…` / `api_key: …` の
     ///   形の代入で、値が 16 文字以上かつ英字と数字を両方含むもの）。.env や設定ファイルの未知の形式のキーを拾うため。
     ///   値の条件で `max_tokens: 4096` のような設定値は当たらない。
+    /// - 値パターンは「キーらしい文字が規定長続く」ことで当て、**秘密範囲は次の空白まで伸ばす**（末尾の `\S*`）。
+    ///   OCR が値の途中に記号を混ぜたり、値に想定外の文字（`!` など）が含まれたりしたときに、残りが塗り残されないように
+    ///   するため（マスク漏れ対策）。開始側の条件は変えないので誤検知は増えない（例: `accessToken = getToken(cfg.k1)` は
+    ///   `getToken` が 16 文字に満たず当たらない）。
+    /// - `private_key` は見出し行だけでなく鍵本体までを覆う（`.blockStart`）。前後の `-----` は条件にしない
+    ///   （Vision が `-----BEGIN` を `-BEGIN`、`-----END` を `---END` と読んで本数が揃わないため。描画した PEM で確認）。
     public static let defaults: [SecretPattern] = [
-        SecretPattern(kind: "anthropic_key", mode: .value, pattern: #"(?i)sk-ant-[A-Za-z0-9_\-]{20,}"#),
-        SecretPattern(kind: "openai_key", mode: .value, pattern: #"(?i)sk-(?!ant-)(?:proj-)?[A-Za-z0-9_\-]{20,}"#),
-        SecretPattern(kind: "stripe_key", mode: .value, pattern: #"(?i)[sr]k_(?:live|test)_[A-Za-z0-9]{16,}"#),
+        SecretPattern(kind: "anthropic_key", mode: .value, pattern: #"(?i)sk-ant-[A-Za-z0-9_\-]{20,}\S*"#),
+        SecretPattern(kind: "openai_key", mode: .value, pattern: #"(?i)sk-(?!ant-)(?:proj-)?[A-Za-z0-9_\-]{20,}\S*"#),
+        SecretPattern(kind: "stripe_key", mode: .value, pattern: #"(?i)[sr]k_(?:live|test)_[A-Za-z0-9]{16,}\S*"#),
         SecretPattern(kind: "aws_access_key", mode: .value, pattern: #"(?<![A-Z0-9])(?:AKIA|ASIA)[0-9A-Z]{16}(?![A-Z0-9])"#),
-        SecretPattern(kind: "github_token", mode: .value, pattern: #"(?i)(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,})"#),
-        SecretPattern(kind: "slack_token", mode: .value, pattern: #"xox[abprs]-[A-Za-z0-9\-]{10,}"#),
-        SecretPattern(kind: "google_api_key", mode: .value, pattern: #"AIza[0-9A-Za-z_\-]{35}"#),
-        SecretPattern(kind: "private_key", mode: .value, pattern: #"-----BEGIN [A-Z ]*PRIVATE KEY-----"#),
+        SecretPattern(kind: "github_token", mode: .value, pattern: #"(?i)(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,})\S*"#),
+        SecretPattern(kind: "slack_token", mode: .value, pattern: #"xox[abprs]-[A-Za-z0-9\-]{10,}\S*"#),
+        SecretPattern(kind: "google_api_key", mode: .value, pattern: #"AIza[0-9A-Za-z_\-]{35}\S*"#),
+        SecretPattern(kind: "private_key", mode: .blockStart, pattern: #"BEGIN [A-Z ]*PRIVATE KEY"#),
         SecretPattern(kind: "dsn_password", mode: .value, pattern: #"[A-Za-z][A-Za-z0-9+.\-]*://[^:\s/@]+:\s?(?<v>[^@\s]+)@"#),
         SecretPattern(
             kind: "secret_assignment", mode: .value,
-            pattern: #"(?i)\b[A-Z0-9_]*(?:SECRET|TOKEN|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY)[A-Z0-9_]*\s*[=:：]\s*["']?(?<v>(?=[A-Za-z0-9/+_\-.]*[0-9])(?=[A-Za-z0-9/+_\-.]*[A-Za-z])[A-Za-z0-9/+_\-.]{16,})"#
+            pattern: #"(?i)\b[A-Z0-9_]*(?:SECRET|TOKEN|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY)[A-Z0-9_]*\s*[=:：]\s*["']?(?<v>(?=[A-Za-z0-9/+_\-.]*[0-9])(?=[A-Za-z0-9/+_\-.]*[A-Za-z])[A-Za-z0-9/+_\-.]{16,}\S*)"#
         ),
         SecretPattern(kind: "aws_secret_label", mode: .label, pattern: #"(?i)(?:aws[ _]?)?secret[ _]?access[ _]?key(?:[ _]?id)?"#),
         SecretPattern(

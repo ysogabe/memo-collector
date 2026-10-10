@@ -10,6 +10,9 @@ import Foundation
 public enum SecretMasker {
     /// 余白（bbox の高さに対する割合）。行の高さの 1/3 程度あれば上下のはみ出しを隠せる。
     public static let defaultPaddingRatio: CGFloat = 0.35
+    /// 余白の基準にする高さの上限（画像の高さに対する割合）。複数行のブロック（PEM 鍵）は bbox が高いので、
+    /// そのまま割合を掛けると余白が隣の行まで広がる。1 行分の高さ程度で頭打ちにする。
+    public static let maxPaddingBaseRatio: CGFloat = 0.04
     /// 余白の下限（ピクセル）。
     public static let minimumPaddingPixels: CGFloat = 4
     /// 塗りの色（不透明の黒）。
@@ -50,7 +53,7 @@ public enum SecretMasker {
         let bounds = CGRect(x: 0, y: 0, width: w, height: h)
         return findings.compactMap { f in
             let r = CGRect(x: f.bbox.minX * w, y: f.bbox.minY * h, width: f.bbox.width * w, height: f.bbox.height * h)
-            let pad = max(minimumPaddingPixels, r.height * paddingRatio)
+            let pad = max(minimumPaddingPixels, min(r.height, h * maxPaddingBaseRatio) * paddingRatio)
             let padded = r.insetBy(dx: -pad, dy: -pad).intersection(bounds)
             return padded.isNull || padded.isEmpty ? nil : padded.integral
         }

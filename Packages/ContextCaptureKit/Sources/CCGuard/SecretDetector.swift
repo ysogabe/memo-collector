@@ -38,25 +38,12 @@ public struct SecretDetector: Sendable {
     }
 
     public func detect(lines: [OCRLine]) -> [SecretFinding] {
-        var findings: [SecretFinding] = []
-        // 行ごとに「既に秘密とした範囲」を持ち、後のパターンが同じ範囲を二重に取らないようにする。
-        var claimed: [Int: [NSRange]] = [:]
+        // 行ごとの一致範囲（パターンの評価順つき）。重なった範囲は最後に和集合へまとめる
+        // （狭い方だけを bbox にすると広い方の秘密が塗り残されるため）。kind は先に評価したパターンのものを採る。
+        var spans: [Int: [(range: NSRange, order: Int, kind: String)]] = [:]
+        var blockFindings: [SecretFinding] = []
 
-        func claim(_ lineIndex: Int, _ range: NSRange) -> Bool {
-            if claimed[lineIndex, default: []].contains(where: { NSIntersectionRange($0, range).length > 0 }) { return false }
-            claimed[lineIndex, default: []].append(range)
-            return true
-        }
-
-        func box(_ lineIndex: Int, _ range: NSRange) -> CGRect {
-            let line = lines[lineIndex]
-            if let r = Range(range, in: line.text), let b = line.boxForRange(r), b.width > 0, b.height > 0 {
-                return b
-            }
-            return line.bbox
-        }
-
-        for pattern in patterns {
+        for (order, pattern) in patterns.enumerated() {
             for (i, line) in lines.enumerated() {
                 let ns = line.text as NSString
                 let matches = pattern.regex.matches(in: line.text, range: NSRange(location: 0, length: ns.length))
@@ -65,19 +52,91 @@ public struct SecretDetector: Sendable {
                     case .value:
                         let v = m.range(withName: "v")
                         let range = v.location != NSNotFound ? v : m.range
-                        if claim(i, range) {
-                            findings.append(SecretFinding(kind: pattern.kind, bbox: box(i, range)))
-                        }
+                        spans[i, default: []].append((range, order, pattern.kind))
                     case .label:
                         guard let value = labelValue(match: m.range, lineIndex: i, lines: lines) else { continue }
-                        if claim(value.line, value.range) {
-                            findings.append(SecretFinding(kind: pattern.kind, bbox: box(value.line, value.range)))
-                        }
+                        spans[value.line, default: []].append((value.range, order, pattern.kind))
+                    case .blockStart:
+                        blockFindings.append(SecretFinding(kind: pattern.kind, bbox: blockBox(headerIndex: i, lines: lines)))
                     }
                 }
             }
         }
-        return findings
+
+        var findings: [SecretFinding] = []
+        for i in spans.keys.sorted() {
+            for merged in Self.mergeOverlapping(spans[i]!) {
+                findings.append(SecretFinding(kind: merged.kind, bbox: box(lines[i], merged.range)))
+            }
+        }
+        return findings + blockFindings
+    }
+
+    /// 重なる（または接する）範囲を和集合にまとめる。kind は含まれる中で最も先に評価したパターンのもの。
+    static func mergeOverlapping(_ items: [(range: NSRange, order: Int, kind: String)]) -> [(range: NSRange, kind: String)] {
+        let sorted = items.sorted { $0.range.location < $1.range.location }
+        var out: [(range: NSRange, order: Int, kind: String)] = []
+        for item in sorted {
+            if var last = out.last, item.range.location <= NSMaxRange(last.range) {
+                last.range = NSUnionRange(last.range, item.range)
+                if item.order < last.order { last.order = item.order; last.kind = item.kind }
+                out[out.count - 1] = last
+            } else {
+                out.append(item)
+            }
+        }
+        return out.map { ($0.range, $0.kind) }
+    }
+
+    private func box(_ line: OCRLine, _ range: NSRange) -> CGRect {
+        if range.location == 0, range.length == (line.text as NSString).length { return line.bbox }
+        if let r = Range(range, in: line.text), let b = line.boxForRange(r), b.width > 0, b.height > 0 {
+            return b
+        }
+        return line.bbox
+    }
+
+    /// PEM の END 行（見出しと対）と、END が見えないときの本体行（base64 らしい行）。
+    static let blockEnd = try! NSRegularExpression(pattern: #"END [A-Z ]*PRIVATE KEY"#)
+    static let base64Line = try! NSRegularExpression(pattern: #"^[A-Za-z0-9+/=]{16,}$"#)
+    /// 本体の行と行の間に許す隙間（行の高さの何倍まで）。
+    static let blockLineMaxGap: CGFloat = 1.5
+
+    /// 鍵ブロック全体の bbox。見出し → END（同じ列で下にある最も近いもの）までの行をすべて含める。
+    /// END が無ければ（画面外・OCR 漏れ）、見出しの下に縦に連続する base64 らしい行の塊の終わりまで。
+    func blockBox(headerIndex: Int, lines: [OCRLine]) -> CGRect {
+        let header = lines[headerIndex].bbox
+        let h = max(header.height, 0.001)
+        func sameColumn(_ r: CGRect) -> Bool { abs(r.minX - header.minX) <= h * 3 }
+        let below = lines.indices
+            .filter { $0 != headerIndex && lines[$0].bbox.minY >= header.minY + h * 0.5 && sameColumn(lines[$0].bbox) }
+            .sorted { lines[$0].bbox.minY < lines[$1].bbox.minY }
+
+        if let endIndex = below.first(where: { j in
+            let t = lines[j].text
+            return Self.blockEnd.firstMatch(in: t, range: NSRange(location: 0, length: (t as NSString).length)) != nil
+        }) {
+            let endBox = lines[endIndex].bbox
+            var box = header.union(endBox)
+            for j in lines.indices where j != headerIndex {
+                let r = lines[j].bbox
+                if r.midY > header.minY, r.midY < endBox.maxY, sameColumn(r) { box = box.union(r) }
+            }
+            return box
+        }
+
+        var box = header
+        var bottom = header.maxY
+        for j in below {
+            let r = lines[j].bbox
+            guard r.minY - bottom <= h * Self.blockLineMaxGap else { break }
+            let compact = lines[j].text.filter { !$0.isWhitespace }
+            guard Self.base64Line.firstMatch(in: compact, range: NSRange(location: 0, length: (compact as NSString).length)) != nil
+            else { break }
+            box = box.union(r)
+            bottom = r.maxY
+        }
+        return box
     }
 
     /// 見出しに対応する値の位置。値が無い・伏せ字・値らしくないなら nil。
