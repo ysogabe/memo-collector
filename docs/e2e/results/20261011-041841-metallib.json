@@ -1,0 +1,21 @@
+{
+  "schema": "cc-e2e-metallib/1",
+  "builds": {
+    "swiftpm_test": {
+      "path": "/Users/yoshio/works/60-misc/memo-collector/Packages/ContextCaptureKit/.build/out/Products/Release/CCIntentTests.xctest/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib",
+      "sha256": "282550b064507602f7da8cfa2dab2ca8f10341c2802191234a1cbf17f892952f",
+      "mtime": 1791660508.337049
+    },
+    "xcode_test": {
+      "path": "/Users/yoshio/works/60-misc/memo-collector/DerivedData/e2e-kit/Build/Products/Release/CCIntentTests.xctest/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib",
+      "sha256": "282550b064507602f7da8cfa2dab2ca8f10341c2802191234a1cbf17f892952f",
+      "mtime": 1791661916.082697
+    },
+    "app_release": {
+      "path": "/Users/yoshio/works/60-misc/memo-collector/DerivedData/e2e-app/Build/Products/Release/ContextCapture.app/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib",
+      "sha256": "282550b064507602f7da8cfa2dab2ca8f10341c2802191234a1cbf17f892952f",
+      "mtime": 1791662446.516508
+    }
+  },
+  "all_identical": true
+}
