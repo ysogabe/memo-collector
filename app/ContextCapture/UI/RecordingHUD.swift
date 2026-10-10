@@ -56,6 +56,7 @@ final class HUDController {
         model.reset()
         let panel = self.panel ?? makePanel()
         self.panel = panel
+        if panel.contentView == nil { panel.contentView = makeHost() }
         position(panel)
         panel.orderFrontRegardless()
         levelsTask?.cancel()
@@ -71,14 +72,21 @@ final class HUDController {
         levelsTask?.cancel()
         levelsTask = nil
         panel?.orderOut(nil)
+        // 中身（SwiftUI）も外す。orderOut だけだと点滅（repeatForever のアニメーション）が隠れたパネルの中で回り続け、
+        // 録音を 1 回でもした後はアイドルでも CPU を使い続ける（切り出した実験で隠した後も 1.9%、外せば 0.00%）。
+        panel?.contentView = nil
     }
 
     private func makePanel() -> OverlayPanel {
         let p = OverlayPanel(contentRect: NSRect(origin: .zero, size: Self.size), clickThrough: true)
+        p.contentView = makeHost()
+        return p
+    }
+
+    private func makeHost() -> NSView {
         let host = NSHostingView(rootView: RecordingHUDView(model: model))
         host.frame = NSRect(origin: .zero, size: Self.size)
-        p.contentView = host
-        return p
+        return host
     }
 
     private func position(_ p: NSPanel) {

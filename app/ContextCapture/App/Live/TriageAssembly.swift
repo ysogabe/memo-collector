@@ -17,6 +17,10 @@ extension TriageQueue: TriageQueuing {
     func reindexAll(ids: [String]) async -> [String] {
         await reindexAndWait(ids: ids).failedIDs
     }
+
+    func setCapturing(_ capturing: Bool) async {
+        if capturing { pause() } else { resume() }
+    }
 }
 
 extension CoreMLEmbedder: PreparableEmbedder {

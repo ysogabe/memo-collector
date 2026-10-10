@@ -42,12 +42,26 @@ public actor D1IntentClassifier: IntentClassifying, ModelUnloadable {
         }
     }
 
+    /// MLX のバッファキャッシュの上限の既定（256MB）。
+    ///
+    /// 上限を付けないと、d1 の forward で解放したバッファを MLX がキャッシュに溜め続け、d1 常駐中の footprint が
+    /// 3.3〜3.6GB 余計に増える（docs/e2e/report.md §4・§7 問題 2）。E2E（3 モデル同時、`CC_E2E_MLX_CACHE_LIMIT_MB=256`、
+    /// 同 §8）で 256MB にすると、トリアージ中のピークが 7,224 → 4,084MB、MLX キャッシュが 3,587 → 269MB に下がり、
+    /// d1 1 件（2 問）の p50 は 0.47 → 0.48 秒・意図と日時の確率（最大 |Δp| 0.04258）・正解数は同一だった。
+    public static let defaultMLXCacheLimitBytes = 256 << 20
+
+    /// `load()` で設定する MLX のキャッシュ上限（バイト）。nil なら触らない（MLX の既定 = 実質無制限）。
+    /// ⚠️ `Memory.cacheLimit` はプロセス全体で 1 つ（同じプロセスの他の MLX 利用にも効く）。
+    public nonisolated let mlxCacheLimitBytes: Int?
+
     public init(
         modelDirectory: URL = CCPaths.resolve().modelDirectory(.d1),
-        modelIdentifier: String = D1IntentClassifier.defaultModelIdentifier
+        modelIdentifier: String = D1IntentClassifier.defaultModelIdentifier,
+        mlxCacheLimitBytes: Int? = D1IntentClassifier.defaultMLXCacheLimitBytes
     ) {
         self.modelDirectory = modelDirectory
         self.modelIdentifier = modelIdentifier
+        self.mlxCacheLimitBytes = mlxCacheLimitBytes
     }
 
     public var isLoaded: Bool { loaded != nil }
@@ -60,6 +74,8 @@ public actor D1IntentClassifier: IntentClassifying, ModelUnloadable {
         for name in ["config.json", "tokenizer.json"] where !fm.fileExists(atPath: modelDirectory.appendingPathComponent(name).path) {
             throw D1IntentError.modelNotFound(modelDirectory.appendingPathComponent(name))
         }
+        // 重みの読み込みより先に（読み込み中に解放されるバッファもキャッシュに溜めない）。
+        if let limit = mlxCacheLimitBytes { Memory.cacheLimit = limit }
         let rssBefore = Self.residentBytes()
         let t0 = Date()
         let tokenizer = try D1Tokenizer(tokenizerJSON: modelDirectory.appendingPathComponent("tokenizer.json"))

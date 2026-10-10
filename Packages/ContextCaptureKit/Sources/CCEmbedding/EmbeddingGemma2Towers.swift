@@ -131,6 +131,7 @@ final class EmbeddingGemma2TextTower: @unchecked Sendable {
     /// 768 次元・L2 正規化済みの埋め込み（同期。呼び出し側が autoreleasepool で囲む）。
     /// `ids` 中の `softImage` の位置には `imageTokens`（[1, T, 512] の先頭から順に）の行を入れる。
     func embed(ids: [Int32], imageTokens: MLMultiArray? = nil) throws -> [Float] {
+        #if arch(arm64)
         guard !ids.isEmpty, let length = Self.lengths.first(where: { $0 >= ids.count }), let model = models[length] else {
             throw EmbeddingError.predictionFailed("\(ids.count) tokens do not fit")
         }
@@ -189,6 +190,11 @@ final class EmbeddingGemma2TextTower: @unchecked Sendable {
             for i in 0..<r.count { r[i] = p[i] }
         }
         return EmbeddingVector.normalize(r)
+        #else
+        // Float16 は x86_64 の macOS では使えない。アプリは Apple Silicon 専用（PRD §3）で x86_64 では動かさないが、
+        // Xcode は Release（Any Mac）でパッケージを universal でビルドするので、x86_64 でもコンパイルだけは通す。
+        throw EmbeddingError.predictionFailed("Apple Silicon (arm64) only")
+        #endif
     }
 }
 

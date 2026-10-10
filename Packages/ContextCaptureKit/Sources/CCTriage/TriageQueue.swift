@@ -15,6 +15,9 @@ import Foundation
 ///     書かない（編集側が `reprocess` を投げる）。
 ///   - index: 推定中に注釈・タイトルが変わったら書かない。guard が needs_review でも入れる（ローカルの検索にしか使わない）。
 /// - 意図モデル（d1）は最後の使用から `Configuration.classifierIdleTimeout`（既定 10 分）で `unload()` する。処理中は解放しない。
+/// - `pause()` / `resume()`: キャプチャ（録音開始〜保存完了）の間、**次のステップを始めない**（進行中のステップは中断しない）。
+///   文字起こし（Whisper、ANE）とガード（Vision OCR）・索引（埋め込み、ANE）が重なると STT が約 2 倍になるため
+///   （docs/e2e/report.md §7）。止めたまま再開されなくても `Configuration.maxPauseDuration` で自動的に再開する。
 /// - ⚠️ OCR 結果・検出文字列・注釈本文はログにもイベントにも出さない。
 public actor TriageQueue {
     public struct Configuration: Sendable {
@@ -22,13 +25,18 @@ public actor TriageQueue {
         public var classifierIdleTimeout: Duration
         /// d1 に渡す注釈の最大文字数。
         public var maxAnnotationCharacters: Int
+        /// `pause()` のまま `resume()` が来なかったときに自動で再開するまでの時間（呼び出し側の取りこぼしの保険）。
+        /// 既定 180 秒 = 録音の上限（AppCoordinator の 120 秒）+ 文字起こし・保存の余裕。
+        public var maxPauseDuration: Duration
 
         public init(
             classifierIdleTimeout: Duration = .seconds(600),
-            maxAnnotationCharacters: Int = AnnotationPreprocessor.maxCharacters
+            maxAnnotationCharacters: Int = AnnotationPreprocessor.maxCharacters,
+            maxPauseDuration: Duration = .seconds(180)
         ) {
             self.classifierIdleTimeout = classifierIdleTimeout
             self.maxAnnotationCharacters = maxAnnotationCharacters
+            self.maxPauseDuration = maxPauseDuration
         }
     }
 
@@ -55,6 +63,16 @@ public actor TriageQueue {
     private var unloadTimer: Task<Void, Never>?
     /// `reindexAndWait` が見張っている記録の、索引ステップの最後の結果。
     private var indexWatches: [UUID: IndexWatch] = [:]
+    /// 一時停止中か（`pause()` / `resume()`）。
+    private var paused = false
+    /// 一時停止が解けるのを待っているワーカー。
+    private var pauseWaiters: [CheckedContinuation<Void, Never>] = []
+    /// `maxPauseDuration` で自動再開するタイマ。
+    private var pauseTimer: Task<Void, Never>?
+    /// pause のたびに増える。タイマは自分の世代の一時停止だけを解く（前の pause の遅れたタイマで次の pause を解かない）。
+    private var pauseGeneration = 0
+    /// 自動再開した回数（取りこぼしの検出用）。
+    public private(set) var autoResumeCount = 0
 
     private struct IndexWatch {
         var ids: Set<String>
@@ -162,6 +180,49 @@ public actor TriageQueue {
     /// 処理中または待ちがあるか。
     public var isBusy: Bool { worker != nil || !queue.isEmpty }
 
+    /// 次のステップを始めないようにする（キャプチャの開始時に呼ぶ）。進行中のステップはそのまま終わらせる。
+    /// 投入（`enqueue` 等）は受け付ける。すでに止まっていれば何もしない（入れ子は数えない。数えるのは呼び出し側）。
+    /// ⚠️ 止まっている間は `waitUntilIdle()` / `reindexAndWait` も再開まで返らない。
+    public func pause() {
+        guard !paused else { return }
+        paused = true
+        pauseGeneration += 1
+        let generation = pauseGeneration
+        let limit = configuration.maxPauseDuration
+        pauseTimer = Task { [weak self] in
+            try? await Task.sleep(for: limit)
+            guard !Task.isCancelled else { return }
+            await self?.autoResume(generation: generation)
+        }
+    }
+
+    /// 一時停止を解き、待っていたステップを始める。止まっていなければ何もしない。
+    public func resume() {
+        guard paused else { return }
+        paused = false
+        pauseTimer?.cancel()
+        pauseTimer = nil
+        let waiters = pauseWaiters
+        pauseWaiters = []
+        for w in waiters { w.resume() }
+    }
+
+    /// 一時停止中か。
+    public var isPaused: Bool { paused }
+
+    private func autoResume(generation: Int) {
+        guard paused, generation == pauseGeneration else { return }
+        autoResumeCount += 1
+        resume()
+    }
+
+    /// 一時停止中なら解けるまで待つ（ステップの境目で呼ぶ）。
+    private func waitWhilePaused() async {
+        while paused {
+            await withCheckedContinuation { pauseWaiters.append($0) }
+        }
+    }
+
     /// 待っている件数（処理中のものは含まない）。
     public var pendingCount: Int { queue.count }
 
@@ -189,6 +250,7 @@ public actor TriageQueue {
 
     private func drain() async {
         while !queue.isEmpty {
+            await waitWhilePaused()
             let job = queue.removeFirst()
             await process(job)
         }
@@ -229,14 +291,17 @@ public actor TriageQueue {
         }
 
         if job.steps.contains(.guardScan) {
+            await waitWhilePaused()
             let outcome = await runGuard(record: record, image: image, imageError: imageError)
             finishStep(id: job.id, step: .guardScan, outcome: outcome)
         }
         if job.steps.contains(.intent) {
+            await waitWhilePaused()
             let outcome = await runIntent(record: record)
             finishStep(id: job.id, step: .intent, outcome: outcome)
         }
         if job.steps.contains(.index) {
+            await waitWhilePaused()
             let outcome = await runIndex(record: record, image: image)
             finishStep(id: job.id, step: .index, outcome: outcome)
         }

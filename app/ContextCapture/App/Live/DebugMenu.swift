@@ -2,7 +2,7 @@ import AppKit
 import Observation
 import SwiftUI
 
-/// デバッグメニューに出す各モデルの状態（`LiveServices.refreshDebugStatus()` が 5 秒ごとに更新。メニューを出しているときだけ）。
+/// デバッグメニューに出す各モデルの状態（`LiveServices.refreshDebugStatus()` がメニューを開いたとき・d1 の解放時に更新）。
 /// d1 の無使用解放（既定 10 分）が効いているかをここで確かめる。
 @Observable
 @MainActor

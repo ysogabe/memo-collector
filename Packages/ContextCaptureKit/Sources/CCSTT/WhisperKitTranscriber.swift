@@ -52,6 +52,9 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         public var textDecoderCompute: MLComputeUnits
         /// WhisperKit のログを出すか（調査用）。
         public var verboseLogging: Bool
+        /// 読み込みの直後に短い合成音で 1 回推論して温めるか（`warmUpSamples`）。
+        /// 温めないと、読み込み後の最初の文字起こしが 5.2〜8.4 秒かかる（2 回目以降は 1.6 秒前後。docs/e2e/report.md §6・§7 問題 3）。
+        public var warmUpAfterLoad: Bool
 
         public init(
             variant: String = WhisperModelLayout.defaultVariant,
@@ -62,7 +65,8 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             firstTokenLogProbThreshold: Float? = -1.5,
             audioEncoderCompute: MLComputeUnits = .cpuAndNeuralEngine,
             textDecoderCompute: MLComputeUnits = .cpuAndNeuralEngine,
-            verboseLogging: Bool = false
+            verboseLogging: Bool = false,
+            warmUpAfterLoad: Bool = true
         ) {
             self.variant = variant
             self.speechGate = speechGate
@@ -73,6 +77,7 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             self.audioEncoderCompute = audioEncoderCompute
             self.textDecoderCompute = textDecoderCompute
             self.verboseLogging = verboseLogging
+            self.warmUpAfterLoad = warmUpAfterLoad
         }
     }
 
@@ -85,6 +90,9 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
     /// 中身に触るのはこの actor の中だけ（呼び出しは actor が直列化する）。
     final class KitBox: @unchecked Sendable {
         let kit: WhisperKit
+        /// 温めにかかった秒数と失敗（読み込み Task の中で書き、完了後に actor が読む）。
+        var warmUpDuration: TimeInterval?
+        var warmUpError: String?
         init(_ kit: WhisperKit) { self.kit = kit }
     }
 
@@ -92,8 +100,12 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
     private var loading: Task<KitBox, Error>?
     /// unload のたびに増やす。読み込み中に unload されたら、その読み込み結果は捨てる。
     private var generation = 0
-    /// 直近の読み込みにかかった秒数（計測用）。
+    /// 直近の読み込みにかかった秒数（計測用。温めの時間を含む）。
     public private(set) var lastLoadDuration: TimeInterval?
+    /// 直近の読み込みのうち、温め（`Configuration.warmUpAfterLoad`）にかかった秒数。温めていなければ nil。
+    public private(set) var lastWarmUpDuration: TimeInterval?
+    /// 直近の温めが失敗したときの説明（型名だけ。成功・温めていなければ nil）。
+    public private(set) var lastWarmUpError: String?
 
     /// Whisper が無音・雑音に対して返しがちな定型句（結果がこれだけなら noSpeech とみなす）。
     static let hallucinations: Set<String> = [
@@ -126,8 +138,13 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
 
     // MARK: - SpeechTranscribing
 
+    /// 読み込み、`Configuration.warmUpAfterLoad` なら 1 回推論して温める（温めの失敗は無視する）。
+    /// 温めは読み込みと同じ Task の中で済ませてから WhisperKit を公開する。その間に届いた `transcribe` は
+    /// 読み込みの完了（= 温めの完了）を待ってから普通に処理する（同じ WhisperKit を 2 つの推論が同時に触らない）。
+    /// 温めるのは `prepare()` から読み込んだときだけ。`transcribe` が初めての読み込みを始めたとき（prepare が走っていない・失敗した）は
+    /// 温めない（ユーザーの文字起こしの前に温めの推論を挟まない）。
     public func prepare() async throws {
-        _ = try await loadedKit()
+        _ = try await loadedKit(warmUp: configuration.warmUpAfterLoad)
     }
 
     public func transcribe(samples: [Float], vocabulary: [String]) async throws -> Transcript {
@@ -202,19 +219,26 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
 
     // MARK: - 内部
 
-    private func loadedKit() async throws -> WhisperKit {
+    private func loadedKit(warmUp: Bool = false) async throws -> WhisperKit {
         if let whisperKit { return whisperKit }
         if let loading { return try await loading.value.kit }
         let layout = self.layout
         let configuration = self.configuration
         let task = Task { () throws -> KitBox in
-            KitBox(try await Self.load(layout: layout, configuration: configuration))
+            let box = KitBox(try await Self.load(layout: layout, configuration: configuration))
+            if warmUp, !Task.isCancelled {
+                let t0 = Date()
+                box.warmUpError = await Self.warmUp(box.kit)
+                box.warmUpDuration = Date().timeIntervalSince(t0)
+            }
+            return box
         }
         loading = task
         let myGeneration = generation
         let start = Date()
         do {
-            let kit = try await task.value.kit
+            let box = try await task.value
+            let kit = box.kit
             guard generation == myGeneration else {
                 // 読み込み中に unload された
                 await kit.unloadModels()
@@ -222,6 +246,8 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             }
             whisperKit = kit
             lastLoadDuration = Date().timeIntervalSince(start)
+            lastWarmUpDuration = box.warmUpDuration
+            lastWarmUpError = box.warmUpError
             loading = nil
             return kit
         } catch {
@@ -256,6 +282,29 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             return try await WhisperKit(config)
         } catch {
             throw STTError.engineFailure(String(describing: error))
+        }
+    }
+
+    /// 温めに使う合成音（2 秒・16kHz・振幅 0.05 の 440Hz 正弦波）。完全な無音より実際の入力に近い経路
+    /// （エンコーダ → デコーダの数トークン）を通す。`SpeechGate` は通さずに WhisperKit へ直接渡すので、無音判定には掛からない。
+    /// ⚠️ 1 秒以下だと WhisperKit は窓を 1 つも処理しない（`DecodingOptions.windowClipTime` の既定 1 秒を末尾から削るため）。
+    static func warmUpSamples(sampleRate: Int = 16_000, seconds: Double = 2.0) -> [Float] {
+        let n = Int(Double(sampleRate) * seconds)
+        return (0..<n).map { i in 0.05 * Float(sin(2 * Double.pi * 440 * Double(i) / Double(sampleRate))) }
+    }
+
+    /// 1 回推論して、Core ML / ANE の初回実行のコストを先に払う。結果は捨てる（ログにも出さない）。失敗しても読み込みは成功扱いで、
+    /// 失敗の説明（型名）を返す。
+    static func warmUp(_ kit: WhisperKit) async -> String? {
+        var options = baseDecodingOptions()
+        // 合成音の結果は使わないので、デコーダは数トークンで打ち切る（初回実行のコストはデコーダの最初の 1 回でほぼ払える）。
+        options.sampleLength = 8
+        kit.textDecoder.logitsFilters = nil
+        do {
+            _ = try await kit.transcribe(audioArray: warmUpSamples(), decodeOptions: options)
+            return nil
+        } catch {
+            return "\(type(of: error))"
         }
     }
 

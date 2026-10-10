@@ -36,6 +36,11 @@ struct CaptureDependencies {
 /// - idle 以外での押下（キーリピート・二重配送・stopping 中の再押下）は無視。idle / stopping での解放（対の無い解放）も無視。
 /// - stop() が返った時点で idle に戻すので、前の記録の文字起こし中（1〜2 秒）でも次の押下を受けられる。
 /// - 解放が届かない（ホットキーの登録し直し・OS の取りこぼし）ときは `maxRecordingDuration` で解放とみなす。
+/// - キャプチャ中（押下〜保存完了。文字起こしの再試行も含む）は `onCaptureActivityChanged(true)`、すべて終わったら `(false)`。
+///   セッションが重なる（前の記録の保存中に次を押す）ことがあるので数えて、0↔1 の切り替わりだけを知らせる。取り消し・失敗・
+///   無音・短すぎる録音でも必ず `(false)` へ戻る。LiveServices がトリアージの一時停止（ANE の取り合いを避ける）に使う。
+/// - 1 件ごとの結果（保存・破棄・失敗）と所要時間を `CCLog.capture` の notice で出す。⚠️ 注釈・URL・ウインドウタイトル・
+///   スクショの中身はログに出さない（id・バンドル ID・時間・エラーの種類だけ）。
 @MainActor
 final class AppCoordinator: CaptureControlling {
     enum Phase: String, Sendable {
@@ -50,6 +55,10 @@ final class AppCoordinator: CaptureControlling {
         /// starting 中に届いた解放（start() の完了後に処理する）。
         var pendingRelease: HotKeyEvent?
         var watchdog: Task<Void, Never>?
+        /// 押下 → 録音開始（ミリ秒）。ログ用。
+        var pressToRecordingMs: Double?
+        /// `onCaptureActivityChanged` の数え上げから外したか（二重に外さない）。
+        var activityEnded = false
 
         init(pressUptime: TimeInterval, captureTask: Task<CaptureContext, Never>, signpost: OSSignpostIntervalState) {
             self.pressUptime = pressUptime
@@ -71,6 +80,10 @@ final class AppCoordinator: CaptureControlling {
     var onRecordSaved: @MainActor (String) -> Void = { _ in }
     /// 取り消しで記録を消した直後に呼ぶ。M2 でトリアージの取り消し（キューから外す）をここに差す。
     var onRecordRemoved: @MainActor (String) -> Void = { _ in }
+    /// キャプチャが始まった（true）/ すべて終わった（false）。0↔1 の切り替わりのときだけ呼ぶ。
+    var onCaptureActivityChanged: @MainActor (Bool) -> Void = { _ in }
+    /// 進行中のキャプチャ（押下〜保存完了・再試行）の数。
+    private(set) var activeCaptures = 0
 
     private nonisolated let stream: AsyncStream<CaptureEvent>
     private nonisolated let continuation: AsyncStream<CaptureEvent>.Continuation
@@ -103,47 +116,56 @@ final class AppCoordinator: CaptureControlling {
 
     func undo(recordID: String) async throws {
         try await deps.store.delete(id: recordID)
-        CCLog.capture.info("undo \(recordID, privacy: .public)")
+        CCLog.capture.notice("capture undone \(recordID, privacy: .public)")
         onRecordRemoved(recordID)
     }
 
     func retryTranscription(recordID: String) async {
         guard !retrying.contains(recordID) else { return }
         retrying.insert(recordID)
-        defer { retrying.remove(recordID) }
+        beginActivity()
+        defer {
+            retrying.remove(recordID)
+            endActivity()
+        }
         guard let record = try? await deps.store.get(id: recordID), let audioPath = record.audioPath,
               let url = try? await deps.store.attachmentURL(for: audioPath)
         else {
-            CCLog.capture.error("retry: record or audio missing \(recordID, privacy: .public)")
+            CCLog.capture.error("retry failed: record or audio missing \(recordID, privacy: .public)")
             emit(.failed(.transcriptionFailed(recordID: recordID)))
             return
         }
         let samples: [Float]
         do { samples = try deps.readAudio(url) } catch {
-            CCLog.capture.error("retry: audio unreadable \(String(describing: error), privacy: .public)")
+            CCLog.capture.error("retry failed: audio unreadable \(recordID, privacy: .public) \(Self.describe(error), privacy: .public)")
             emit(.failed(.transcriptionFailed(recordID: recordID)))
             return
         }
         let transcript: Transcript
+        let sttStart = deps.uptime()
         do {
             transcript = try await deps.transcriber.transcribe(samples: samples, vocabulary: deps.vocabulary())
-        } catch STTError.noSpeech {
+        } catch let STTError.noSpeech(reason) {
+            CCLog.capture.notice("retry failed: no speech (\(reason.rawValue, privacy: .public)) \(recordID, privacy: .public)")
             emit(.failed(.noVoice))
             return
         } catch {
-            CCLog.capture.error("retry: stt failed \(String(describing: error), privacy: .public)")
+            CCLog.capture.error("retry failed: stt \(recordID, privacy: .public) \(Self.describe(error), privacy: .public)")
             emit(.failed(.transcriptionFailed(recordID: recordID)))
             return
         }
+        let sttMs = max(0, (deps.uptime() - sttStart) * 1000)
         // 再試行の間にユーザーが詳細で手直ししていたら、その記録を読み直して注釈だけを差し替える。
         var updated = (try? await deps.store.get(id: recordID)) ?? record
         updated.annotation = Annotation(text: transcript.text, sttEngine: transcript.engine)
         do {
             try await deps.store.update(updated)
         } catch {
-            emit(.failed(.saveFailed(detail: String(describing: error))))
+            CCLog.capture.error("retry failed: update \(recordID, privacy: .public) \(Self.describe(error), privacy: .public)")
+            emit(.failed(.saveFailed(detail: Self.describe(error))))
             return
         }
+        CCLog.capture.notice("retry saved \(recordID, privacy: .public) stt \(sttMs, format: .fixed(precision: 0), privacy: .public)ms")
         emit(.saved(updated, notice: nil))
         onRecordSaved(recordID)
     }
@@ -181,6 +203,7 @@ final class AppCoordinator: CaptureControlling {
         let session = Session(pressUptime: e.uptime, captureTask: captureTask,
                               signpost: CCLog.signposter.beginInterval("pressToRecording"))
         state = .starting(session)
+        beginActivity()
         spawn { await self.beginRecording(session) }
     }
 
@@ -202,16 +225,20 @@ final class AppCoordinator: CaptureControlling {
             try await deps.recorder.start()
         } catch {
             CCLog.signposter.endInterval("pressToRecording", s.signpost)
-            CCLog.capture.error("recorder.start failed: \(String(describing: error), privacy: .public)")
+            CCLog.capture.error("capture failed: recorder.start \(Self.describe(error), privacy: .public)")
             s.captureTask.cancel()
             if isCurrent(s) { state = .idle }
+            endActivity(s)
             emit(.failed(.microphoneUnavailable))
             return
         }
         CCLog.signposter.endInterval("pressToRecording", s.signpost)
-        latency.record(.pressToRecording, milliseconds: max(0, (deps.uptime() - s.pressUptime) * 1000))
+        let pressToRecording = max(0, (deps.uptime() - s.pressUptime) * 1000)
+        s.pressToRecordingMs = pressToRecording
+        latency.record(.pressToRecording, milliseconds: pressToRecording)
         guard isCurrent(s) else {
             await deps.recorder.cancel()
+            endActivity(s)
             return
         }
         state = .recording(s)
@@ -238,10 +265,13 @@ final class AppCoordinator: CaptureControlling {
     }
 
     private func stopRecording(_ s: Session, releaseUptime: TimeInterval, discard: Bool) async {
+        // ここから先のどの終わり方（破棄・停止の失敗・無音・保存の失敗・保存）でもキャプチャ中を外す。
+        defer { endActivity(s) }
         if discard {
             await deps.recorder.cancel()
             s.captureTask.cancel()
             state = .idle
+            CCLog.capture.notice("capture discarded: too short (\(max(0, releaseUptime - s.pressUptime), format: .fixed(precision: 2), privacy: .public)s)")
             emit(.recordingDiscarded)
             return
         }
@@ -249,7 +279,7 @@ final class AppCoordinator: CaptureControlling {
         do {
             audio = try await deps.recorder.stop()
         } catch {
-            CCLog.capture.error("recorder.stop failed: \(String(describing: error), privacy: .public)")
+            CCLog.capture.error("capture failed: recorder.stop \(Self.describe(error), privacy: .public)")
             s.captureTask.cancel()
             state = .idle
             emit(.recordingEnded)
@@ -259,30 +289,40 @@ final class AppCoordinator: CaptureControlling {
         state = .idle
         emit(.recordingEnded)
         let signpost = CCLog.signposter.beginInterval("releaseToSaved")
-        await save(audio: audio, context: await s.captureTask.value, releaseUptime: releaseUptime)
+        await save(audio: audio, context: await s.captureTask.value, releaseUptime: releaseUptime,
+                   pressToRecordingMs: s.pressToRecordingMs)
         CCLog.signposter.endInterval("releaseToSaved", signpost)
     }
 
     // MARK: - 保存
 
-    private func save(audio: RecordedAudio, context: CaptureContext, releaseUptime: TimeInterval) async {
+    private func save(audio: RecordedAudio, context: CaptureContext, releaseUptime: TimeInterval, pressToRecordingMs: Double?) async {
         defer { removeTemporaryAudio(audio) }
+        let bundleID = context.app?.bundleID ?? "-"
+        let audioSeconds = Double(audio.samples16kMono.count) / 16_000
         // エンコード（重い）は文字起こしと並行に。ファイルへの書き込みは「声が入っていた」と分かってから。
         let encode = deps.encodeScreenshot
         let encodeTask = Task.detached(priority: .userInitiated) { context.screenshot.flatMap(encode) }
 
         var transcript: Transcript?
+        let sttStart = deps.uptime()
+        var sttMs: Double { max(0, (deps.uptime() - sttStart) * 1000) }
         do {
             transcript = try await deps.transcriber.transcribe(samples: audio.samples16kMono, vocabulary: deps.vocabulary())
         } catch let STTError.noSpeech(reason) {
-            CCLog.capture.info("no speech (\(reason.rawValue, privacy: .public)): record not created")
+            CCLog.capture.notice("""
+                capture failed: no speech (\(reason.rawValue, privacy: .public)), record not created \
+                app \(bundleID, privacy: .public) audio \(audioSeconds, format: .fixed(precision: 1), privacy: .public)s \
+                stt \(sttMs, format: .fixed(precision: 0), privacy: .public)ms
+                """)
             encodeTask.cancel()
             emit(.failed(.noVoice))
             return
         } catch {
             // 音声を残して記録を作り、[再試行] を出す（PRD §6.3）。
-            CCLog.capture.error("stt failed: \(String(describing: error), privacy: .public)")
+            CCLog.capture.error("stt failed: \(Self.describe(error), privacy: .public) stt \(sttMs, format: .fixed(precision: 0), privacy: .public)ms")
         }
+        let sttElapsedMs = sttMs
 
         let capturedAt = context.capturedAt.roundedToMilliseconds
         let id = ULID.generate(now: capturedAt).string
@@ -295,7 +335,7 @@ final class AppCoordinator: CaptureControlling {
                 screenshotPath = p
                 written.append(p)
             } catch {
-                CCLog.store.error("screenshot write failed: \(String(describing: error), privacy: .public)")
+                CCLog.store.error("screenshot write failed: \(Self.describe(error), privacy: .public)")
             }
         } else if context.screenshot != nil {
             CCLog.capture.error("screenshot encode failed")
@@ -308,7 +348,7 @@ final class AppCoordinator: CaptureControlling {
             audioPath = p
             written.append(p)
         } catch {
-            CCLog.store.error("audio write failed: \(String(describing: error), privacy: .public)")
+            CCLog.store.error("audio write failed: \(Self.describe(error), privacy: .public)")
         }
 
         let record = ContextRecord(
@@ -326,16 +366,29 @@ final class AppCoordinator: CaptureControlling {
         do {
             try await deps.store.insert(record)
         } catch {
-            CCLog.store.error("insert failed: \(String(describing: error), privacy: .public)")
+            CCLog.capture.error("capture failed: insert \(Self.describe(error), privacy: .public) app \(bundleID, privacy: .public)")
             await removeAttachments(written)
-            emit(.failed(.saveFailed(detail: String(describing: error))))
+            emit(.failed(.saveFailed(detail: Self.describe(error))))
             return
         }
         guard transcript != nil else {
+            CCLog.capture.notice("""
+                capture saved without transcript (stt failed) \(id, privacy: .public) app \(bundleID, privacy: .public) \
+                stt \(sttElapsedMs, format: .fixed(precision: 0), privacy: .public)ms
+                """)
             emit(.failed(.transcriptionFailed(recordID: id)))
             return
         }
-        latency.record(.releaseToSaved, milliseconds: max(0, (deps.uptime() - releaseUptime) * 1000))
+        let releaseToSaved = max(0, (deps.uptime() - releaseUptime) * 1000)
+        latency.record(.releaseToSaved, milliseconds: releaseToSaved)
+        CCLog.capture.notice("""
+            capture saved \(id, privacy: .public) app \(bundleID, privacy: .public) \
+            pressToRecording \(pressToRecordingMs ?? -1, format: .fixed(precision: 0), privacy: .public)ms \
+            releaseToSaved \(releaseToSaved, format: .fixed(precision: 0), privacy: .public)ms \
+            stt \(sttElapsedMs, format: .fixed(precision: 0), privacy: .public)ms \
+            audio \(audioSeconds, format: .fixed(precision: 1), privacy: .public)s \
+            screenshot \(screenshotPath != nil ? "yes" : "no", privacy: .public)
+            """)
         let notice: CaptureNotice? = context.screenshotSkipReason == ScreenshotSkipReason.permissionDenied ? .screenRecordingDenied : nil
         emit(.saved(record, notice: notice))
         onRecordSaved(id)
@@ -353,7 +406,33 @@ final class AppCoordinator: CaptureControlling {
         if let url = audio.fileURL { try? FileManager.default.removeItem(at: url) }
     }
 
+    // MARK: - キャプチャ中（トリアージの一時停止）
+
+    private func beginActivity() {
+        activeCaptures += 1
+        if activeCaptures == 1 { onCaptureActivityChanged(true) }
+    }
+
+    /// セッションの終わり（どの終わり方でも 1 回だけ数える）。
+    private func endActivity(_ s: Session) {
+        guard !s.activityEnded else { return }
+        s.activityEnded = true
+        endActivity()
+    }
+
+    private func endActivity() {
+        guard activeCaptures > 0 else { return }
+        activeCaptures -= 1
+        if activeCaptures == 0 { onCaptureActivityChanged(false) }
+    }
+
     // MARK: - 補助
+
+    /// ログ用のエラーの説明。型名とドメイン・コードだけ（エラーの本文にパスや文字列が混ざるのを避ける）。
+    nonisolated static func describe(_ error: Error) -> String {
+        let ns = error as NSError
+        return "\(type(of: error)) (\(ns.domain)#\(ns.code))"
+    }
 
     private func isCurrent(_ s: Session) -> Bool {
         switch state {

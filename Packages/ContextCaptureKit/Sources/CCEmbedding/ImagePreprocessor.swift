@@ -212,6 +212,7 @@ enum ImagePreprocessor {
     @_optimize(speed)
     static func patchify(rgbx px: [UInt8], width tw: Int, height th: Int, budget: ImageTokenBudget,
                          positionTable: Data) throws -> Prepared {
+        #if arch(arm64)
         let P = patchSize, K = poolingKernel, D = patchValues
         let N = budget.maxPatches, T = budget.rawValue
         let ph = th / P, pw = tw / P, n = ph * pw
@@ -266,5 +267,10 @@ enum ImagePreprocessor {
         }
         return Prepared(patches: patches, positions: positions, pool: pool, valid: valid, positionEmbeddings: pe,
                         softTokens: n / (K * K), resizedWidth: tw, resizedHeight: th)
+        #else
+        // Float16 は x86_64 の macOS では使えない。アプリは Apple Silicon 専用（PRD §3）で x86_64 では動かさないが、
+        // Xcode は Release（Any Mac）でパッケージを universal でビルドするので、x86_64 でもコンパイルだけは通す。
+        throw EmbeddingError.predictionFailed("Apple Silicon (arm64) only")
+        #endif
     }
 }
