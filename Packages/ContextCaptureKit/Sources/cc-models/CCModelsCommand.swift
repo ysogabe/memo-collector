@@ -8,8 +8,16 @@ struct CCModelsCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "cc-models",
         abstract: "Context Capture のモデルを取得・変換・検証する",
-        subcommands: [Paths.self, Prepare.self]
+        subcommands: [Paths.self, Prepare.self, WhisperCommand.self]
     )
+
+    /// `cc-models prepare <model>`。グループは main が持ち、各担当は葉のコマンドだけを足す。
+    struct Prepare: AsyncParsableCommand {
+        static let configuration = CommandConfiguration(
+            abstract: "モデルを取得・変換する",
+            subcommands: [PrepareD1.self, PrepareWhisperCommand.self]
+        )
+    }
 
     /// 解決された保存先を表示する（CC_DATA_DIR / CC_MODELS_DIR の確認用）。
     struct Paths: ParsableCommand {

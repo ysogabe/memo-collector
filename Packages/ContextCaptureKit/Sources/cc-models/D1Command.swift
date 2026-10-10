@@ -3,14 +3,7 @@ import CCCore
 import CCModels
 import Foundation
 
-/// `cc-models prepare d1` / `cc-models verify d1`。
-struct Prepare: AsyncParsableCommand {
-    static let configuration = CommandConfiguration(
-        abstract: "モデルを取得・変換する",
-        subcommands: [PrepareD1.self]
-    )
-}
-
+/// `cc-models prepare d1`（グループ `Prepare` は CCModelsCommand.swift）。
 struct PrepareD1: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "d1",
