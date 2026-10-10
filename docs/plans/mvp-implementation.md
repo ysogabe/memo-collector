@@ -175,6 +175,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 5 cleanup（§6 の Packages 側 10 項目。自前コードの警告 0）
 - [x] Wave 6 polish（7 項目。パッケージ 304 件・アプリ 54 件のテスト。degraded 中のアプリ検索はベクトルを続けて注意書き。d1 は manifest がある置き場で余計なファイルがあると取り直しになる）
 - [x] Wave 4 e2e（docs/e2e/report.md。解放→保存 p90 1.72〜1.80 秒（続けて録ると 4.38 秒、起動後最初の 1 件は 5.2〜8.4 秒）、アイドル CPU 0.02%、アイドルメモリ 121MB〜591MB、トリアージ中ピーク 7.22GB、d1 の SwiftPM / Xcode 差 0.0。修正項目は Wave 7）
-- [ ] Wave 7 fix（e2e と実機確認の指摘: Release の arm64 限定、MLX キャッシュ上限、Whisper の初回推論、録音中のトリアージ一時停止、キャプチャのログ、トリアージ後のアイドル CPU）→ main が scripts/e2e.sh で再計測
+- [x] Wave 7 fix（arm64 限定＋CCEmbedding の Float16 を `#if arch(arm64)`、MLX キャッシュ上限 256MB（ピーク 7.2→4.1GB）、Whisper の起動時ウォームアップ（初回 STT 5.2→1.4 秒）、キャプチャ中のトリアージ一時停止（効果は実機で確認: m1.md W7-5）、notice ログ、隠れた HUD のアニメーションが CPU を使い続ける不具合。アプリのテスト 66 件）
+- [ ] main による e2e 再計測（CC_E2E_CONFIG=swiftpm-release-w7）
 - [ ] セキュリティレビュー（security-review skill）
 - [ ] PR（github-pr-workflow。M1 実機確認が未了なら `Refs #1`）
