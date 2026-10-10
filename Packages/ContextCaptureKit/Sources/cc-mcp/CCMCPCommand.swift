@@ -36,7 +36,10 @@ struct CCMCPCommand: AsyncParsableCommand {
             throw ExitCode(3)
         }
 
-        let handlers = MCPToolHandlers(store: store, embedderProvider: makeEmbedderProvider(paths: paths))
+        // 状態が ready なら検索モデル（テキスト塔）を裏で読み込み始める（すぐ戻る。stdio の受付は待たせない）。
+        let queryEmbedder = makeQueryEmbedder(paths: paths)
+        await queryEmbedder.prewarm()
+        let handlers = MCPToolHandlers(store: store, embedderResolver: { await queryEmbedder.resolve() })
         let server = ContextCaptureMCPServer(handlers: handlers)
         try await server.start(transport: StdioTransport())
         MCPLog.write("起動した（データ: \(paths.dataRoot.path)）")
@@ -48,42 +51,19 @@ struct CCMCPCommand: AsyncParsableCommand {
 
 /// 検索用の埋め込みモデルを作る唯一の場所。
 ///
-/// ANE の初回コンパイルは実行ファイルごとに数分かかるため、cc-mcp では ANE を使わず **テキスト塔を CPU/GPU で**、
-/// 最初の検索時に遅延ロードする（main 決定。クエリはテキストだけなので視覚塔は読まない）。
-/// 次のときは nil を返し、search_captures は部分一致に切り替わる（`fallback_reason: embedder_unavailable`）:
+/// ANE の初回コンパイルは実行ファイルごとに数分かかるため、cc-mcp では ANE を使わず **テキスト塔を CPU/GPU で**読む
+/// （main 決定。クエリはテキストだけなので視覚塔は読まない）。読み込みは起動直後に裏で始め（`prewarm`）、
+/// 検索が来たら最大 5 秒待ち、間に合わなければ部分一致（`fallback_reason: embedder_warming`）。
+/// 次のときは使わず、search_captures は部分一致に切り替わる（`fallback_reason: embedder_unavailable`）:
 /// - 埋め込みモデル（`EmbeddingGemma2Text.mlmodelc` など）が `CC_MODELS_DIR` / 既定のモデル置き場に無い
-/// - アプリが書く索引の状態ファイル（データルートの `search-index.json`）が無い・作り直し中・
+/// - アプリが書く索引の状態ファイル（`SearchIndexState`、データルートの `search-index.json`）が無い・ready でない・
 ///   シグネチャ（`CoreMLEmbedder.Configuration.indexSignature`）がこちらの設定と食い違う → 標準エラーに警告
-func makeEmbedderProvider(paths: CCPaths = .resolve()) -> EmbedderProvider {
-    let box = LazyQueryEmbedder(paths: paths)
-    return { await box.embedder() }
-}
-
-/// 検索のたびに索引の状態を読み直し（アプリが作り直しを終えれば次の検索からベクトルを使う）、合っていれば埋め込みを返す。
-actor LazyQueryEmbedder {
-    let paths: CCPaths
-    private var cached: CoreMLEmbedder?
-    /// 同じ理由の警告を検索のたびに出さない。
-    private var lastWarning: String?
-
-    init(paths: CCPaths) {
-        self.paths = paths
-    }
-
-    func embedder() -> (any Embedder)? {
-        let modelDirectory = paths.modelDirectory(.embedding)
+func makeQueryEmbedder(paths: CCPaths = .resolve()) -> WarmingQueryEmbedder {
+    let modelDirectory = paths.modelDirectory(.embedding)
+    return WarmingQueryEmbedder(stateURL: paths.searchIndexStateURL) { state in
         let required = ["EmbeddingGemma2Text.mlmodelc", "embeddings.bf16", "tokenizer.json"]
         guard required.allSatisfy({ FileManager.default.fileExists(atPath: modelDirectory.appendingPathComponent($0).path) }) else {
-            warn("埋め込みモデルが無いので部分一致で検索する: \(modelDirectory.path)")
-            return nil
-        }
-        guard let state = SearchIndexState.read(paths: paths) else {
-            warn("索引の状態ファイル（\(SearchIndexState.fileName)）が無いので部分一致で検索する。アプリで検索の準備が終わるのを待ってください")
-            return nil
-        }
-        guard state.status == .ready else {
-            warn("アプリが検索の索引を作り直している（\(state.status)）ので部分一致で検索する")
-            return nil
+            return .reject("埋め込みモデルが無いので部分一致で検索する: \(modelDirectory.path)")
         }
         let configuration = CoreMLEmbedder.Configuration(
             modelDirectory: modelDirectory,
@@ -93,21 +73,15 @@ actor LazyQueryEmbedder {
             dimension: state.dimension
         )
         guard configuration.indexSignature == state.indexSignature else {
-            warn("索引のシグネチャが食い違うのでベクトル検索を使わない（アプリ: \(state.indexSignature)、cc-mcp: \(configuration.indexSignature)）")
-            return nil
+            return .reject("索引のシグネチャが食い違うのでベクトル検索を使わない（アプリ: \(state.indexSignature)、cc-mcp: \(configuration.indexSignature)）")
         }
-        if let cached, cached.configuration == configuration { return cached }
-        let e = CoreMLEmbedder(configuration: configuration)
-        cached = e
-        lastWarning = nil
-        MCPLog.write("埋め込み検索を使う（\(configuration.indexSignature)、CPU/GPU。初回の検索でテキスト塔を読み込む）")
-        return e
-    }
-
-    private func warn(_ message: String) {
-        cached = nil
-        guard message != lastWarning else { return }
-        lastWarning = message
-        MCPLog.write(message)
+        return .use(.init(
+            key: configuration.indexSignature,
+            make: { CoreMLEmbedder(configuration: configuration) },
+            warm: { embedder in
+                // テキスト塔だけ読み、初回推論まで済ませる。
+                if let coreML = embedder as? CoreMLEmbedder { _ = try await coreML.prepare(includeVision: false) }
+            }
+        ))
     }
 }

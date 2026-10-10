@@ -14,6 +14,8 @@ public typealias EmbedderProvider = @Sendable () async -> (any Embedder)?
 public struct MCPToolHandlers: Sendable {
     public let store: SQLiteRecordStore
     public let embedderProvider: EmbedderProvider
+    /// 検索ごとに埋め込みの状態を引く（読み込み中を区別できる。cc-mcp は `WarmingQueryEmbedder.resolve`）。
+    public let embedderResolver: QueryEmbedderResolver
     public let imageLoader: MCPImageLoader
     /// 日付だけの since と Markdown の時刻のタイムゾーン、JSON の日時のオフセット。
     public let timeZone: TimeZone
@@ -32,6 +34,29 @@ public struct MCPToolHandlers: Sendable {
     ) {
         self.store = store
         self.embedderProvider = embedderProvider
+        self.embedderResolver = {
+            if let e = await embedderProvider() { return .available(e) }
+            return .unavailable
+        }
+        self.imageLoader = imageLoader
+        self.timeZone = timeZone
+        self.now = now
+    }
+
+    /// 読み込み中（`.warming`）を区別できる解決関数で作る（cc-mcp はこちら）。
+    public init(
+        store: SQLiteRecordStore,
+        embedderResolver: @escaping QueryEmbedderResolver,
+        imageLoader: MCPImageLoader = MCPImageLoader(),
+        timeZone: TimeZone = .current,
+        now: @escaping @Sendable () -> Date = { Date() }
+    ) {
+        self.store = store
+        self.embedderResolver = embedderResolver
+        self.embedderProvider = {
+            if case let .available(e) = await embedderResolver() { return e }
+            return nil
+        }
         self.imageLoader = imageLoader
         self.timeZone = timeZone
         self.now = now
@@ -104,8 +129,15 @@ public struct MCPToolHandlers: Sendable {
         let statuses = Self.searchStatuses(includeArchived: includeArchived)
 
         return try await storeOperation {
-            var fallbackReason = "embedder_unavailable"
-            if let embedder = await embedderProvider() {
+            let fallbackReason: String
+            switch await embedderResolver() {
+            case .unavailable:
+                fallbackReason = "embedder_unavailable"
+            case .warming:
+                fallbackReason = "embedder_warming"
+            case .failed:
+                fallbackReason = "embedder_failed"
+            case let .available(embedder):
                 do {
                     let vector = try await embedder.embedQuery(query)
                     // 状態の絞り込みは上位 limit 件を選ぶ前に効く（archived が多くても件数が足りなくならない）。

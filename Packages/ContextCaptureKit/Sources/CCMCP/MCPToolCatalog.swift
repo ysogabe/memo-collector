@@ -88,7 +88,9 @@ public enum CCMCPToolCatalog {
             title: "記録の検索",
             description: """
             自然文で記録を探す。埋め込みが使えればベクトル検索（mode=vector）、使えなければ注釈・ウインドウタイトル・URL の部分一致（mode=keyword、\
-            空白区切りの語をすべて含むもの）。archived の記録は既定で除外する。
+            空白区切りの語をすべて含むもの）。keyword になった理由は fallback_reason（embedder_unavailable / \
+            embedder_warming: 検索モデルの読み込み中で、しばらく後に同じ検索をすると vector になる / embedder_failed）。\
+            archived の記録は既定で除外する。
             """,
             inputSchema: .object([
                 "type": "object",
