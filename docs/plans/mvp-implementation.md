@@ -112,6 +112,8 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - 画面収録の許可後はアプリの再起動が要る（オンボーディング文言に反映）
 - NSAppleScript をバックグラウンドの直列キューで実行している（Apple はメイン推奨）。実機で問題があればメインへ
 - wiring: `CaptureDiagnostics` の 3 関数をデバッグメニューから呼べるようにする
+- UI: `InboxFilter.matches(_:)` を app から CCCore へ移す。MCP の `get_capture` は `RecordMarkdown.handoffScreenshotPath(_:)`（渡してよい画像の規則）を共有する
+- UI: 除外アプリでスクショを撮らなかったときのトースト文言は出さない（PRD §6.3 に無い。現状維持）
 - 調査書 runtime-coreml-mlx.md §4.2 のトークナイザ原因を更新（ignore_merges ではなく、swift-transformers の前分割が書記素クラスタ単位で照合し単独 LF に `[\r\n]` が一致しない）
 
 ## 7. 進捗（main が Wave ごとに更新）
@@ -125,7 +127,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 1 intent（トークン 104/104 一致、意図最大誤差 0.043、未見 21/22、p50 0.85 秒、8bit 2.9GB、Swift のみの変換が Python 版とビット一致）
 - [ ] Wave 1 stt（dispatch 済み。worktree: ../memo-collector-worktrees/{store,stt,intent}、ブランチ wave1/*）
 - [x] Wave 1 capture（47 テスト成功。権限・実機の経路は未検証 → docs/manual-tests/capture.md で M1 時にユーザー確認）
-- [ ] Wave 2 ui（前倒しで dispatch 済み。worktree ../memo-collector-worktrees/ui、フェイク実装で単独動作）
+- [x] Wave 2 ui（check.sh green、スナップショット 12 枚 docs/ui-snapshots/。組み立て点は app/ContextCapture/App/AppEnvironment.swift の `// WIRING:`）
 - [ ] Wave 2 wiring → M1 動作確認
 - [ ] Wave 3 guard+triage（dispatch 済み。worktree ../memo-collector-worktrees/guard-triage）
 - [ ] Wave 3 embedding（stt 完了後に dispatch。ANE の取り合いを避ける）

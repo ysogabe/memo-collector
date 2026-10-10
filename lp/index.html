@@ -197,8 +197,8 @@
     <table class="spec">
       <thead><tr><th scope="col">役割</th><th scope="col">モデル</th><th scope="col">検証結果</th></tr></thead>
       <tbody>
-        <tr><td>文字起こし</td><td>Whisper large-v3-turbo</td><td>1 件 1.1 秒。意図の推定と索引まで含めても 1.6 秒（90 パーセンタイル）</td></tr>
-        <tr><td>意図の推定</td><td>LiquidAI d1-3B</td><td>未見の注釈 22 件中 21 件を正しく分類、1 件 0.3 秒</td></tr>
+        <tr><td>文字起こし</td><td>Whisper large-v3-turbo</td><td>1 件 1.3 秒（Apple Neural Engine で実行）。意図の推定と索引は保存後に裏で行います</td></tr>
+        <tr><td>意図の推定</td><td>LiquidAI d1-3B</td><td>未見の注釈 22 件中 21 件を正しく分類、1 件 1 秒未満</td></tr>
         <tr><td>検索</td><td>Google EmbeddingGemma 2</td><td>上位 3 件に正解が入る割合 93%（注釈とスクショを合わせて索引）</td></tr>
         <tr><td>秘密情報のチェック</td><td>Apple Vision の文字認識</td><td>ダミーのキーやトークンを含む 4 画面すべて検出、誤検知 0</td></tr>
       </tbody>
@@ -224,7 +224,7 @@
       </details>
       <details>
         <summary>ディスクはどれくらい使いますか？</summary>
-        <p>モデルが合わせて約 9GB です。記録 1 件あたりはスクショ（WebP）が 100〜300KB 程度、テキストはごくわずかです。音声は既定で 7 日後に削除し、文字起こしだけを残します。</p>
+        <p>モデルが合わせて約 5〜6GB です。記録 1 件あたりはスクショ（WebP）が 100〜300KB 程度、テキストはごくわずかです。音声は既定で 7 日後に削除し、文字起こしだけを残します。</p>
       </details>
       <details>
         <summary>オンライン会議の最中に使えますか？相手に聞こえませんか？</summary>
