@@ -7,6 +7,8 @@
 
 ```
 memo-collector/
+├── app/                                 # macOS アプリ（XcodeGen の project.yml。`scripts/check.sh` でビルド）
+├── Packages/ContextCaptureKit/          # ロジック一式の SwiftPM パッケージ（CCCore ほか、cc-models / cc-mcp）
 ├── docs/
 │   ├── concept/source-conversation.md   # 一次ソース: 元の ChatGPT 会話の要約と、そこで決まった設計原則
 │   ├── prd/PRD.md                       # プロダクト要求仕様（MVP スコープ・データモデル・アーキテクチャ）

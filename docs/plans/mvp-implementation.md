@@ -51,7 +51,7 @@ scripts/check.sh                      # 全 QA コマンドの入口
 
 ## 3. 型とプロトコル（CCCore、契約の骨子）
 
-Wave 0 がこの骨子で `CCCore` を実装し、確定したシグネチャはソースが正典になる。
+Wave 0 がこの骨子で `CCCore` を実装し、確定したシグネチャは **`Packages/ContextCaptureKit/Sources/CCCore/` のソースが正典**（特に `Protocols.swift`）。Wave 0 での確定事項: プロトコル名は `Embedder`（MLXNN.Embedding との衝突回避）、`AudioRecording` は `start() async throws` / `stop()` / `cancel()` / `levels()`、Swift 名 `guardInfo` / `handoffs`（JSON キーは PRD どおり）、マスク版は `<id>-masked.<ext>`、`CC_DATA_DIR` を変えてもモデル位置は動かない、`RecordStore.count(_:)` と `InboxFilter` / `SearchHit` / `AttachmentKind` / `ModelSlot` を追加。
 
 - `ContextRecord`: PRD §7 のフィールド（id は ULID 文字列、captured_at、app{name,bundleID}、window{title,frame}、url、extra[String:String]、screenshotPath / maskedScreenshotPath / audioPath（相対パス）、annotation{text, sttEngine, edited}、triage{intent, intentConfidence, mentionsDatetime, datetimeProbability, model}?、guard{status: pending|clear|needs_review|masked, findings[{kind, bbox(正規化 0–1・左上原点)}]}、handoffs[{to, at, via}]、notes[{author, text, at}]、status: inbox|done|archived）
 - `Intent`: `todo / research / code / note / schedule`。確信度 < 0.7 は `intent = nil`（未分類）として保存し、確率は残す
@@ -69,7 +69,7 @@ Wave 0 がこの骨子で `CCCore` を実装し、確定したシグネチャは
 
 ```zsh
 scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら非 0
-  # 1) cd Packages/ContextCaptureKit && swift build && swift test
+  # 1) cd Packages/ContextCaptureKit && swift build && swift test（この環境では swift test でも MLX の metallib が作られる。確認済み）
   # 2) cd app && xcodegen generate && xcodebuild -scheme ContextCapture -configuration Debug build
 ```
 
@@ -96,8 +96,9 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 
 - [x] 推論ランタイム調査（(b) Go、2026-10-10）
 - [x] PRD を (b) に更新
-- [ ] Issue・作業ブランチ
-- [ ] Wave 0 scaffold
+- [x] Issue #1・作業ブランチ feat/1-mvp-app
+- [x] Wave 0 scaffold（check.sh green、`swift test` で MLX が Metal 実行できることを確認）
+- [ ] 追加調査: FluidUse / embeddinggemma-2-coreml（dispatch 済み。結果を Wave 1 capture・Wave 3 embedding の設計に反映）
 - [ ] Wave 1 capture / store / stt / intent
 - [ ] Wave 2 ui / wiring → M1 動作確認
 - [ ] Wave 3 embedding / guard+triage
