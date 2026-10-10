@@ -15,7 +15,8 @@ import XCTest
 ///
 /// - `CC_RUN_E2E=1` のときだけ走る（それ以外は XCTSkip）。モデルは `CC_MODELS_DIR`（読み取りのみ）。データは一時ディレクトリ
 /// - 結果は `docs/e2e/results/<timestamp>-<config>.json`（`CC_E2E_OUT` で上書き）
-/// - `CC_E2E_MLX_CACHE_LIMIT_MB`: 実験用。MLX のキャッシュ上限を設定して測る（製品の挙動とは異なる。config 名を変えること）
+/// - `CC_E2E_MLX_CACHE_LIMIT_MB`: 実験用。MLX のキャッシュ上限（MB）を製品の既定（256MB）から変えて測る。`unlimited` で上限なし
+///   （Wave 4 の本計測と同じ条件）。config 名を変えること
 /// - `CC_E2E_ROUNDS`（既定 3）、`CC_E2E_LIMIT`（1 周の件数、既定 30）。動作確認だけなら `CC_E2E_ROUNDS=1 CC_E2E_LIMIT=3`
 /// - 入口は `scripts/e2e.sh`
 final class E2EHarnessTests: XCTestCase {
@@ -114,12 +115,20 @@ final class E2EHarnessTests: XCTestCase {
         ]
         snap("3_after_embedding_prepare")
 
-        // 実験用: MLX のバッファキャッシュの上限（製品は設定していない = 無制限）。`CC_E2E_MLX_CACHE_LIMIT_MB` があるときだけ設定する。
-        if let mb = env["CC_E2E_MLX_CACHE_LIMIT_MB"].flatMap(Int.init) {
-            Memory.cacheLimit = mb << 20
-            out["mlx_cache_limit_mb_experiment"] = mb
+        // MLX のバッファキャッシュの上限。製品（`D1IntentClassifier` の既定）は `load()` で 256MB を設定する。
+        // 実験用に `CC_E2E_MLX_CACHE_LIMIT_MB` で上書きできる（`unlimited` なら設定しない = Wave 4 の本計測と同じ無制限）。
+        var mlxCacheLimit: Int? = D1IntentClassifier.defaultMLXCacheLimitBytes
+        if let v = env["CC_E2E_MLX_CACHE_LIMIT_MB"] {
+            if v == "unlimited" {
+                mlxCacheLimit = nil
+                out["mlx_cache_limit_mb_experiment"] = "unlimited"
+            } else if let mb = Int(v) {
+                mlxCacheLimit = mb << 20
+                out["mlx_cache_limit_mb_experiment"] = mb
+            }
         }
-        let d1 = D1IntentClassifier(modelDirectory: d1Dir)
+        out["mlx_cache_limit_bytes"] = mlxCacheLimit.map { $0 as Any } ?? NSNull()
+        let d1 = D1IntentClassifier(modelDirectory: d1Dir, mlxCacheLimitBytes: mlxCacheLimit)
         let d1Load = try await d1.load()
         loads["d1_load_s"] = d1Load.loadSeconds
         loads["d1_tokenizer_load_s"] = d1Load.tokenizerSeconds
