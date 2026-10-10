@@ -57,7 +57,7 @@ enum FakeData {
             "~/works/hermes % gh auth status",
             "github.com",
             "  ✓ Logged in to github.com account ysogabe",
-            "  - Token: ghp_8fK2xQ9mVb7LwZ3nT1sR4yU6pE0aHc5dJgN",
+            "  - Token: ghp_FAKEexampleTOKENforUIdemo000000000",
             "  - Token scopes: 'repo', 'read:org'",
             "~/works/hermes % ",
         ], secretLine: 3)
@@ -103,7 +103,7 @@ enum FakeData {
         let maskedScreen = MockScreen.terminal(lines: [
             "~/works/infra % cat .env.local",
             "DATABASE_URL=postgres://localhost:5432/app",
-            "OPENAI_API_KEY=sk-proj-Q2c4R7t9W1y3Z5b8D0f2H4j6",
+            "OPENAI_API_KEY=sk-proj-FAKEexampleKEYforUIdemo00",
             "LOG_LEVEL=debug",
             "~/works/infra % ",
         ], secretLine: 2)
