@@ -166,6 +166,6 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 5 wiring-m2（アプリのテスト 46 件。非 fake 起動で resumePending・needs_review 判定・埋め込み初回準備 158 秒・d1 の 10 分解放・cc-mcp の vector 検索をログで確認。実機確認手順 docs/manual-tests/m2-m3.md）
 - [x] Wave 5 cleanup（§6 の Packages 側 10 項目。自前コードの警告 0）
 - [x] Wave 6 polish（7 項目。パッケージ 304 件・アプリ 54 件のテスト。degraded 中のアプリ検索はベクトルを続けて注意書き。d1 は manifest がある置き場で余計なファイルがあると取り直しになる）
-- [ ] Wave 4 e2e（Release ビルド・サブエージェント停止・load average を記録して main が計測: 解放→トースト p90、3 モデル同時常駐のメモリ（MLX アクティブ + footprint）、アイドル CPU、アプリ内での d1 数値一致）
+- [ ] Wave 4 e2e（ハーネス dispatch 済み: E2ETests + scripts/e2e.sh + docs/e2e/report.md。その後 main が再計測して照合。Release ビルド・サブエージェント停止・load average を記録して main が計測: 解放→トースト p90、3 モデル同時常駐のメモリ（MLX アクティブ + footprint）、アイドル CPU、アプリ内での d1 数値一致）
 - [ ] セキュリティレビュー（security-review skill）
 - [ ] PR（github-pr-workflow。M1 実機確認が未了なら `Refs #1`）
