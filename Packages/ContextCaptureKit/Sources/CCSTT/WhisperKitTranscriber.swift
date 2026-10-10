@@ -90,8 +90,9 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
     /// 中身に触るのはこの actor の中だけ（呼び出しは actor が直列化する）。
     final class KitBox: @unchecked Sendable {
         let kit: WhisperKit
-        /// 温めにかかった秒数（読み込み Task の中で書き、完了後に actor が読む）。
+        /// 温めにかかった秒数と失敗（読み込み Task の中で書き、完了後に actor が読む）。
         var warmUpDuration: TimeInterval?
+        var warmUpError: String?
         init(_ kit: WhisperKit) { self.kit = kit }
     }
 
@@ -103,6 +104,8 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
     public private(set) var lastLoadDuration: TimeInterval?
     /// 直近の読み込みのうち、温め（`Configuration.warmUpAfterLoad`）にかかった秒数。温めていなければ nil。
     public private(set) var lastWarmUpDuration: TimeInterval?
+    /// 直近の温めが失敗したときの説明（型名だけ。成功・温めていなければ nil）。
+    public private(set) var lastWarmUpError: String?
 
     /// Whisper が無音・雑音に対して返しがちな定型句（結果がこれだけなら noSpeech とみなす）。
     static let hallucinations: Set<String> = [
@@ -223,7 +226,7 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             let box = KitBox(try await Self.load(layout: layout, configuration: configuration))
             if configuration.warmUpAfterLoad, !Task.isCancelled {
                 let t0 = Date()
-                await Self.warmUp(box.kit)
+                box.warmUpError = await Self.warmUp(box.kit)
                 box.warmUpDuration = Date().timeIntervalSince(t0)
             }
             return box
@@ -242,6 +245,7 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             whisperKit = kit
             lastLoadDuration = Date().timeIntervalSince(start)
             lastWarmUpDuration = box.warmUpDuration
+            lastWarmUpError = box.warmUpError
             loading = nil
             return kit
         } catch {
@@ -279,20 +283,27 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         }
     }
 
-    /// 温めに使う合成音（1 秒・16kHz・振幅 0.05 の 440Hz 正弦波）。完全な無音より実際の入力に近い経路
+    /// 温めに使う合成音（2 秒・16kHz・振幅 0.05 の 440Hz 正弦波）。完全な無音より実際の入力に近い経路
     /// （エンコーダ → デコーダの数トークン）を通す。`SpeechGate` は通さずに WhisperKit へ直接渡すので、無音判定には掛からない。
-    static func warmUpSamples(sampleRate: Int = 16_000, seconds: Double = 1.0) -> [Float] {
+    /// ⚠️ 1 秒以下だと WhisperKit は窓を 1 つも処理しない（`DecodingOptions.windowClipTime` の既定 1 秒を末尾から削るため）。
+    static func warmUpSamples(sampleRate: Int = 16_000, seconds: Double = 2.0) -> [Float] {
         let n = Int(Double(sampleRate) * seconds)
         return (0..<n).map { i in 0.05 * Float(sin(2 * Double.pi * 440 * Double(i) / Double(sampleRate))) }
     }
 
-    /// 1 回推論して、Core ML / ANE の初回実行のコストを先に払う。結果は捨てる（ログにも出さない）。失敗しても読み込みは成功扱い。
-    static func warmUp(_ kit: WhisperKit) async {
+    /// 1 回推論して、Core ML / ANE の初回実行のコストを先に払う。結果は捨てる（ログにも出さない）。失敗しても読み込みは成功扱いで、
+    /// 失敗の説明（型名）を返す。
+    static func warmUp(_ kit: WhisperKit) async -> String? {
         var options = baseDecodingOptions()
         // 合成音の結果は使わないので、デコーダは数トークンで打ち切る（初回実行のコストはデコーダの最初の 1 回でほぼ払える）。
         options.sampleLength = 8
         kit.textDecoder.logitsFilters = nil
-        _ = try? await kit.transcribe(audioArray: warmUpSamples(), decodeOptions: options)
+        do {
+            _ = try await kit.transcribe(audioArray: warmUpSamples(), decodeOptions: options)
+            return nil
+        } catch {
+            return "\(type(of: error))"
+        }
     }
 
     /// 日本語固定・temperature 0・タイムスタンプなし。

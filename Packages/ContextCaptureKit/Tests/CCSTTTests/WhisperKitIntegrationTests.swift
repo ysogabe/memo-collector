@@ -233,6 +233,33 @@ final class WhisperKitIntegrationTests: XCTestCase {
         }
     }
 
+    /// 読み込み直後の温め（`Configuration.warmUpAfterLoad`）の効果（`CC_STT_EXPERIMENT=warmup`）。
+    /// 温めあり / なしで、prepare の時間・温めの時間・最初と 2 回目の文字起こしの時間を出す。
+    func testWarmUpExperiment() async throws {
+        guard ProcessInfo.processInfo.environment["CC_STT_EXPERIMENT"] == "warmup" else {
+            throw XCTSkip("CC_STT_EXPERIMENT=warmup のときだけ走る調査用テスト")
+        }
+        let layout = try requireModel()
+        let audio = try STTTestSupport.loadWav(STTTestSupport.audioURL(id: 2))
+        for warm in [false, true, false, true] {
+            let t = WhisperKitTranscriber(layout: layout, configuration: .init(warmUpAfterLoad: warm))
+            var t0 = Date()
+            try await t.prepare()
+            let prepare = Date().timeIntervalSince(t0)
+            let warmUp = await t.lastWarmUpDuration ?? -1
+            let warmError = await t.lastWarmUpError ?? "-"
+            t0 = Date()
+            _ = try await t.transcribe(samples: audio, vocabulary: [])
+            let first = Date().timeIntervalSince(t0)
+            t0 = Date()
+            _ = try await t.transcribe(samples: audio, vocabulary: [])
+            let second = Date().timeIntervalSince(t0)
+            print(String(format: "[ccstt] warmup=%@ prepare=%.2fs warm=%.2fs (error %@) first=%.2fs second=%.2fs",
+                         warm ? "on" : "off", prepare, warmUp, warmError, first, second))
+            await t.unload()
+        }
+    }
+
     /// 前文脈トークンが実際にプレフィルへ入っているかをログで確かめる（`CC_STT_EXPERIMENT=prefill`）。
     func testPrefillLogExperiment() async throws {
         guard ProcessInfo.processInfo.environment["CC_STT_EXPERIMENT"] == "prefill" else {
