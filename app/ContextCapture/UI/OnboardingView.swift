@@ -95,6 +95,8 @@ final class OnboardingViewModel {
 struct OnboardingView: View {
     @Bindable var vm: OnboardingViewModel
     let hotkey: String
+    /// ホットキーを登録できないときの説明（本番の配線から。スナップショットでは nil）。
+    var hotKeyIssue: () -> HotKeyIssue? = { nil }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -169,6 +171,12 @@ struct OnboardingView: View {
             }
             .background(Color.primary.opacity(0.03), in: RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.08)))
+            if let issue = hotKeyIssue() {
+                Label(issue.message, systemImage: "exclamationmark.triangle")
+                    .foregroundStyle(Color.warnText)
+                    .font(.system(size: 12))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Button("状態を確かめ直す") { Task { await vm.refreshPermissions() } }
                 .buttonStyle(.link)
                 .font(.system(size: 12))

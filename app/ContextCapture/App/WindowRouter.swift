@@ -47,7 +47,9 @@ final class WindowRouter: NSObject, NSWindowDelegate {
                 self.onboarding?.close()
             }
             onboarding = makeWindow(title: "Context Capture へようこそ", size: NSSize(width: 640, height: 600),
-                                    root: OnboardingView(vm: vm, hotkey: model.settings.hotkey.display), resizable: false)
+                                    root: OnboardingView(vm: vm, hotkey: model.settings.hotkey.display,
+                                                        hotKeyIssue: { [weak model] in model?.hotKeyIssue }),
+                                    resizable: false)
         }
         present(onboarding!)
     }
