@@ -6,6 +6,8 @@ import Foundation
 ///
 /// - 1 件ずつ**直列**に、guard → intent → index の順で処理する。各ステップは独立に失敗してよい
 ///   （1 つの失敗が他のステップを止めない）。失敗したステップは次回の `resumePending()` で拾われる状態のまま残す。
+/// - モデル（d1・埋め込み）が未準備のエラー（`ModelReadinessReporting.isModelNotReady`）は失敗にせず
+///   `.skipped(.notReady)` にする。何も書かないので、モデルが揃った後の `resumePending()` で拾われる。
 /// - 書き込みは `modify`（トランザクション内の read-modify-write）で最新を読み直し、**該当フィールドだけ**を変える。
 ///   - guard: `guardInfo.status == .pending` で、スクショのパスが処理開始時と同じときだけ書く（ユーザーが clear / masked
 ///     にした後は上書きしない）。
@@ -51,6 +53,13 @@ public actor TriageQueue {
     /// 前回の解放以降に分類器を使ったか（使っていなければタイマを張らない）。
     private var classifierUsedSinceUnload = false
     private var unloadTimer: Task<Void, Never>?
+    /// `reindexAndWait` が見張っている記録の、索引ステップの最後の結果。
+    private var indexWatches: [UUID: IndexWatch] = [:]
+
+    private struct IndexWatch {
+        var ids: Set<String>
+        var outcomes: [String: TriageStepOutcome] = [:]
+    }
 
     public init(
         store: any TriageRecordStore,
@@ -107,6 +116,30 @@ public actor TriageQueue {
             n += 1
         }
         return n
+    }
+
+    /// 索引だけを作り直し、キューが空になるまで待って、**索引ステップが成功しなかった記録**を返す（索引の作り直しの完了判定用）。
+    ///
+    /// 記録ごとに最後に出た索引ステップの結果で判定する:
+    /// - 成功扱い: `.succeeded`、`.skipped(.recordMissing)`（消えた記録は対象外）
+    /// - それ以外（失敗・未準備・処理中に注釈が編集されて古いベクトルを捨てた後、やり直しが走らなかった等）は `failedIDs`
+    /// 注釈の編集で捨てたもの（`.annotationChanged`）は、編集側の `reprocess` が同じ待ちの間に成功すれば成功になる。
+    public func reindexAndWait(ids: [String]) async -> TriageReindexReport {
+        guard !ids.isEmpty else { return TriageReindexReport(requested: 0, failedIDs: []) }
+        let key = UUID()
+        indexWatches[key] = IndexWatch(ids: Set(ids))
+        for id in ids { schedule(Job(id: id, steps: [.index])) }
+        await waitUntilIdle()
+        let watch = indexWatches.removeValue(forKey: key) ?? IndexWatch(ids: Set(ids))
+        var seen = Set<String>()
+        let failed = ids.filter { id in
+            guard seen.insert(id).inserted else { return false }
+            switch watch.outcomes[id] {
+            case .succeeded?, .skipped(.recordMissing)?: return false
+            default: return true
+            }
+        }
+        return TriageReindexReport(requested: seen.count, failedIDs: failed)
     }
 
     /// 進捗のストリーム。呼ぶたびに新しい購読（複数購読できる）。購読前のイベントは届かない。
@@ -172,7 +205,7 @@ public actor TriageQueue {
         do {
             guard let r = try await store.get(id: job.id) else {
                 for step in job.steps.sorted() {
-                    broadcast(.stepFinished(id: job.id, step: step, outcome: .skipped(.recordMissing)))
+                    finishStep(id: job.id, step: step, outcome: .skipped(.recordMissing))
                 }
                 broadcast(.recordFinished(id: job.id))
                 return
@@ -180,7 +213,7 @@ public actor TriageQueue {
             record = r
         } catch {
             for step in job.steps.sorted() {
-                broadcast(.stepFinished(id: job.id, step: step, outcome: .failed(Self.describe(error))))
+                finishStep(id: job.id, step: step, outcome: .failed(Self.describe(error)))
             }
             broadcast(.recordFinished(id: job.id))
             return
@@ -197,15 +230,15 @@ public actor TriageQueue {
 
         if job.steps.contains(.guardScan) {
             let outcome = await runGuard(record: record, image: image, imageError: imageError)
-            broadcast(.stepFinished(id: job.id, step: .guardScan, outcome: outcome))
+            finishStep(id: job.id, step: .guardScan, outcome: outcome)
         }
         if job.steps.contains(.intent) {
             let outcome = await runIntent(record: record)
-            broadcast(.stepFinished(id: job.id, step: .intent, outcome: outcome))
+            finishStep(id: job.id, step: .intent, outcome: outcome)
         }
         if job.steps.contains(.index) {
             let outcome = await runIndex(record: record, image: image)
-            broadcast(.stepFinished(id: job.id, step: .index, outcome: outcome))
+            finishStep(id: job.id, step: .index, outcome: outcome)
         }
         broadcast(.recordFinished(id: job.id))
     }
@@ -257,7 +290,7 @@ public actor TriageQueue {
             classifierUsedSinceUnload = true
             result = try await classifier.classify(text: text)
         } catch {
-            return .failed(Self.describe(error))
+            return Self.outcome(for: error)
         }
         return await write(record.id) { r in
             if r.triage?.isManual == true { return .skipped(.manuallyEdited) }
@@ -275,7 +308,7 @@ public actor TriageQueue {
         do {
             vector = try await embedder.embedDocument(text: text, title: title, image: image)
         } catch {
-            return .failed(Self.describe(error))
+            return Self.outcome(for: error)
         }
         do {
             // 埋め込み中に注釈・タイトルが変わったら古いベクトルは書かない（編集側の reprocess が新しいものを書く）。
@@ -335,12 +368,28 @@ public actor TriageQueue {
 
     // MARK: - イベント
 
+    /// ステップの終わりを知らせ、`reindexAndWait` の見張りに索引の結果を残す。
+    private func finishStep(id: String, step: TriageStep, outcome: TriageStepOutcome) {
+        if step == .index {
+            for key in indexWatches.keys where indexWatches[key]!.ids.contains(id) {
+                indexWatches[key]!.outcomes[id] = outcome
+            }
+        }
+        broadcast(.stepFinished(id: id, step: step, outcome: outcome))
+    }
+
     private func broadcast(_ event: TriageEvent) {
         for c in subscribers.values { c.yield(event) }
     }
 
     private func unsubscribe(_ key: UUID) {
         subscribers[key] = nil
+    }
+
+    /// モデルの呼び出しが投げたエラーの結果。未準備（`ModelReadinessReporting.isModelNotReady`）は失敗にせず後回しにする。
+    static func outcome(for error: Error) -> TriageStepOutcome {
+        if (error as? any ModelReadinessReporting)?.isModelNotReady == true { return .skipped(.notReady) }
+        return .failed(describe(error))
     }
 
     /// 失敗の説明。エラーの本文に秘密や注釈が混ざる可能性を避け、型名とドメイン・コードだけにする。

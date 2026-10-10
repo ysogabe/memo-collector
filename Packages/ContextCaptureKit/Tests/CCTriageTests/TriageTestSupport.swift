@@ -7,6 +7,11 @@ import XCTest
 
 struct FakeError: Error {}
 
+/// 「モデルが未準備」のエラー（アプリの `EmbeddingNotReady` に相当）。
+struct FakeNotReady: ModelReadinessReporting {
+    var isModelNotReady: Bool { true }
+}
+
 /// 一時データルートの本物の SQLiteRecordStore。
 final class TempStore {
     let url: URL
@@ -102,6 +107,10 @@ final class FakeEmbedder: Embedder, @unchecked Sendable {
     private let lock = NSLock()
     private var _calls: [Call] = []
     var fail = false
+    /// 未準備（`FakeNotReady`）を投げる。
+    var notReady = false
+    /// この注釈の記録だけ失敗させる。
+    var failTexts: Set<String> = []
     let dimension = 256
     var calls: [Call] { lock.withLock { _calls } }
 
@@ -109,7 +118,8 @@ final class FakeEmbedder: Embedder, @unchecked Sendable {
 
     func embedDocument(text: String, title: String?, image: CGImage?) async throws -> [Float] {
         lock.withLock { _calls.append(Call(text: text, title: title, hasImage: image != nil)) }
-        if fail { throw FakeError() }
+        if notReady { throw FakeNotReady() }
+        if fail || failTexts.contains(text) { throw FakeError() }
         return unit()
     }
 

@@ -25,6 +25,7 @@ public enum TriageStepOutcome: Sendable, Equatable {
     /// 書き込んだ。
     case succeeded
     /// 何もしなかった（理由つき。例: 注釈が空、手動で変更済み、処理中に注釈が編集された）。
+    /// `.skipped(.notReady)` はモデルが未準備のため後回しにしたもの（失敗ではない。次回の `resumePending` で拾われる）。
     case skipped(TriageSkipReason)
     /// 失敗した（次回の `resumePending` か `reprocess` で再試行される）。説明は型名程度で、秘密や本文は含まない。
     case failed(String)
@@ -43,6 +44,27 @@ public enum TriageSkipReason: String, Sendable, Equatable {
     case screenshotChanged
     /// 処理中にレコードが削除された。
     case recordMissing
+    /// モデル（d1・埋め込み）が未準備（ファイルが無い・読み込みや初回最適化の途中）。何も書いていないので、
+    /// モデルが揃った後の `resumePending()` がこのステップを拾う。判定は `ModelReadinessReporting.isModelNotReady`。
+    case notReady
+}
+
+extension TriageStepOutcome {
+    /// モデルが未準備で後回しにしたか（`.skipped(.notReady)`）。
+    public var isDeferredUntilReady: Bool { self == .skipped(.notReady) }
+}
+
+/// `TriageQueue.reindexAndWait(ids:)` の結果。
+public struct TriageReindexReport: Sendable, Equatable {
+    /// 依頼した記録の数（重複は 1 つ）。
+    public var requested: Int
+    /// 索引ステップが成功しなかった記録（依頼した順）。空なら全件がこの埋め込みで索引された。
+    public var failedIDs: [String]
+
+    public init(requested: Int, failedIDs: [String]) {
+        self.requested = requested
+        self.failedIDs = failedIDs
+    }
 }
 
 /// UI に流す進捗。

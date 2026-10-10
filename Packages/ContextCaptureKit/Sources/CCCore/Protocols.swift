@@ -136,3 +136,14 @@ public protocol StatusFilteredSearching: Sendable {
     /// 埋め込みの無いレコードは対象外。
     func search(vector: [Float], limit: Int, statuses: Set<RecordStatus>) async throws -> [SearchHit]
 }
+
+/// 「モデルが未準備」を表せるエラー（Wave 6）。
+///
+/// モデルのファイルが無い・読み込みや初回最適化の途中、のように**待てば直る**失敗を、本当の失敗と区別するために使う。
+/// トリアージ（CCTriage）はこれが `true` のエラーを失敗にせず `.skipped(.notReady)` にする
+/// （書き込まないので、モデルが揃った後の `resumePending()` がそのステップを拾う）。
+/// enum のエラーは一部の case だけが未準備のことがあるので、型ではなくこのプロパティで判定する。
+public protocol ModelReadinessReporting: Error {
+    /// モデルが未準備のための失敗か。
+    var isModelNotReady: Bool { get }
+}
