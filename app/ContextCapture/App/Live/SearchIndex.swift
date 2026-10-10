@@ -8,9 +8,12 @@ import Foundation
 /// `activate(imageTokens:)`（起動時・モデル準備の後・画像トークン数の変更時）:
 /// 1. 埋め込みを作れなければ（モデルが無い）`.unavailable`。ガードと意図のために `resumePending()` だけ呼ぶ
 /// 2. `SwitchableEmbedder.install`（バックグラウンドで ANE の初回特殊化。UI は固めない）→ `.preparing`
-/// 3. 保存済みのシグネチャ（`search-index.json`）と比べ、同じなら `.ready` で `resumePending()`（埋め込みの無い記録を拾う）
-/// 4. 違う・無いなら `.rebuilding`: 状態ファイルを `rebuilding` にしてから全件に `reindex`、キューが空になったら `ready` で書く
+/// 3. 保存済みのシグネチャ（`search-index.json`）と比べ、同じで `ready` なら `.ready` で `resumePending()`（埋め込みの無い記録を拾う）
+/// 4. 同じで `degraded`（前回の作り直しで一部が失敗）なら、**失敗した記録（`failed_ids`）だけ**やり直す
+/// 5. 違う・無い・`rebuilding` なら `.rebuilding`: 状態ファイルを `rebuilding` にしてから全件に索引を積み、終わるまで待つ
 ///    （作り直しの途中で落ちても、次の起動で `rebuilding` のまま → もう一度作り直す。混ざった索引を残さない）
+/// 6. 索引できなかった記録が残れば 1 回だけやり直し、それでも残れば **`ready` にしない**: 状態ファイルは
+///    `degraded`（`failed_ids` つき。cc-mcp はベクトル検索を使わない）、表示は `.degraded(failed:)`。全部できたら `ready`
 @MainActor
 final class SearchIndexMaintainer {
     typealias EmbedderFactory = @MainActor (_ imageTokens: Int) -> (any PreparableEmbedder)?
@@ -61,7 +64,8 @@ final class SearchIndexMaintainer {
         activate(imageTokens: imageTokens)
     }
 
-    /// オンボーディングでモデルが揃ったとき。埋め込みが同じ設定で準備済み・準備中なら作り直さず、後回しのステップだけ拾う。
+    /// オンボーディングでモデルが揃ったとき。埋め込みが同じ設定で準備済み・準備中なら作り直さず、後回しのステップだけ拾う
+    /// （`degraded` のときは `activate` し直して失敗分をやり直す）。
     func modelsPrepared(imageTokens: Int) {
         let usable: [SearchReadiness] = [.ready, .preparing, .rebuilding]
         if usable.contains(readiness), activeImageTokens == imageTokens {
@@ -94,7 +98,7 @@ final class SearchIndexMaintainer {
         }
         activeImageTokens = imageTokens
         readiness = .preparing
-        // 準備の間もガードと意図は進めてよい（索引ステップは EmbeddingNotReady ですぐ失敗し、後で拾われる）。
+        // 準備の間もガードと意図は進めてよい（索引ステップは EmbeddingNotReady ですぐ .skipped(.notReady) になり、後で拾われる）。
         await resume()
         let t0 = Date()
         let state = await embedder.install(e)
@@ -106,10 +110,20 @@ final class SearchIndexMaintainer {
         CCLog.models.notice("embedder ready in \(Date().timeIntervalSince(t0), format: .fixed(precision: 1), privacy: .public)s (\(e.indexSignature, privacy: .public))")
 
         let saved = SearchIndexState.read(from: stateURL)
-        if let saved, saved.indexSignature == e.indexSignature, saved.status == .ready {
-            readiness = .ready
-            await resume()
-            return
+        if let saved, saved.indexSignature == e.indexSignature {
+            if saved.status == .ready {
+                readiness = .ready
+                await resume()
+                return
+            }
+            if saved.status == .degraded, let failed = saved.failedIDs {
+                // 前回の作り直しで索引できなかった記録だけやり直す（全件はやり直さない）。
+                CCLog.models.notice("search index: retrying \(failed.count) records that failed last time")
+                readiness = .rebuilding
+                await resume()
+                await finishRebuild(ids: failed, state: saved, generation: gen)
+                return
+            }
         }
 
         // 作り直し（初回・シグネチャ変更・前回の作り直しが途中）。
@@ -117,9 +131,7 @@ final class SearchIndexMaintainer {
         readiness = .rebuilding
         let rebuilding = SearchIndexState(indexSignature: e.indexSignature, imageTokens: imageTokens, dimension: e.dimension,
                                           status: .rebuilding, updatedAt: Date())
-        do { try rebuilding.write(to: stateURL) } catch {
-            CCLog.models.error("search index state write failed: \(String(describing: error), privacy: .public)")
-        }
+        write(rebuilding)
         let ids: [String]
         do {
             let total = try await store.count(InboxFilter(statuses: []))
@@ -129,24 +141,45 @@ final class SearchIndexMaintainer {
             readiness = .failed
             return
         }
-        // 先に resumePending（埋め込みの無い記録・未処理のガードや意図）を積み、そのあと全件の reindex を積む。
+        guard isCurrent(gen) else { return }
+        // 先に resumePending（埋め込みの無い記録・未処理のガードや意図）を積み、そのあと全件の索引を積む。
         // キューは未着手の同じ id のジョブを 1 つにまとめるので、同じ記録を 2 回埋め込まない。
         await resume()
         // list は新しい順。新しいものから埋め込む（検索で先に見つかってほしいのは最近のもの）。
-        for id in ids {
-            guard isCurrent(gen) else { return }
-            await queue.reindex(id: id)
-        }
-        await queue.waitUntilIdle()
+        await finishRebuild(ids: ids, state: rebuilding, generation: gen)
+    }
+
+    /// `ids` の索引を積んで終わるまで待ち、結果で状態を決める。索引できなかった記録が残れば 1 回だけやり直し、
+    /// それでも残れば `degraded`（`failed_ids` に残して次回やり直す）。全部できたら `ready`。
+    private func finishRebuild(ids: [String], state: SearchIndexState, generation gen: Int) async {
+        var failed = await queue.reindexAll(ids: ids)
         guard isCurrent(gen) else { return }
-        var ready = rebuilding
-        ready.status = .ready
-        ready.updatedAt = Date()
-        do { try ready.write(to: stateURL) } catch {
+        if !failed.isEmpty {
+            CCLog.models.notice("search index: \(failed.count) records failed; retrying once")
+            failed = await queue.reindexAll(ids: failed)
+            guard isCurrent(gen) else { return }
+        }
+        var next = state
+        next.updatedAt = Date()
+        if failed.isEmpty {
+            next.status = .ready
+            next.failedIDs = nil
+            write(next)
+            CCLog.models.notice("search index rebuilt: \(ids.count) records")
+            readiness = .ready
+        } else {
+            next.status = .degraded
+            next.failedIDs = failed
+            write(next)
+            CCLog.models.error("search index degraded: \(failed.count) of \(ids.count) records could not be indexed")
+            readiness = .degraded(failed: failed.count)
+        }
+    }
+
+    private func write(_ state: SearchIndexState) {
+        do { try state.write(to: stateURL) } catch {
             CCLog.models.error("search index state write failed: \(String(describing: error), privacy: .public)")
         }
-        CCLog.models.notice("search index rebuilt: \(ids.count) records")
-        readiness = .ready
     }
 
     private func resume() async {
@@ -170,6 +203,9 @@ struct EmbeddingSearchService: SearchServing {
     static let preparingNotice = "検索の準備中のため、文字の一致で探しています"
     static let unavailableNotice = "検索モデルが未準備のため、文字の一致で探しています"
     static let failedNotice = "見た目での検索を使えないため、文字の一致で探しています"
+    static func degradedNotice(failed: Int) -> String {
+        "\(failed) 件の記録は索引を作れなかったため、検索に出ないことがあります"
+    }
 
     init(embedder: SwitchableEmbedder, store: any RecordStore, readiness: @escaping @Sendable () async -> SearchReadiness) {
         self.embedder = embedder
@@ -184,11 +220,15 @@ struct EmbeddingSearchService: SearchServing {
 
     func searchWithNotice(_ query: String, limit: Int) async throws -> SearchResponse {
         let notice: String
-        switch await readiness() {
-        case .ready:
+        let current = await readiness()
+        switch current {
+        case .ready, .degraded:
+            // degraded: 大半はこの埋め込みで索引済みなので見た目での検索を使い、出ないことがある旨を添える。
             do {
                 let vector = try await embedder.embedQuery(query)
-                return SearchResponse(hits: try await store.search(vector: vector, limit: limit), notice: nil)
+                let hits = try await store.search(vector: vector, limit: limit)
+                if case let .degraded(n) = current { return SearchResponse(hits: hits, notice: Self.degradedNotice(failed: n)) }
+                return SearchResponse(hits: hits, notice: nil)
             } catch {
                 CCLog.models.error("vector search failed, falling back: \(String(describing: type(of: error)), privacy: .public)")
                 notice = Self.failedNotice

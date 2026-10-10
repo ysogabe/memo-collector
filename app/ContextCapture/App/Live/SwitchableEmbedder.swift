@@ -13,13 +13,16 @@ protocol PreparableEmbedder: Embedder, ModelUnloadable {
 }
 
 /// 埋め込みが準備中・未準備のとき（すぐ throw して、呼び出し側に後回しさせる）。
-struct EmbeddingNotReady: Error, Equatable {}
+/// `ModelReadinessReporting` なので、トリアージは失敗ではなく `.skipped(.notReady)` にする（`resumePending()` で拾われる）。
+struct EmbeddingNotReady: ModelReadinessReporting, Equatable {
+    var isModelNotReady: Bool { true }
+}
 
 /// アプリで使う埋め込みの持ち手。`TriageQueue`（索引）と検索の両方がこれを持つ。
 ///
 /// - 中身（`PreparableEmbedder`）は差し替えられる（設定の画像トークン数を変えたとき。`CoreMLEmbedder` の設定は不変なので作り直す）
 /// - **準備が終わるまでは `embedQuery` / `embedDocument` がすぐ `EmbeddingNotReady` を投げる**。トリアージの索引ステップは
-///   失敗扱いで残り、準備後の `resumePending()` で拾われる（直列キューが数分の初回特殊化で止まらないように）
+///   `.skipped(.notReady)`（失敗ではない）で残り、準備後の `resumePending()` で拾われる（直列キューが数分の初回特殊化で止まらないように）
 actor SwitchableEmbedder: Embedder {
     enum State: Sendable, Equatable {
         case unavailable

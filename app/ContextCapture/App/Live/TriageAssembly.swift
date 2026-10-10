@@ -13,6 +13,10 @@ extension TriageQueue: TriageQueuing {
     func reindex(id: String) async {
         reprocess(id: id, steps: [.index])
     }
+
+    func reindexAll(ids: [String]) async -> [String] {
+        await reindexAndWait(ids: ids).failedIDs
+    }
 }
 
 extension CoreMLEmbedder: PreparableEmbedder {

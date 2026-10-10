@@ -27,6 +27,21 @@ final class FakeTriageQueue: TriageQueuing, @unchecked Sendable {
         return resumeCount.get()
     }
     func waitUntilIdle() async {}
+    /// `reindexAll` で索引できなかったことにする id（`failRemaining` 回まで失敗する）。
+    let failing = Box<[String: Int]>([:])
+    func reindexAll(ids: [String]) async -> [String] {
+        var failed: [String] = []
+        for id in ids {
+            calls.update { $0.append(.reindex(id)) }
+            failing.update { f in
+                if let n = f[id], n > 0 {
+                    f[id] = n - 1
+                    failed.append(id)
+                }
+            }
+        }
+        return failed
+    }
 
     var reindexed: [String] { calls.get().compactMap { if case let .reindex(id) = $0 { return id } else { return nil } } }
 }

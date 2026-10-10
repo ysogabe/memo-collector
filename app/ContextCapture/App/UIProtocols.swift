@@ -81,6 +81,9 @@ enum SearchReadiness: Sendable, Equatable {
     /// 索引を作っている（初回・画像トークン数の変更後）。
     case rebuilding
     case ready
+    /// 作り直しは終わったが、一部の記録（failed 件）の埋め込みに失敗した。見た目での検索は使うが、その記録は出ないことがある。
+    /// 次の起動（またはモデルの準備後）に失敗分だけやり直す。cc-mcp はこの間ベクトル検索を使わない（状態ファイルが degraded）。
+    case degraded(failed: Int)
     /// 読み込めなかった。
     case failed
 
@@ -91,6 +94,7 @@ enum SearchReadiness: Sendable, Equatable {
         case .preparing: return "検索の準備中…（初回は数分かかります）"
         case .rebuilding: return "検索の索引を作っています…"
         case .ready: return nil
+        case let .degraded(n): return "検索: \(n) 件の記録の索引を作れませんでした（次回の起動でやり直します）"
         case .failed: return "検索: 見た目での検索を使えません（文字の一致で探します）"
         }
     }
@@ -110,6 +114,17 @@ protocol TriageQueuing: Sendable {
     func resumePending() async throws -> Int
     /// キューが空になるまで待つ。
     func waitUntilIdle() async
+    /// 索引だけ作り直し、キューが空になるまで待って、**索引できなかった記録の id** を返す（索引の作り直しの完了判定）。
+    /// 本物は `TriageQueue.reindexAndWait(ids:)`。既定実装は `reindex` を順に積んで待つだけで、失敗を報告しない（空配列）。
+    func reindexAll(ids: [String]) async -> [String]
+}
+
+extension TriageQueuing {
+    func reindexAll(ids: [String]) async -> [String] {
+        for id in ids { await reindex(id: id) }
+        await waitUntilIdle()
+        return []
+    }
 }
 
 /// 何もしないキュー（フェイク起動・スナップショット用）。
