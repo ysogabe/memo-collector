@@ -81,6 +81,8 @@ let package = Package(
         .testTarget(name: "CCTriageTests", dependencies: ["CCTriage"]),
         .testTarget(name: "CCModelsTests", dependencies: ["CCModels"]),
         .testTarget(name: "CCMCPTests", dependencies: ["CCMCP"]),
+        // Wave 4 e2e: 本物の 3 モデルを 1 プロセスに載せた計測ハーネス（CC_RUN_E2E=1 のときだけ走る。scripts/e2e.sh）。
+        .testTarget(name: "E2ETests", dependencies: ["CCCore", "CCStore", "CCSTT", "CCIntent", "CCEmbedding", "CCGuard", "CCTriage", mlx]),
     ],
     swiftLanguageModes: [.v5]
 )
