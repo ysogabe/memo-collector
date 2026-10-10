@@ -19,7 +19,7 @@
 #   CC_E2E_IDLE_SETTLE  (c) モデル準備の後に待つ秒（既定 60）
 #   CC_E2E_IDLE_SAMPLES (c) 取る回数（1 秒ごと、既定 60）
 #   CC_E2E_CONFIG       (a) の結果ファイル名の構成名（既定 swiftpm-release）
-#   CC_E2E_MLX_CACHE_LIMIT_MB  (a) の実験: MLX のキャッシュ上限（製品は未設定）。CC_E2E_CONFIG も変えること
+#   CC_E2E_MLX_CACHE_LIMIT_MB  (a) の MLX キャッシュ上限（MB）。既定は製品と同じ 256。旧計測と同じ無制限は `unlimited`。変えるときは CC_E2E_CONFIG も変えること
 set -euo pipefail
 
 root=${0:A:h:h}
