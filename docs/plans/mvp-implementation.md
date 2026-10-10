@@ -127,6 +127,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 1 capture（47 テスト成功。権限・実機の経路は未検証 → docs/manual-tests/capture.md で M1 時にユーザー確認）
 - [ ] Wave 2 ui（前倒しで dispatch 済み。worktree ../memo-collector-worktrees/ui、フェイク実装で単独動作）
 - [ ] Wave 2 wiring → M1 動作確認
-- [ ] Wave 3 embedding / guard+triage
+- [ ] Wave 3 guard+triage（dispatch 済み。worktree ../memo-collector-worktrees/guard-triage）
+- [ ] Wave 3 embedding（stt 完了後に dispatch。ANE の取り合いを避ける）
 - [ ] Wave 4 mcp / e2e
 - [ ] PR
