@@ -27,7 +27,8 @@ PRD §10 の非機能要件と §8.1 のモデル配置を、本物の 3 モデ�
 | データ | 一時ディレクトリ（周・条件ごとに新しいストア。(c) のアプリも一時ディレクトリ） |
 | 評価データ | `poc/fixtures/dataset.json`（注釈 30・画面 14・テキストクエリ 10）、`poc/fixtures/audio/*.wav`、`poc/fixtures/screens/*.png` |
 | 周回 | 3 周 × 3 条件 × 30 件。条件の順は周ごとにずらした |
-| 除外したもの | 埋め込みの ANE 初回コンパイル（xctest バイナリが変わると走る。1 回目 98 + 24 秒）・モデルの読み込み・各モデルの初回呼び出しは計測から除き、`model_loads` に別記 |
+| 除外したもの | 埋め込みの ANE 初回コンパイル（xctest バイナリが変わると走る。試走時 98 + 24 秒）・モデルの読み込み・各モデルの初回呼び出しは計測から除き、`model_loads` に別記 |
+| Debug | 未計測（参考欄なし）。`CC_E2E_STEPS=a` を `-c release` なしの `swift test` に変えれば同じ E2ETests が `swiftpm-debug` として出る |
 | 本計測の uptime | (a) 前 `2:09 load 4.35 4.49 4.87` → 後 `2:27 load 2.15 2.70 3.83`、(b) 前 `2:27 load 2.15` / Xcode 前 `2:31 load 1.75`、(c) 前 `2:34 load 2.72` → 後 `2:36 load 2.04` |
 | 本計測中の他のプロセス | ContextCapture は 0 個、他の担当は無し。(a) 開始時の上位は XProtectRemediatorColdSnap 99%・syspolicyd 40%（OS の定期スキャン）。(a) の各周開始時の 1 分 load は 1.5〜8.9（`rounds_detail[].load_average_before`。8.9 は 1 周目の paced の直前のみ） |
 
