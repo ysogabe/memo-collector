@@ -143,8 +143,19 @@ public struct EmbeddingModelPreparer: Sendable {
 
     /// 揃っていれば検証だけ。そうでなければ取得 → sha256 照合 → コンパイル → 置き換え。
     /// `source` を渡すと HF の代わりにそのディレクトリ（HF リポジトリと同じ構成）から取る（照合は同じ）。
+    /// ファイルは揃っているが manifest だけ無い（`.unmanifested`）ときは、固定 revision のものと確かめられれば
+    /// **取り直さずに** `adoptExisting` で manifest だけ作る（ネットワーク不要。Whisper と同じ）。
     public func prepare(source: URL? = nil, force: Bool = false, progress: ProgressHandler? = nil) async throws -> Outcome {
-        if !force, case .ready(let m) = try verify(level: .sha256) { return .alreadyPrepared(m) }
+        if !force {
+            switch try verify(level: .sha256) {
+            case .ready(let m):
+                return .alreadyPrepared(m)
+            case .unmanifested:
+                if try canAdoptExisting() { return try adoptExisting(progress: progress) }
+            case .missing, .mismatched:
+                break
+            }
+        }
         let fm = FileManager.default
         let staging: URL
         if let source {
@@ -218,6 +229,84 @@ public struct EmbeddingModelPreparer: Sendable {
         }
         progress?("manifest", 1)
         return .prepared(written)
+    }
+
+    // MARK: - 既存の採用（manifest の無い置き場）
+
+    /// 既存のファイルを取り直さずに採用できるか: 読み込みに要るファイルが揃っていて、元ファイルをそのまま置いたもの
+    /// （`copiedFiles`: トークナイザ・埋め込み表など）のうち在るものがすべて固定 revision の sha256（`sourceFiles`）と一致する。
+    /// `.mlmodelc` はコンパイル物なので照合できない（同じ置き場にある元ファイルが固定 revision なら、同じ手順で作ったものとみなす）。
+    /// sha256 の計算で約 0.3GB を読む。
+    public func canAdoptExisting(fileManager: FileManager = .default) throws -> Bool {
+        let missing = Self.requiredFiles.filter { !fileManager.fileExists(atPath: destination.appendingPathComponent($0).path) }
+        guard missing.isEmpty else { return false }
+        return try adoptableSources(fileManager: fileManager) != nil
+    }
+
+    /// 今あるファイルをそのまま採用し、manifest を作って書く（**ネットワークを使わない**）。LICENSE / NOTICE.txt が無ければ足す。
+    /// 採用できない（必須ファイルが無い・元ファイルの sha256 が固定 revision と違う）ときは throw。
+    /// ⚠️ manifest.json などを書き込むので、読み取り専用として扱う置き場（`CC_MODELS_DIR` でスパイクを指したとき等）では呼ばないこと。
+    @discardableResult
+    public func adoptExisting(progress: ProgressHandler? = nil, fileManager: FileManager = .default) throws -> Outcome {
+        for name in Self.requiredFiles where !fileManager.fileExists(atPath: destination.appendingPathComponent(name).path) {
+            throw EmbeddingPrepareError.missingSourceFile(name)
+        }
+        progress?("verify", 0)
+        guard let sources = try adoptableSources(fileManager: fileManager) else {
+            // 食い違うファイルを特定して報告する。
+            for f in sourceFiles where Self.copiedFiles.contains(f.path) {
+                let url = destination.appendingPathComponent(f.path)
+                guard fileManager.fileExists(atPath: url.path) else { continue }
+                let sha = try D1ModelPreparer.sha256(of: url)
+                if sha != f.sha256 { throw EmbeddingPrepareError.checksumMismatch(path: f.path, expected: f.sha256, actual: sha) }
+            }
+            throw EmbeddingPrepareError.verificationFailed(destination.path)
+        }
+        progress?("verify", 1)
+        progress?("manifest", 0)
+        let license = destination.appendingPathComponent("LICENSE")
+        if !fileManager.fileExists(atPath: license.path) {
+            try (EmbeddingModelLicense.apache2 + "\n").write(to: license, atomically: true, encoding: .utf8)
+        }
+        let notice = destination.appendingPathComponent("NOTICE.txt")
+        if !fileManager.fileExists(atPath: notice.path) {
+            try Self.notice.write(to: notice, atomically: true, encoding: .utf8)
+        }
+        let files = try Self.listFiles(in: destination, fileManager: fileManager).map { path -> EmbeddingModelManifest.File in
+            let url = destination.appendingPathComponent(path)
+            return .init(path: path, size: Self.fileSize(url, fileManager: fileManager) ?? -1, sha256: try D1ModelPreparer.sha256(of: url))
+        }
+        let manifest = EmbeddingModelManifest(
+            formatVersion: EmbeddingModelManifest.currentFormatVersion, repo: Self.repoId, revision: Self.revision,
+            baseModel: Self.baseModel, license: "Apache-2.0", preparationVersion: Self.preparationVersion,
+            preparedWith: Self.preparedWith + " (adopted existing files)",
+            compiledOn: ProcessInfo.processInfo.operatingSystemVersionString,
+            createdAt: Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down)),
+            sourceFiles: sources, files: files)
+        try manifest.encoded().write(to: manifestURL, options: .atomic)
+        guard case .ready(let written) = try verify(level: .size, fileManager: fileManager) else {
+            throw EmbeddingPrepareError.verificationFailed(manifestURL.path)
+        }
+        progress?("manifest", 1)
+        return .prepared(written)
+    }
+
+    /// 置き場にある元ファイル（`copiedFiles`）を `sourceFiles` の sha256 と照合する。読み込みに要るもの
+    /// （tokenizer.json・embeddings.bf16・position_embeddings.f16）は在ること。全部合えば manifest の `source_files` を、
+    /// 1 つでも違えば nil を返す。
+    private func adoptableSources(fileManager: FileManager) throws -> [EmbeddingModelManifest.File]? {
+        var out: [EmbeddingModelManifest.File] = []
+        for f in sourceFiles where Self.copiedFiles.contains(f.path) {
+            let url = destination.appendingPathComponent(f.path)
+            guard fileManager.fileExists(atPath: url.path) else {
+                if Self.requiredFiles.contains(f.path) { return nil }
+                continue
+            }
+            guard Self.fileSize(url, fileManager: fileManager) == f.size,
+                  try D1ModelPreparer.sha256(of: url) == f.sha256 else { return nil }
+            out.append(.init(path: f.path, size: f.size, sha256: f.sha256))
+        }
+        return out.isEmpty ? nil : out
     }
 
     /// 元ファイルを `directory` へ取る。既に sha256 が合うものは取り直さない。

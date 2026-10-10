@@ -189,6 +189,35 @@ final class MCPToolHandlersTests: XCTestCase {
         XCTAssertEqual(Set(items.compactMap { $0["id"] as? String }), [a.id, archived.id])
     }
 
+    /// archived が上位を占めても、状態の絞り込みが上位 limit 件を選ぶ前に効くので件数が足りる
+    /// （以前は limit*4+20 件取ってから archived を落としていたので、この条件で 0 件になった）。
+    func testVectorSearchFiltersStatusesBeforeLimit() async throws {
+        let embedder = FakeEmbedder()
+        // 「alpha」に完全一致する archived を 30 件、少しずれる inbox / done を 1 件ずつ。
+        for i in 0..<30 {
+            let r = Fixtures.record("alpha archived \(i)", at: Date(timeIntervalSince1970: 1_791_500_000 + Double(i)), status: .archived)
+            try await temp.store.insert(r)
+            try await temp.store.setEmbedding(id: r.id, vector: embedder.vector(for: "alpha"))
+        }
+        let inbox = Fixtures.record("alpha beta inbox", at: Date(timeIntervalSince1970: 1_791_400_000))
+        let done = Fixtures.record("alpha gamma done", at: Date(timeIntervalSince1970: 1_791_400_001), status: .done)
+        for r in [inbox, done] {
+            try await temp.store.insert(r)
+            try await temp.store.setEmbedding(id: r.id, vector: embedder.vector(for: r.annotation.text))
+        }
+        handlers = MCPToolHandlers(store: temp.store, embedderProvider: { embedder }, timeZone: Fixtures.tokyo)
+
+        var json = try await call("search_captures", ["query": "alpha", "limit": 2]).json()
+        XCTAssertEqual(json["mode"] as? String, "vector")
+        var items = try XCTUnwrap(json["items"] as? [[String: Any]])
+        XCTAssertEqual(Set(items.compactMap { $0["id"] as? String }), [inbox.id, done.id])
+
+        json = try await call("search_captures", ["query": "alpha", "limit": 5, "include_archived": true]).json()
+        items = try XCTUnwrap(json["items"] as? [[String: Any]])
+        XCTAssertEqual(items.count, 5)
+        XCTAssertTrue(items.allSatisfy { $0["status"] as? String == "archived" })
+    }
+
     func testSearchFallsBackToKeywordWithoutEmbedder() async throws {
         try await temp.store.insert(Fixtures.record("ここで null になる理由を調べて", title: "adapter.ts"))
         try await temp.store.insert(Fixtures.record("買い物リスト", title: "メモ", url: "https://shop.example.com/Cart"))

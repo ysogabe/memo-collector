@@ -52,6 +52,9 @@ final class TriageWiring {
             case .succeeded:
                 if step != .index { visiblyChanged.insert(id) }
                 CCLog.triage.info("\(id, privacy: .public) \(step.rawValue, privacy: .public): ok")
+            case .skipped(.notReady):
+                // モデルが未準備で後回し（失敗ではない）。モデルが揃った後の resumePending() で拾われる。
+                CCLog.triage.info("\(id, privacy: .public) \(step.rawValue, privacy: .public): deferred (model not ready)")
             case let .skipped(reason):
                 CCLog.triage.info("\(id, privacy: .public) \(step.rawValue, privacy: .public): skipped \(reason.rawValue, privacy: .public)")
             case let .failed(detail):

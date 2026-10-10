@@ -4,8 +4,8 @@ import Foundation
 /// メモリ上の `RecordStore`。添付だけは一時ディレクトリに実ファイルとして書く（詳細画面が URL から画像を読むため）。
 final class FakeRecordStore: RecordStore, @unchecked Sendable {
     // 状態はすべて lock の内側で触る。
-    private let lock = NSLock()
-    private var records: [String: ContextRecord] = [:]
+    fileprivate let lock = NSLock()
+    fileprivate var records: [String: ContextRecord] = [:]
     private var embeddings: [String: [Float]] = [:]
     /// 添付を置くデータルート（一時ディレクトリ）。
     let root: URL
@@ -84,6 +84,20 @@ final class FakeRecordStore: RecordStore, @unchecked Sendable {
     }
 
     static func matches(_ r: ContextRecord, _ f: InboxFilter) -> Bool { f.matches(r) }
+}
+
+extension FakeRecordStore: RecordModifying {
+    /// `SQLiteRecordStore.modify` と同じ read-modify-write（lock の内側。transform が throw したら書かない）。
+    @discardableResult
+    func modify(id: String, _ transform: @escaping @Sendable (inout ContextRecord) throws -> Void) async throws -> ContextRecord {
+        try lock.withLock {
+            guard var r = records[id] else { throw FakeStoreError.notFound(id) }
+            try transform(&r)
+            r.id = id
+            records[id] = r
+            return r
+        }
+    }
 }
 
 enum FakeStoreError: Error {

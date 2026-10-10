@@ -1,3 +1,4 @@
+import CCCore
 import Foundation
 
 /// CCEmbedding のエラー。
@@ -66,5 +67,13 @@ public enum EmbeddingVector {
             nb += b[i] * b[i]
         }
         return dot / (na.squareRoot() * nb.squareRoot())
+    }
+}
+
+extension EmbeddingError: ModelReadinessReporting {
+    /// モデルのファイルが足りない（`cc-models prepare embedding` 前）のは未準備。
+    public var isModelNotReady: Bool {
+        if case .modelFilesMissing = self { return true }
+        return false
     }
 }

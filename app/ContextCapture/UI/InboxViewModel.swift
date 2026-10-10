@@ -184,18 +184,3 @@ enum Clipboard {
         pb.setString(RecordMarkdown.render(record, includeScreenshotLink: true), forType: .string)
     }
 }
-
-extension InboxFilter {
-    /// `InboxFilter` の意味（CCCore のドキュメント）どおりに 1 件を判定する。limit / offset は見ない。
-    func matches(_ r: ContextRecord) -> Bool {
-        if !statuses.isEmpty && !statuses.contains(r.status) { return false }
-        if let intent, r.triage?.intent != intent { return false }
-        if unclassifiedOnly {
-            guard let t = r.triage, t.intent == nil, intent == nil else { return false }
-        }
-        if let since, r.capturedAt < since { return false }
-        if let until, r.capturedAt >= until { return false }
-        if let g = guardStatuses, !g.contains(r.guardInfo.status) { return false }
-        return true
-    }
-}

@@ -96,7 +96,8 @@ struct ListInboxOutput: Encodable {
 struct SearchOutput: Encodable {
     /// "vector"（埋め込み検索）か "keyword"（部分一致）。
     var mode: String
-    /// keyword になった理由（"embedder_unavailable" / "embedder_failed"）。vector なら nil。
+    /// keyword になった理由（"embedder_unavailable" / "embedder_warming"（検索モデルの読み込み中。少し後なら vector になる）/
+    /// "embedder_failed"）。vector なら nil。
     var fallbackReason: String?
     var query: String
     var count: Int

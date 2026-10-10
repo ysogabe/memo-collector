@@ -188,3 +188,11 @@ extension D1IntentClassifier: ModelPreparable {
         _ = try load()
     }
 }
+
+extension D1IntentError: ModelReadinessReporting {
+    /// モデルのファイルが無い（`cc-models prepare d1` 前・オンボーディング中）のは未準備。
+    public var isModelNotReady: Bool {
+        if case .modelNotFound = self { return true }
+        return false
+    }
+}

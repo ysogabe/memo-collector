@@ -14,6 +14,8 @@ public typealias EmbedderProvider = @Sendable () async -> (any Embedder)?
 public struct MCPToolHandlers: Sendable {
     public let store: SQLiteRecordStore
     public let embedderProvider: EmbedderProvider
+    /// 検索ごとに埋め込みの状態を引く（読み込み中を区別できる。cc-mcp は `WarmingQueryEmbedder.resolve`）。
+    public let embedderResolver: QueryEmbedderResolver
     public let imageLoader: MCPImageLoader
     /// 日付だけの since と Markdown の時刻のタイムゾーン、JSON の日時のオフセット。
     public let timeZone: TimeZone
@@ -32,6 +34,29 @@ public struct MCPToolHandlers: Sendable {
     ) {
         self.store = store
         self.embedderProvider = embedderProvider
+        self.embedderResolver = {
+            if let e = await embedderProvider() { return .available(e) }
+            return .unavailable
+        }
+        self.imageLoader = imageLoader
+        self.timeZone = timeZone
+        self.now = now
+    }
+
+    /// 読み込み中（`.warming`）を区別できる解決関数で作る（cc-mcp はこちら）。
+    public init(
+        store: SQLiteRecordStore,
+        embedderResolver: @escaping QueryEmbedderResolver,
+        imageLoader: MCPImageLoader = MCPImageLoader(),
+        timeZone: TimeZone = .current,
+        now: @escaping @Sendable () -> Date = { Date() }
+    ) {
+        self.store = store
+        self.embedderResolver = embedderResolver
+        self.embedderProvider = {
+            if case let .available(e) = await embedderResolver() { return e }
+            return nil
+        }
         self.imageLoader = imageLoader
         self.timeZone = timeZone
         self.now = now
@@ -101,17 +126,24 @@ public struct MCPToolHandlers: Sendable {
         }
         let limit = try args.int("limit", range: 1...CCMCPToolCatalog.maxLimit) ?? CCMCPToolCatalog.defaultSearchLimit
         let includeArchived = try args.bool("include_archived") ?? false
-        let allowed: (ContextRecord) -> Bool = { includeArchived || $0.status != .archived }
+        let statuses = Self.searchStatuses(includeArchived: includeArchived)
 
         return try await storeOperation {
-            var fallbackReason = "embedder_unavailable"
-            if let embedder = await embedderProvider() {
+            let fallbackReason: String
+            switch await embedderResolver() {
+            case .unavailable:
+                fallbackReason = "embedder_unavailable"
+            case .warming:
+                fallbackReason = "embedder_warming"
+            case .failed:
+                fallbackReason = "embedder_failed"
+            case let .available(embedder):
                 do {
                     let vector = try await embedder.embedQuery(query)
-                    // search は状態で絞らないので多めに取ってから archived を落とす。
-                    let hits = try await store.search(vector: vector, limit: min(limit * 4 + 20, 500))
-                    let items = hits.filter { allowed($0.record) }.prefix(limit).map { CaptureSummary($0.record, score: $0.score) }
-                    return try jsonResult(SearchOutput(mode: "vector", fallbackReason: nil, query: query, count: items.count, items: Array(items)))
+                    // 状態の絞り込みは上位 limit 件を選ぶ前に効く（archived が多くても件数が足りなくならない）。
+                    let hits = try await store.search(vector: vector, limit: limit, statuses: statuses)
+                    let items = hits.map { CaptureSummary($0.record, score: $0.score) }
+                    return try jsonResult(SearchOutput(mode: "vector", fallbackReason: nil, query: query, count: items.count, items: items))
                 } catch {
                     fallbackReason = "embedder_failed"
                     MCPLog.write("search_captures: 埋め込み検索に失敗したので部分一致に切り替える（\(type(of: error))）")
@@ -129,7 +161,7 @@ public struct MCPToolHandlers: Sendable {
     func keywordSearch(query: String, limit: Int, includeArchived: Bool) async throws -> [ContextRecord] {
         let terms = query.split(whereSeparator: { $0.isWhitespace }).map(String.init).filter { !$0.isEmpty }
         guard !terms.isEmpty else { return [] }
-        let statuses: Set<RecordStatus> = includeArchived ? [] : [.inbox, .done]
+        let statuses = Self.searchStatuses(includeArchived: includeArchived)
         var results: [ContextRecord] = []
         var offset = 0
         let page = 500
@@ -143,6 +175,11 @@ public struct MCPToolHandlers: Sendable {
             offset += page
         }
         return results
+    }
+
+    /// 検索の対象にする状態（空集合は全状態）。archived は `include_archived` のときだけ。
+    static func searchStatuses(includeArchived: Bool) -> Set<RecordStatus> {
+        includeArchived ? [] : [.inbox, .done]
     }
 
     static func matches(_ r: ContextRecord, terms: [String]) -> Bool {
