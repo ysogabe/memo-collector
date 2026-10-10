@@ -1,52 +1,7 @@
 import CCCore
 import Foundation
 
-/// 検索索引の状態ファイル（データルート直下の `search-index.json`）。
-///
-/// アプリが書き、cc-mcp（別プロセス）が読む。cc-mcp はここの `image_tokens` で同じ設定の埋め込みを作り、
-/// `index_signature` が自分のものと一致し `status == "ready"` のときだけベクトル検索を使う
-/// （**形式を変えるときは `Packages/ContextCaptureKit/Sources/cc-mcp/CCMCPCommand.swift` の読み手も直す**）。
-struct SearchIndexState: Codable, Equatable, Sendable {
-    enum Status: String, Codable, Sendable {
-        /// 全件がこのシグネチャで埋め込まれている。
-        case ready
-        /// 作り直しの途中（古いシグネチャのベクトルが混ざっている）。
-        case rebuilding
-    }
-
-    var indexSignature: String
-    var imageTokens: Int
-    var dimension: Int
-    var status: Status
-    var updatedAt: Date
-
-    static let fileName = "search-index.json"
-
-    enum CodingKeys: String, CodingKey {
-        case indexSignature = "index_signature"
-        case imageTokens = "image_tokens"
-        case dimension
-        case status
-        case updatedAt = "updated_at"
-    }
-
-    static func url(dataRoot: URL) -> URL { dataRoot.appendingPathComponent(fileName) }
-
-    static func read(from url: URL) -> SearchIndexState? {
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        let d = JSONDecoder()
-        d.dateDecodingStrategy = .iso8601
-        return try? d.decode(SearchIndexState.self, from: data)
-    }
-
-    func write(to url: URL) throws {
-        let e = JSONEncoder()
-        e.dateEncodingStrategy = .iso8601
-        e.outputFormatting = [.prettyPrinted, .sortedKeys]
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try e.encode(self).write(to: url, options: .atomic)
-    }
-}
+// 状態ファイル `search-index.json` の型 `SearchIndexState` は CCCore（cc-mcp と共有）。
 
 /// 埋め込みの準備と索引の整合を保つ（F-11）。
 ///

@@ -59,29 +59,6 @@ func makeEmbedderProvider(paths: CCPaths = .resolve()) -> EmbedderProvider {
     return { await box.embedder() }
 }
 
-/// アプリ（`app/ContextCapture/App/Live/SearchIndex.swift` の `SearchIndexState`）が書く `search-index.json` の読み手。
-/// **形式を変えるときはアプリ側と合わせる。**
-struct SearchIndexStateFile: Decodable, Equatable {
-    var indexSignature: String
-    var imageTokens: Int
-    var dimension: Int
-    var status: String
-
-    static let fileName = "search-index.json"
-
-    enum CodingKeys: String, CodingKey {
-        case indexSignature = "index_signature"
-        case imageTokens = "image_tokens"
-        case dimension
-        case status
-    }
-
-    static func read(dataRoot: URL) -> SearchIndexStateFile? {
-        guard let data = try? Data(contentsOf: dataRoot.appendingPathComponent(fileName)) else { return nil }
-        return try? JSONDecoder().decode(SearchIndexStateFile.self, from: data)
-    }
-}
-
 /// 検索のたびに索引の状態を読み直し（アプリが作り直しを終えれば次の検索からベクトルを使う）、合っていれば埋め込みを返す。
 actor LazyQueryEmbedder {
     let paths: CCPaths
@@ -100,11 +77,11 @@ actor LazyQueryEmbedder {
             warn("埋め込みモデルが無いので部分一致で検索する: \(modelDirectory.path)")
             return nil
         }
-        guard let state = SearchIndexStateFile.read(dataRoot: paths.dataRoot) else {
-            warn("索引の状態ファイル（\(SearchIndexStateFile.fileName)）が無いので部分一致で検索する。アプリで検索の準備が終わるのを待ってください")
+        guard let state = SearchIndexState.read(paths: paths) else {
+            warn("索引の状態ファイル（\(SearchIndexState.fileName)）が無いので部分一致で検索する。アプリで検索の準備が終わるのを待ってください")
             return nil
         }
-        guard state.status == "ready" else {
+        guard state.status == .ready else {
             warn("アプリが検索の索引を作り直している（\(state.status)）ので部分一致で検索する")
             return nil
         }
