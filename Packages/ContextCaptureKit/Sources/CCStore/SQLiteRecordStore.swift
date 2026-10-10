@@ -214,24 +214,14 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
     }
 
     /// 埋め込みを持たないレコードの id（SQL で引く。起動時のインデックス再開用）。
+    /// 次元が `dimension` と違う（古い）埋め込みは「無い」とみなす（検索の対象にもならないので、作り直す対象）。
     public func idsWithoutEmbedding() async throws -> Set<String> {
-        try await pool.read { db in
-            try Set(String.fetchAll(
-                db,
-                sql: """
-                SELECT r.id FROM records r
-                LEFT JOIN embeddings e ON e.record_id = r.id
-                WHERE e.record_id IS NULL
-                """
-            ))
-        }
+        try await idsWithoutEmbedding(dimension: dimension)
     }
 
-    /// 埋め込みを持つレコードの id（SQL で引く）。
+    /// 埋め込み（次元が `dimension` のもの）を持つレコードの id（SQL で引く）。
     public func idsWithEmbedding() async throws -> Set<String> {
-        try await pool.read { db in
-            try Set(String.fetchAll(db, sql: "SELECT e.record_id FROM embeddings e JOIN records r ON r.id = e.record_id"))
-        }
+        try await idsWithEmbedding(dimension: dimension)
     }
 
     /// スコア降順（同点は id 降順）の上位 k 件の添字。
@@ -382,13 +372,29 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
 // MARK: - CCCore の追加プロトコルへの準拠
 
 extension SQLiteRecordStore: RecordModifying, EmbeddingPresenceChecking, StatusFilteredSearching {
-    /// SQL で引く（零ベクトルの全件検索は使わない）。`dimension` は使わない。
+    /// 次元が `dimension` の埋め込みを持つレコードの id。SQL で引く（零ベクトルの全件検索は使わない）。
     public func idsWithEmbedding(dimension: Int) async throws -> Set<String> {
-        try await idsWithEmbedding()
+        try await pool.read { db in
+            try Set(String.fetchAll(
+                db,
+                sql: "SELECT e.record_id FROM embeddings e JOIN records r ON r.id = e.record_id WHERE e.dim = ?",
+                arguments: [dimension]
+            ))
+        }
     }
 
-    /// SQL で引く。`dimension` は使わない。
+    /// 次元が `dimension` の埋め込みを持たないレコードの id（違う次元の古い埋め込みしか無いものを含む）。SQL で引く。
     public func idsWithoutEmbedding(dimension: Int) async throws -> Set<String> {
-        try await idsWithoutEmbedding()
+        try await pool.read { db in
+            try Set(String.fetchAll(
+                db,
+                sql: """
+                SELECT r.id FROM records r
+                LEFT JOIN embeddings e ON e.record_id = r.id AND e.dim = ?
+                WHERE e.record_id IS NULL
+                """,
+                arguments: [dimension]
+            ))
+        }
     }
 }

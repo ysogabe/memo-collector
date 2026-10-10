@@ -83,6 +83,16 @@ final class Wave5StoreTests: XCTestCase {
         let viaProtocol = try await p.idsWithoutEmbedding(dimension: 256)
         XCTAssertEqual(viaProtocol, [a.id, c.id])
 
+        // 次元の違う（古い）埋め込みは「無い」扱い（検索の対象外なので作り直す対象）。
+        try await store.pool.write { db in
+            try db.execute(sql: "INSERT INTO embeddings (record_id, dim, vector) VALUES (?, 128, ?)",
+                           arguments: [c.id, Data(count: 128 * 4)])
+        }
+        let staleWithout = try await store.idsWithoutEmbedding()
+        XCTAssertEqual(staleWithout, [a.id, c.id])
+        let staleWith = try await store.idsWithEmbedding()
+        XCTAssertEqual(staleWith, [b.id])
+
         // 削除すると埋め込みも消える。
         try await store.delete(id: b.id)
         let afterDelete = try await store.idsWithEmbedding()
