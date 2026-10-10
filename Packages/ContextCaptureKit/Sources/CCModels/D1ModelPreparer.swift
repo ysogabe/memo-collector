@@ -269,6 +269,55 @@ public struct D1ModelPreparer: Sendable {
         return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 
+    // MARK: - 検証（書き込まない。Wave 6: Whisper / 埋め込みと同じ形）
+
+    /// `CCIntent.D1IntentClassifier.load()` が読むファイル。
+    public static let requiredFiles = ["config.json", "tokenizer.json", "model.safetensors"]
+
+    public enum VerificationLevel: Sendable {
+        /// 大きさだけ（数ミリ秒。アプリ起動時・オンボーディングの判定向け）。
+        case size
+        /// sha256 まで（2.9GB を読むので数秒）。
+        case sha256
+    }
+
+    public enum Status: Sendable, Equatable {
+        /// manifest があり、全ファイルが一致。
+        case ready(D1ModelManifest)
+        /// 読み込みに要るファイルが無い。
+        case missing([String])
+        /// ファイルはあるが manifest が無い（スパイクの変換物など）。
+        case unmanifested
+        /// manifest と食い違う（ファイル名。repo / revision 違いは `manifest.json`）。
+        case mismatched([String])
+    }
+
+    /// 変換物を manifest と突き合わせる。**何も書かない**。`.size` は manifest の `bytes` とだけ比べる。
+    public func verify(level: VerificationLevel = .sha256, fileManager: FileManager = .default) throws -> Status {
+        let missing = Self.requiredFiles.filter { !fileManager.fileExists(atPath: destination.appendingPathComponent($0).path) }
+        guard missing.isEmpty else { return .missing(missing) }
+        let manifestURL = destination.appendingPathComponent(CCPaths.manifestFileName)
+        guard fileManager.fileExists(atPath: manifestURL.path) else { return .unmanifested }
+        let manifest = try JSONDecoder().decode(D1ModelManifest.self, from: Data(contentsOf: manifestURL))
+        var bad: [String] = []
+        if manifest.repo != Self.repoId || manifest.revision != Self.revision { bad.append(CCPaths.manifestFileName) }
+        for (name, entry) in manifest.files {
+            let url = destination.appendingPathComponent(name)
+            guard let size = (try? fileManager.attributesOfItem(atPath: url.path)[.size] as? NSNumber)?.intValue,
+                  size == entry.bytes else {
+                bad.append(name)
+                continue
+            }
+            if level == .sha256, try Self.sha256(of: url) != entry.sha256 { bad.append(name) }
+        }
+        let listed = Set(manifest.files.keys)
+        for name in try fileManager.contentsOfDirectory(atPath: destination.path)
+        where name != CCPaths.manifestFileName && name != ".DS_Store" && !listed.contains(name) {
+            bad.append(name)
+        }
+        return bad.isEmpty ? .ready(manifest) : .mismatched(bad.sorted())
+    }
+
     /// 変換物を manifest の sha256 と突き合わせる。一致しないファイル名を返す（空なら健全）。
     public static func verify(directory: URL) throws -> [String] {
         let data = try Data(contentsOf: directory.appendingPathComponent(CCPaths.manifestFileName))

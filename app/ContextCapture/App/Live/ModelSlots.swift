@@ -111,8 +111,8 @@ struct D1ModelSlot: ModelSlotPreparing {
     /// HF の元 checkpoint（model.safetensors 約 5.8GB と tokenizer 類）。
     static let sourceBytes: Int64 = 5_850_000_000
     static let convertedBytes: Int64 = 2_900_000_000
-    /// `CCIntent.D1IntentClassifier.load()` が読むファイル。
-    static let requiredFiles = ["config.json", "tokenizer.json", "model.safetensors"]
+    /// `CCIntent.D1IntentClassifier.load()` が読むファイル（`D1ModelPreparer.requiredFiles` と同じ）。
+    static let requiredFiles = D1ModelPreparer.requiredFiles
 
     /// Python の HF キャッシュに同じ revision があれば取得しない。
     var hasCachedSource: Bool { D1ModelPreparer.pythonHFCacheSnapshot() != nil }
@@ -120,16 +120,26 @@ struct D1ModelSlot: ModelSlotPreparing {
     /// 取得物（変換後も `.downloads/` に残る）+ 変換物 + 作業の余裕。
     var requiredFreeBytes: Int64 { downloadBytes + Self.convertedBytes + 500_000_000 }
 
+    /// `D1ModelPreparer.verify(level: .size)`（起動時にも呼ぶので sha256 は読まない）。manifest が無い開発用の置き場
+    /// （`.unmanifested`）も揃っているとみなす（変換し直さない）。食い違う（途中で壊れた等）・無いなら準備する。
     func filesPresent() -> Bool {
-        Self.requiredFiles.allSatisfy {
-            FileManager.default.fileExists(atPath: preparer.destination.appendingPathComponent($0).path)
+        switch try? preparer.verify(level: .size) {
+        case .ready?, .unmanifested?: return true
+        default: return false
         }
     }
 
     func isPrepared() async -> Bool { filesPresent() }
 
     func prepare(progress: @escaping @Sendable (ModelPreparationProgress.Phase, Double) -> Void) async throws {
-        guard !filesPresent() else { return }
+        switch (try? preparer.verify(level: .size)) ?? .missing([]) {
+        case .ready, .unmanifested:
+            return
+        case let .missing(names):
+            CCLog.models.notice("d1 missing \(names.joined(separator: ","), privacy: .public) at \(preparer.destination.path, privacy: .public)")
+        case let .mismatched(names):
+            CCLog.models.notice("d1 mismatched \(names.joined(separator: ","), privacy: .public) at \(preparer.destination.path, privacy: .public)")
+        }
         let preparer = preparer
         let source: URL
         if let cached = D1ModelPreparer.pythonHFCacheSnapshot() {
