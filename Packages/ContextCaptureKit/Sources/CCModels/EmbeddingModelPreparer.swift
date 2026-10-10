@@ -207,7 +207,12 @@ public struct EmbeddingModelPreparer: Sendable {
             try fm.moveItem(at: work, to: destination)
         }
         succeeded = true
-        if source == nil { try? fm.removeItem(at: staging) }
+        if source == nil {
+            try? fm.removeItem(at: staging)
+            // 他のモデルの取得物が無ければ .downloads 自体も消す
+            let parent = staging.deletingLastPathComponent()
+            if (try? fm.contentsOfDirectory(atPath: parent.path))?.isEmpty == true { try? fm.removeItem(at: parent) }
+        }
         guard case .ready(let written) = try verify(level: .size) else {
             throw EmbeddingPrepareError.verificationFailed(manifestURL.path)
         }
