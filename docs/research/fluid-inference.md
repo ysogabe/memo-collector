@@ -229,6 +229,12 @@ $B/ax-probe
 
 結果ファイル: `spikes/fluid/results/`（`coreml_*.json` = Python、`swift_text_*.json` / `swift_image_*.json` = Swift、`*.score.json` = Swift の採点、`*.log` に `/usr/bin/time -l` の最大 RSS・peak memory footprint）。
 
+## 5.1 製品実装（Wave 3 embedding）で分かったこと（追記）
+
+- **HF の画像縮小は PIL ではなく torchvision の uint8 bicubic**: HF の `Gemma4ImageProcessor` は `torchvision.transforms.v2.functional.resize(uint8, BICUBIC, antialias=True)` で縮小しており、その積和は torchvision の uint8 経路（`_compute_indices_int16_weights_aa`）の **int16 固定小数点**（軸ごとに最大の重みが int16 に収まる最大の精度 ≤ 22bit を選ぶ）。PIL（22bit 固定小数点）とは実画像で 1 段ずれる画素がある（s01 で 298 値）。本調査の §3.4 の「bicubic」比較はこの差を区別していない。製品（`CCEmbedding/ImagePreprocessor.swift`）は torchvision の重み計算・丸めを写し、**ビット一致**させた
+- **ANE キャッシュの鍵は「実行ファイル + モデルのパス」と推測**: §3.3 の「同じバイナリを別名にすると再コンパイル」に加え、製品実装でもモデルの置き場を変えると初回と同じ時間がかかった。鍵が実行ファイルのパスとモデルのパスの組と見ている（公式の記述は無く、推測）。このため cc-mcp（別の実行ファイル）はテキスト塔を `.cpuAndGPU` で遅延ロードし、アプリはモデル準備後に**アプリのプロセス内で** `CoreMLEmbedder.prepare()` を呼んで温める（計画書 §6）
+- **release ビルドで融合 1 件 0.59 秒**（テキストのみ 6ms、ピーク 375MB）。§3.2 の値は debug / スパイク実装のもの。融合 256 R@3 0.933 / MRR 0.950、参照とのコサイン最小 0.9988
+
 ## 6. 未検証事項
 
 - **AX の読み取り**: `ax-probe` の実行プロセスにアクセシビリティ権限が無く（`AXIsProcessTrusted() = false`）、前面ウインドウのタイトル・`AXDocument`・選択テキスト・AX ツリーの走査は**権限が必要で未検証**。確認できたのは前面アプリ名 / バンドル ID（権限不要）と FluidUse の `candidates()`（15 アプリ）だけ。`AXManualAccessibility` による VS Code（Electron）の AX ツリー取得とその副作用も未検証
