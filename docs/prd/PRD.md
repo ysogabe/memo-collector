@@ -183,15 +183,16 @@
 
 | 処理 | 実行タイミング | モデル | PoC 実測 |
 |---|---|---|---|
-| 文字起こし | 同期（保存前） | Whisper large-v3-turbo（MLX）→ FluidAudio と比較して確定 | 1.1 秒 / CER 7.4% |
-| 意図・日時言及 | 非同期 | **d1-3B**（注釈テキストのみ） | 0.3〜0.5 秒 / 未見データ 95.5% |
+| 文字起こし | 同期（保存前） | **Whisper large-v3-turbo（WhisperKit / Core ML）**。FluidAudio Parakeet JA は CER 19.3% で不採用 | 1.3 秒 / CER 7.7% |
+| 意図・日時言及 | 非同期 | **d1-3B**（注釈テキストのみ、MLX Swift 8bit） | 0.75 秒 / 未見データ 95.5% |
 | 秘密情報 | 非同期・受け渡し前に必須 | **Apple Vision OCR + 正規表現** | 0.2 秒 / 4/4・誤検知 0 |
-| 検索インデックス | 非同期 | **EmbeddingGemma 2**（融合 256 次元） | 0.8 秒 / R@3 0.93 |
+| 検索インデックス | 非同期 | **EmbeddingGemma 2**（融合 256 次元、MLX Swift） | 0.6〜0.8 秒 / R@3 0.93 |
 | 画面種別 | 同期・軽量 | モデル不要（バンドル ID とタイトルのルール） | - |
 
 - **d1-omni-600M は日本語では採用しない**（意図 54.5%、音声直接 16.7%）。
-- **メモリ方針**: 常駐は STT と EmbeddingGemma のみ。d1-3B（MPS 6.3GB）は最初のトリアージで読み込み、10 分使われなければ解放。3 つ同時常駐は MPS 約 11GB で基準超過。
-- **推論ランタイム**: PoC は Python（torch MPS）。製品では Swift から呼べる形が要る。候補は (a) 同梱の Python ヘルパープロセスを XPC で呼ぶ、(b) Core ML / MLX Swift へ変換。d1 は `trust_remote_code` の独自ヘッドを持つため (a) から始め、(b) を並行調査する。
+- **メモリ方針**: 常駐は STT と EmbeddingGemma のみ。d1-3B（MLX 8bit で 2.9GB）は最初のトリアージで読み込み、10 分使われなければ解放。3 つ同時常駐の見積りは 5〜7GB（PyTorch 時は約 11GB。同時常駐の実測は実装時に行う）。
+- **推論ランタイム（2026-10-10 決定）**: **(b) Swift ネイティブ**で実装する。STT は WhisperKit、d1-3B と EmbeddingGemma 2 は MLX Swift。根拠は [推論ランタイム調査](../research/runtime-coreml-mlx.md)（d1 は独自ヘッドではなく最終位置 logits の選択肢トークン readout であり、MLX Swift 8bit で PyTorch と同精度）。Python ヘルパー (a) は採らない。Core ML は d1 では採らない（可変長で GPU メモリが膨張、ANE は SIGSEGV）。
+- **前提作業**: d1 の Swift トークナイザ不一致（`"\n\n\n"` の分割）の修正、d1 言語モデル部の抽出と 8bit 量子化（`block_ff_dim` の config 追記）、EmbeddingGemma 2 画像塔の Swift 移植。
 
 ### 8.2 権限
 
@@ -263,7 +264,8 @@
 ## 14. 未決事項
 
 1. 製品名（仮称のまま MVP を作る）
-2. STT の最終選定（Whisper turbo / FluidAudio Parakeet JA）
-3. d1-3B を Swift アプリからどう呼ぶか（Python ヘルパー or 変換）
+2. ~~STT の最終選定~~ → WhisperKit large-v3-turbo に決定（2026-10-10）。語彙プロンプトが効かない件は実装中に調査
+3. ~~d1-3B を Swift アプリからどう呼ぶか~~ → MLX Swift 8bit に決定（2026-10-10）
+6. d1 の LFM Open License v1.0 §5（年商 1,000 万米ドル以上の法人の商用利用は許諾外）が利用者側の法人に及ぶかの法務確認
 4. 音声ファイルの既定保持期間（7 日案）
 5. 配布形態（直接配布 + 公証、Mac App Store はサンドボックスと Accessibility の相性から見送り案）
