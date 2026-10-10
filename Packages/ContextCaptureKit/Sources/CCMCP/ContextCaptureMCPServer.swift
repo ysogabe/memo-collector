@@ -40,13 +40,14 @@ public final class ContextCaptureMCPServer: Sendable {
         await server.withMethodHandler(CallTool.self) { params in
             let started = Date()
             await inFlight.begin()
-            defer { Task { await inFlight.end() } }
             do {
                 let result = try await handlers.call(name: params.name, arguments: params.arguments, clientName: await client.name)
                 MCPLog.write("\(params.name): \(result.isError == true ? "error" : "ok")（\(Self.elapsed(since: started))）")
+                await inFlight.end()
                 return result
             } catch {
                 MCPLog.write("\(params.name): 入力エラー（\(Self.elapsed(since: started))）")
+                await inFlight.end()
                 throw error
             }
         }
