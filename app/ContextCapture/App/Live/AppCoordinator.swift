@@ -284,7 +284,7 @@ final class AppCoordinator: CaptureControlling {
             CCLog.capture.error("stt failed: \(String(describing: error), privacy: .public)")
         }
 
-        let capturedAt = context.capturedAt.ccRoundedToMilliseconds
+        let capturedAt = context.capturedAt.roundedToMilliseconds
         let id = ULID.generate(now: capturedAt).string
         var written: [String] = []
 
@@ -384,12 +384,5 @@ final class AppCoordinator: CaptureControlling {
         while let t = inFlight.values.first {
             await t.value
         }
-    }
-}
-
-extension Date {
-    /// ミリ秒に丸める（DB はミリ秒精度。往復後の `==` を保つため。計画書 §6 の持ち越し事項）。
-    var ccRoundedToMilliseconds: Date {
-        Date(timeIntervalSince1970: (timeIntervalSince1970 * 1000).rounded() / 1000)
     }
 }

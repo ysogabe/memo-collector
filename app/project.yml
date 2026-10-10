@@ -89,6 +89,10 @@ targets:
       - path: ContextCapture/App/Live/TriageAssembly.swift
       - path: ContextCapture/App/Live/LiveGuardReviewer.swift
       - path: ContextCapture/App/Live/ModelPreparationPipeline.swift
+      # 詳細ビューの保存（RecordModifying.modify）。Clipboard と DateText のために InboxViewModel / Theme も入れる。
+      - path: ContextCapture/UI/DetailViewModel.swift
+      - path: ContextCapture/UI/InboxViewModel.swift
+      - path: ContextCapture/UI/Theme.swift
     dependencies:
       - package: ContextCaptureKit
         product: CCCore

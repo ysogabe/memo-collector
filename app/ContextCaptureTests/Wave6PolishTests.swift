@@ -145,3 +145,96 @@ final class SearchIndexDegradedTests: XCTestCase {
         XCTAssertEqual(store.embeddings.get()[a.id], [1, 0, 0, 0])
     }
 }
+
+// MARK: - 詳細ビューの保存（RecordModifying.modify で 1 トランザクション）
+
+/// `modify` だけを許すストア（`update` を呼んだら失敗させ、get + update に戻っていないことを確かめる）。
+final class ModifyOnlyStore: RecordStore, RecordModifying, @unchecked Sendable {
+    let inner = TestStore()
+    let modifyCalls = Box(0)
+    /// modify の直前に「別プロセスの書き込み」を差し込む。
+    let beforeModify = Box<(@Sendable (inout ContextRecord) -> Void)?>(nil)
+
+    func insert(_ record: ContextRecord) async throws { try await inner.insert(record) }
+    func update(_ record: ContextRecord) async throws { throw CocoaError(.featureUnsupported) }
+    func get(id: String) async throws -> ContextRecord? { try await inner.get(id: id) }
+    func list(_ filter: InboxFilter) async throws -> [ContextRecord] { try await inner.list(filter) }
+    func count(_ filter: InboxFilter) async throws -> Int { try await inner.count(filter) }
+    func delete(id: String) async throws { try await inner.delete(id: id) }
+    func setEmbedding(id: String, vector: [Float]) async throws { try await inner.setEmbedding(id: id, vector: vector) }
+    func search(vector: [Float], limit: Int) async throws -> [SearchHit] { try await inner.search(vector: vector, limit: limit) }
+    func writeAttachment(_ data: Data, id: String, kind: AttachmentKind, ext: String, capturedAt: Date) async throws -> String {
+        try await inner.writeAttachment(data, id: id, kind: kind, ext: ext, capturedAt: capturedAt)
+    }
+    func attachmentURL(for relativePath: String) async throws -> URL { try await inner.attachmentURL(for: relativePath) }
+
+    @discardableResult
+    func modify(id: String, _ transform: @escaping @Sendable (inout ContextRecord) throws -> Void) async throws -> ContextRecord {
+        modifyCalls.update { $0 += 1 }
+        let before = beforeModify.get()
+        return try await inner.modify(id: id) { r in
+            before?(&r)
+            try transform(&r)
+        }
+    }
+}
+
+struct NoGuardReview: GuardReviewing {
+    func markReviewed(recordID: String) async throws -> ContextRecord { throw CocoaError(.featureUnsupported) }
+    func useMaskedImage(recordID: String) async throws -> ContextRecord { throw CocoaError(.featureUnsupported) }
+}
+
+@MainActor
+final class DetailSaveTests: XCTestCase {
+    func testAnnotationAndIntentSavesUseModify() async throws {
+        let store = ModifyOnlyStore()
+        defer { try? FileManager.default.removeItem(at: store.inner.root) }
+        let r = makeWave6Record("元の注釈")
+        try await store.insert(r)
+        let queue = FakeTriageQueue()
+        let vm = DetailViewModel(record: r, store: store, guardReview: NoGuardReview(), triage: queue)
+
+        // 保存の直前に別プロセス（cc-mcp）がメモを足していても、注釈の保存で消えない（同じトランザクションで最新に当てる）。
+        store.beforeModify.set { rec in
+            if rec.notes.isEmpty { rec.notes.append(Note(author: "claude-code", text: "メモ", at: Date(timeIntervalSince1970: 1_791_000_000))) }
+        }
+        vm.draftText = "直した注釈"
+        await vm.saveAnnotation()
+        XCTAssertNil(vm.errorMessage)
+        XCTAssertEqual(store.modifyCalls.get(), 1)
+        var saved = try await store.get(id: r.id)
+        XCTAssertEqual(saved?.annotation.text, "直した注釈")
+        XCTAssertEqual(saved?.annotation.edited, true)
+        XCTAssertEqual(saved?.notes.count, 1)
+        XCTAssertEqual(vm.record.notes.count, 1, "画面の記録も最新になる")
+        let edited = await eventually { queue.calls.get().contains(.annotationEdited(r.id)) }
+        XCTAssertTrue(edited)
+
+        await vm.setIntent(.research)
+        XCTAssertEqual(store.modifyCalls.get(), 2)
+        saved = try await store.get(id: r.id)
+        XCTAssertEqual(saved?.triage?.intent, .research)
+        XCTAssertEqual(saved?.triage?.isManual, true)
+    }
+
+    func testMissingRecordIsNotRecreated() async throws {
+        let store = ModifyOnlyStore()
+        defer { try? FileManager.default.removeItem(at: store.inner.root) }
+        let r = makeWave6Record("消える")
+        let vm = DetailViewModel(record: r, store: store, guardReview: NoGuardReview())
+        vm.draftText = "x"
+        await vm.saveAnnotation()
+        XCTAssertNotNil(vm.errorMessage)
+        let missing = try await store.get(id: r.id)
+        XCTAssertNil(missing)
+    }
+}
+
+private func eventually(timeout: TimeInterval = 2, _ condition: @escaping () async -> Bool) async -> Bool {
+    let deadline = Date().addingTimeInterval(timeout)
+    while Date() < deadline {
+        if await condition() { return true }
+        try? await Task.sleep(for: .milliseconds(10))
+    }
+    return await condition()
+}

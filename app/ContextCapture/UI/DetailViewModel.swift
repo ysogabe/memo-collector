@@ -118,12 +118,21 @@ final class DetailViewModel {
     }
 
     /// 最新の記録を読み直して `change` だけを当てて保存する（開いている間にトリアージが書いたガード・意図を巻き戻さない）。
+    /// ストアが `RecordModifying`（本物の `SQLiteRecordStore`・フェイク）なら `modify` で **1 トランザクション**にする
+    /// （読み直しと保存の間に cc-mcp やトリアージが書いた変更を失わない）。そうでなければ get + update。
+    /// 記録が消えていたら保存せずエラーを出す。
     @discardableResult
-    private func commit(flash: String?, _ change: (inout ContextRecord) -> Void) async -> Bool {
+    private func commit(flash: String?, _ change: @escaping @Sendable (inout ContextRecord) -> Void) async -> Bool {
         do {
-            var r = try await store.get(id: record.id) ?? record
-            change(&r)
-            try await store.update(r)
+            let r: ContextRecord
+            if let modifying = store as? any RecordModifying {
+                r = try await modifying.modify(id: record.id) { change(&$0) }
+            } else {
+                guard var latest = try await store.get(id: record.id) else { throw DetailSaveError.recordMissing }
+                change(&latest)
+                try await store.update(latest)
+                r = latest
+            }
             record = r
             draftText = r.annotation.text
             errorMessage = nil
@@ -143,4 +152,8 @@ final class DetailViewModel {
             if flash == s { flash = nil }
         }
     }
+}
+
+private enum DetailSaveError: Error {
+    case recordMissing
 }
