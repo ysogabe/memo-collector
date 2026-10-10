@@ -101,6 +101,11 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - 実装上の必須事項: 画像縮小は HF と同じ bicubic を自前実装（CoreGraphics 補間ではコサイン 0.9938 で不合格）、推論ループは 1 件ごとに `autoreleasepool`（無いと 2.2GB まで膨張）、ANE キャッシュは実行バイナリ単位なので温めはアプリ本体で行う（`cc-models` で温めても効かない）
 - FluidUse はライブラリ依存にしない（EmbeddingGemma 2 の Swift 実装は Apache-2.0 なので帰属表示付きで写してよい）
 
+## 5.2 受け入れ基準の定義（2026-10-11 main 決定）
+
+- 意図の「≥ 80%」は**しきい値前の top-1 正解率（未見データ）**で測る（e2e: 未見 21/22、dev 25/30）。しきい値 0.7 による自動分類の割合（coverage、dev 24/30）は別指標とし、Issue #2 で実データから調整する
+- メモリの「アイドル ≤ 4GB」は d1 解放後の状態で測る。トリアージ後 10 分の d1 常駐期間は「トリアージ中 ≤ 10GB」側で扱う（MLX キャッシュ上限の設定で 3.8GB まで下がる見込み）
+
 ## 6. 持ち越し事項
 
 > 2026-10-10: Wave 5 cleanup / wiring-m2 で多くを消化。残りは「6.1 残件」に集約し、以下の旧リストは経緯として残す。
@@ -169,6 +174,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 5 wiring-m2（アプリのテスト 46 件。非 fake 起動で resumePending・needs_review 判定・埋め込み初回準備 158 秒・d1 の 10 分解放・cc-mcp の vector 検索をログで確認。実機確認手順 docs/manual-tests/m2-m3.md）
 - [x] Wave 5 cleanup（§6 の Packages 側 10 項目。自前コードの警告 0）
 - [x] Wave 6 polish（7 項目。パッケージ 304 件・アプリ 54 件のテスト。degraded 中のアプリ検索はベクトルを続けて注意書き。d1 は manifest がある置き場で余計なファイルがあると取り直しになる）
-- [ ] Wave 4 e2e（ハーネス dispatch 済み: E2ETests + scripts/e2e.sh + docs/e2e/report.md。その後 main が再計測して照合。Release ビルド・サブエージェント停止・load average を記録して main が計測: 解放→トースト p90、3 モデル同時常駐のメモリ（MLX アクティブ + footprint）、アイドル CPU、アプリ内での d1 数値一致）
+- [x] Wave 4 e2e（docs/e2e/report.md。解放→保存 p90 1.72〜1.80 秒（続けて録ると 4.38 秒、起動後最初の 1 件は 5.2〜8.4 秒）、アイドル CPU 0.02%、アイドルメモリ 121MB〜591MB、トリアージ中ピーク 7.22GB、d1 の SwiftPM / Xcode 差 0.0。修正項目は Wave 7）
+- [ ] Wave 7 fix（e2e と実機確認の指摘: Release の arm64 限定、MLX キャッシュ上限、Whisper の初回推論、録音中のトリアージ一時停止、キャプチャのログ、トリアージ後のアイドル CPU）→ main が scripts/e2e.sh で再計測
 - [ ] セキュリティレビュー（security-review skill）
 - [ ] PR（github-pr-workflow。M1 実機確認が未了なら `Refs #1`）
