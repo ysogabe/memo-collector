@@ -116,6 +116,8 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - CCMCP の検索を `search(vector:limit:statuses:)` に切り替え
 - 起動直後に Whisper 読み込み中（約 11 秒）「モデルが未準備」と出る
 - 開発用に記録を入れる正式な経路（cc-models か fixture）
+- **アプリ本体（xcodebuild の Release）で d1 の数値テストを回す**（MLX カーネルの差で誤差が上限 0.05 に近づく恐れ。余裕 0.007）→ Wave 4 e2e で main が実施
+- 見た目の残件（起動直後の「モデルが未準備」表示、`--debug` の 5 秒ポーリング）は別 Issue にする
 - RSS は MLX / Core ML のメモリを反映しない → e2e のメモリはデバッグメニューの MLX アクティブ値と `footprint` で測る
 
 ### 6.0 旧リスト（経緯）
@@ -163,7 +165,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 4 mcp（27 テスト、stdio 往復の結合テストあり。画像は clear/masked のみ・データルート外を読まない。cc-mcp の埋め込みは `makeEmbedderProvider()` が nil → embedding マージ後に CoreMLEmbedder(.cpuAndGPU) を差す）
 - [x] Wave 5 wiring-m2（アプリのテスト 46 件。非 fake 起動で resumePending・needs_review 判定・埋め込み初回準備 158 秒・d1 の 10 分解放・cc-mcp の vector 検索をログで確認。実機確認手順 docs/manual-tests/m2-m3.md）
 - [x] Wave 5 cleanup（§6 の Packages 側 10 項目。自前コードの警告 0）
-- [ ] Wave 6 polish（6.1 残件）
-- [ ] Wave 4 e2e（他の処理を止めた状態で main が計測: 解放→トースト p90、3 モデル同時常駐のメモリ、アイドル CPU）
+- [ ] Wave 6 polish（dispatch 済み: 正しさと MCP 契約に関わる 7 項目）
+- [ ] Wave 4 e2e（Release ビルド・サブエージェント停止・load average を記録して main が計測: 解放→トースト p90、3 モデル同時常駐のメモリ（MLX アクティブ + footprint）、アイドル CPU、アプリ内での d1 数値一致）
 - [ ] セキュリティレビュー（security-review skill）
-- [ ] PR
+- [ ] PR（github-pr-workflow。M1 実機確認が未了なら `Refs #1`）
