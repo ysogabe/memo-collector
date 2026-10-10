@@ -91,7 +91,7 @@ public actor TriageQueue {
         let total = try await store.count(InboxFilter(statuses: []))
         guard total > 0 else { return 0 }
         let records = try await store.list(InboxFilter(statuses: [], limit: total))
-        let embedded = try await store.idsWithEmbedding(dimension: embedder.dimension)
+        let unindexed = try await store.idsWithoutEmbedding(dimension: embedder.dimension)
         var n = 0
         // list は新しい順なので逆にする。
         for record in records.reversed() {
@@ -101,7 +101,7 @@ public actor TriageQueue {
                !AnnotationPreprocessor.prepare(record.annotation.text, maxCharacters: configuration.maxAnnotationCharacters).isEmpty {
                 steps.insert(.intent)
             }
-            if !embedded.contains(record.id) { steps.insert(.index) }
+            if unindexed.contains(record.id) { steps.insert(.index) }
             guard !steps.isEmpty else { continue }
             schedule(Job(id: record.id, steps: steps))
             n += 1

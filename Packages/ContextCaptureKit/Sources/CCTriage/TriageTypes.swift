@@ -77,33 +77,13 @@ extension TriageResult {
 
 // MARK: - ストアへの追加要求
 
-/// トランザクション内の read-modify-write（`SQLiteRecordStore.modify`）。
-/// CCCore の `RecordStore` に無いので CCTriage 側で宣言し、`SQLiteRecordStore` を適合させる
-/// （CCCore へ移すことを提案済み）。
-public protocol RecordModifying: Sendable {
-    @discardableResult
-    func modify(id: String, _ transform: @escaping @Sendable (inout ContextRecord) throws -> Void) async throws -> ContextRecord
-}
-
-/// 埋め込みを持つレコード id の集合。CCStore に専用 API が無いので、既定実装は
-/// 「零ベクトルで全件検索すると埋め込みのあるレコードが全部返る」ことを使う（O(N)、起動時に 1 回だけ）。
-public protocol EmbeddingPresenceChecking: Sendable {
-    func idsWithEmbedding(dimension: Int) async throws -> Set<String>
-}
-
-extension EmbeddingPresenceChecking where Self: RecordStore {
-    public func idsWithEmbedding(dimension: Int) async throws -> Set<String> {
-        let total = try await count(InboxFilter(statuses: []))
-        guard total > 0 else { return [] }
-        let hits = try await search(vector: [Float](repeating: 0, count: dimension), limit: total)
-        return Set(hits.map(\.record.id))
-    }
-}
+/// `RecordModifying` / `EmbeddingPresenceChecking` は CCCore へ移した（`SQLiteRecordStore` の準拠は CCStore が宣言する）。
+/// 以前 `CCTriage.RecordModifying` のように修飾して書いていたコードのために名前を残す。
+public typealias RecordModifying = CCCore.RecordModifying
+public typealias EmbeddingPresenceChecking = CCCore.EmbeddingPresenceChecking
 
 /// トリアージが使うストア。
 public typealias TriageRecordStore = RecordStore & RecordModifying & EmbeddingPresenceChecking
-
-extension SQLiteRecordStore: RecordModifying, EmbeddingPresenceChecking {}
 
 // MARK: - 画像の読み込み
 

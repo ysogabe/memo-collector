@@ -83,3 +83,56 @@ public protocol RecordStore: Sendable {
     /// 相対パスを絶対 URL にする（ファイルの存在は確かめない）。
     func attachmentURL(for relativePath: String) async throws -> URL
 }
+
+// MARK: - 追加の契約（Wave 5。既存のプロトコルに必須要件を足すとアプリのフェイク実装が壊れるので、別プロトコルにする）
+
+/// 使う前に読み込み・初回コンパイル（ANE 特殊化など）を済ませられるもの。
+/// `CoreMLEmbedder`・`WhisperKitTranscriber`・`D1IntentClassifier` が準拠する。
+/// オンボーディングや起動後のバックグラウンドで呼ぶ。何度呼んでもよい（済んでいれば速く返る）。
+public protocol ModelPreparable: Sendable {
+    func prepare() async throws
+}
+
+/// トランザクション内の read-modify-write（`SQLiteRecordStore.modify`）。
+/// 最新を読み直して `transform` で書き換え、同じトランザクションで保存する（別プロセスとの同時更新で変更が失われない）。
+/// id が無ければ throw。`transform` で id を変えても元の id のまま保存される。
+public protocol RecordModifying: Sendable {
+    @discardableResult
+    func modify(id: String, _ transform: @escaping @Sendable (inout ContextRecord) throws -> Void) async throws -> ContextRecord
+}
+
+/// 埋め込み（検索用ベクトル）の有無を調べる。
+///
+/// どちらも既定実装があるので、`RecordStore` の実装は宣言するだけで準拠できる（フェイク向け）。
+/// 既定実装は「零ベクトルで全件検索すると埋め込みのあるレコードが全部返る」ことを使う O(N) の代用。
+/// `SQLiteRecordStore` は SQL で直接引く実装を持つ。
+public protocol EmbeddingPresenceChecking: Sendable {
+    /// 埋め込みを持つレコード id の集合。
+    func idsWithEmbedding(dimension: Int) async throws -> Set<String>
+    /// 埋め込みを持たないレコード id の集合（起動時のインデックス再開用）。
+    func idsWithoutEmbedding(dimension: Int) async throws -> Set<String>
+}
+
+extension EmbeddingPresenceChecking where Self: RecordStore {
+    public func idsWithEmbedding(dimension: Int) async throws -> Set<String> {
+        let total = try await count(InboxFilter(statuses: []))
+        guard total > 0 else { return [] }
+        let hits = try await search(vector: [Float](repeating: 0, count: dimension), limit: total)
+        return Set(hits.map(\.record.id))
+    }
+
+    public func idsWithoutEmbedding(dimension: Int) async throws -> Set<String> {
+        let total = try await count(InboxFilter(statuses: []))
+        guard total > 0 else { return [] }
+        let all = try await list(InboxFilter(statuses: [], limit: total)).map(\.id)
+        return Set(all).subtracting(try await idsWithEmbedding(dimension: dimension))
+    }
+}
+
+/// 状態で絞ったベクトル検索。絞り込みは上位 `limit` 件を選ぶ**前**に効く
+/// （後から絞ると archived が多いときに件数が足りなくなるため）。
+public protocol StatusFilteredSearching: Sendable {
+    /// `statuses` の状態のレコードだけを対象に、ベクトルに近い順に最大 limit 件。空集合なら全状態（`InboxFilter.statuses` と同じ）。
+    /// 埋め込みの無いレコードは対象外。
+    func search(vector: [Float], limit: Int, statuses: Set<RecordStatus>) async throws -> [SearchHit]
+}

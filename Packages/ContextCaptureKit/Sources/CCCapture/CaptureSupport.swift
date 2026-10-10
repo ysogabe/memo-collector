@@ -105,10 +105,7 @@ final class Locked<Value>: @unchecked Sendable {
 }
 
 extension Date {
-    /// ミリ秒に丸める（CCJSON / DB はミリ秒精度なので、往復後の `==` を保つため）。
-    var roundedToMilliseconds: Date {
-        Date(timeIntervalSince1970: (timeIntervalSince1970 * 1000).rounded() / 1000)
-    }
+    // ミリ秒への丸め（`roundedToMilliseconds`）は CCCore の public 拡張を使う。
 
     /// システム起動からの秒（`ProcessInfo.systemUptime` と同じ時計）を Date にする。
     static func fromUptime(_ uptime: TimeInterval, now: Date = Date(), nowUptime: TimeInterval = ProcessInfo.processInfo.systemUptime) -> Date {

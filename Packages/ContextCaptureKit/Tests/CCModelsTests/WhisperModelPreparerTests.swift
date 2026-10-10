@@ -138,3 +138,80 @@ final class WhisperModelPreparerTests: XCTestCase {
         }
     }
 }
+
+/// manifest の無い既存モデル（`.unmanifested`）を取り直さずに採用する経路。
+final class WhisperAdoptExistingTests: XCTestCase {
+    var root: URL!
+    let fm = FileManager.default
+
+    override func setUpWithError() throws {
+        root = fm.temporaryDirectory.appendingPathComponent("ccmodels-adopt-\(UUID().uuidString)/whisperkit", isDirectory: true)
+        try fm.createDirectory(at: root, withIntermediateDirectories: true)
+    }
+
+    override func tearDownWithError() throws {
+        try? fm.removeItem(at: root.deletingLastPathComponent())
+    }
+
+    private func write(_ text: String, _ relative: String) throws {
+        let url = root.appendingPathComponent(relative)
+        try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data(text.utf8).write(to: url)
+    }
+
+    private func makeFiles(_ p: WhisperModelPreparer, modelCommit: String?) throws {
+        let v = "models/argmaxinc/whisperkit-coreml/\(p.variant)"
+        for name in WhisperModelPreparer.requiredModelNames { try write("\(name)", "\(v)/\(name).mlmodelc/coremldata.bin") }
+        try write("{}", "models/openai/whisper-large-v3/tokenizer.json")
+        if let modelCommit {
+            try write("\(modelCommit)\netag\n1\n",
+                      "models/argmaxinc/whisperkit-coreml/.cache/huggingface/download/\(p.variant)/AudioEncoder.mlmodelc/coremldata.bin.metadata")
+        }
+    }
+
+    /// `prepare()` は .unmanifested でネットワークに行かず manifest だけ作る（取得すると一時ディレクトリでは失敗する／遅い）。
+    func testPrepareAdoptsUnmanifestedFilesWithoutNetwork() async throws {
+        let p = WhisperModelPreparer(root: root)
+        try makeFiles(p, modelCommit: nil)  // スパイクの取得物のように .metadata が無い
+        XCTAssertEqual(try p.verify(level: .size), .unmanifested)
+        XCTAssertTrue(p.canAdoptExisting())
+
+        let stages = StageRecorder()
+        let outcome = try await p.prepare { stage, _ in stages.append(stage) }
+        guard case .prepared(let m) = outcome else { return XCTFail("\(outcome)") }
+        XCTAssertEqual(Set(stages.values), ["manifest"])  // model / tokenizer の取得は無い
+        XCTAssertEqual(m.revision, "unknown")
+        XCTAssertEqual(m.files.count, 4)
+        XCTAssertTrue(m.files.allSatisfy { !$0.path.hasPrefix("/") })
+        guard case .ready = try p.verify(level: .sha256) else { return XCTFail() }
+        // 2 回目は何もしない
+        let again = try await p.prepare()
+        XCTAssertEqual(again, .alreadyPrepared(m))
+    }
+
+    func testAdoptExistingRecordsPinnedRevision() throws {
+        let p = WhisperModelPreparer(root: root)
+        try makeFiles(p, modelCommit: WhisperModelPreparer.pinnedModelRevision)
+        XCTAssertTrue(p.canAdoptExisting())
+        guard case .prepared(let m) = try p.adoptExisting() else { return XCTFail() }
+        XCTAssertEqual(m.revision, WhisperModelPreparer.pinnedModelRevision)
+    }
+
+    func testDoesNotAdoptOtherCommitOrIncompleteFiles() throws {
+        let p = WhisperModelPreparer(root: root)
+        try makeFiles(p, modelCommit: "deadbeef")
+        XCTAssertFalse(p.canAdoptExisting())  // prepare() は固定 revision で取り直す側へ行く
+
+        let q = WhisperModelPreparer(root: root.deletingLastPathComponent().appendingPathComponent("empty"))
+        XCTAssertFalse(q.canAdoptExisting())
+        XCTAssertThrowsError(try q.adoptExisting())
+    }
+}
+
+/// 進捗コールバックの段階名を記録する（コールバックは別スレッドから呼ばれうる）。
+private final class StageRecorder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var stored: [String] = []
+    func append(_ s: String) { lock.lock(); stored.append(s); lock.unlock() }
+    var values: [String] { lock.lock(); defer { lock.unlock() }; return stored }
+}

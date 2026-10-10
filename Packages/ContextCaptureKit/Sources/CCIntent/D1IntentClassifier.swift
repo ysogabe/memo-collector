@@ -69,8 +69,8 @@ public actor D1IntentClassifier: IntentClassifying, ModelUnloadable {
         let cfg = try JSONDecoder().decode(LFM2Configuration.self, from: cfgData)
         let base = try JSONDecoder().decode(BaseConfiguration.self, from: cfgData)
         let model = LFM2Model(cfg)
-        try loadWeights(modelDirectory: modelDirectory, model: model, quantization: base.quantization,
-                        perLayerQuantization: base.perLayerQuantization)
+        // `perLayerQuantization` は config の全体設定（`quantization`）も含むので、こちらだけ渡せば同じ（`quantization` は非推奨）。
+        try loadWeights(modelDirectory: modelDirectory, model: model, perLayerQuantization: base.perLayerQuantization)
         let lmHead = model.namedModules().first { $0.0 == "model.embed_tokens" }?.1 as? Embedding
 
         let prompt = D1Prompt(tokenizer: tokenizer)
@@ -179,5 +179,12 @@ public enum D1IntentError: Error, CustomStringConvertible {
         case let .modelNotFound(url): return "d1 モデルのファイルが無い: \(url.path)（`cc-models prepare d1` で準備する）"
         case .emptyInput: return "空の入力"
         }
+    }
+}
+
+extension D1IntentClassifier: ModelPreparable {
+    /// `load()` と同じ（計測値を捨てる）。`ModelPreparable` として他のモデルと同じ手順で温めるため。
+    public func prepare() async throws {
+        _ = try load()
     }
 }

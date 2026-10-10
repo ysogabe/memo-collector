@@ -19,10 +19,14 @@ struct PrepareD1: AsyncParsableCommand {
     @Flag(help: "変換後に manifest の sha256 を検証する")
     var verify = false
 
+    @Flag(help: "HF から取得した元モデル（Models/.downloads/、約 5.8GB）を変換後も残す（既定は消す）")
+    var keepDownloads = false
+
     func run() async throws {
         let dest = output.map { URL(fileURLWithPath: ($0 as NSString).expandingTildeInPath, isDirectory: true) }
             ?? CCPaths.resolve().modelDirectory(.d1)
-        let preparer = D1ModelPreparer(destination: dest)
+        var preparer = D1ModelPreparer(destination: dest)
+        preparer.removeDownloadsAfterConversion = !keepDownloads
         let src = source.map { URL(fileURLWithPath: ($0 as NSString).expandingTildeInPath, isDirectory: true) }
         let t0 = Date()
         let m = try await preparer.prepare(source: src) { f, msg in

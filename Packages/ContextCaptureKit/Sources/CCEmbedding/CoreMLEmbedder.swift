@@ -263,3 +263,11 @@ extension ImagePreprocessor {
         return (th / patchSize) * (tw / patchSize) / (poolingKernel * poolingKernel)
     }
 }
+
+extension CoreMLEmbedder: ModelPreparable {
+    /// `prepare(includeVision: true)` と同じ（計測値を捨てる）。`ModelPreparable` として他のモデルと同じ手順で温めるため。
+    /// 計測値が要るときやテキスト塔だけ温めたいときは `prepare(includeVision:)` を明示して呼ぶ。
+    public func prepare() async throws {
+        _ = try await prepare(includeVision: true)
+    }
+}

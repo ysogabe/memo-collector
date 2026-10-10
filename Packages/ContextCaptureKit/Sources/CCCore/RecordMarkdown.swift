@@ -12,7 +12,7 @@ import Foundation
 ///
 /// > ここで null になる理由を調べて直しておいて
 ///
-/// ![スクショ](captures/2026/10/08/<id>.webp)
+/// ![スクショ](captures/2026/10/08/<id>.heic)
 ///
 /// ### メモ
 /// - claude-code（2026-10-09 10:00）: 原因は lookup()

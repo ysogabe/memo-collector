@@ -91,15 +91,40 @@ public struct CCPaths: Sendable, Equatable {
         else { throw CCPathError.invalidRelativePath(relativePath) }
         return dataRoot.appendingPathComponent(relativePath)
     }
+
+    /// 相対パスを、**シンボリックリンクを解いた実体がデータルート内にある、実在する通常ファイル**の URL にする。
+    /// 外部（MCP など）へファイルの中身を渡す前に使う（パストラバーサル・データルート外を指すリンク対策）。
+    /// 返す URL はリンクを解いた実体のパス。
+    /// - 不正な相対パス（`url(forRelativePath:)` が拒むもの）・実体がデータルート外 → `CCPathError.outsideDataRoot`
+    /// - 無い・ディレクトリ・通常ファイルでない → `CCPathError.notRegularFile`
+    public func resolveRegularFileInsideDataRoot(_ relativePath: String, fileManager: FileManager = .default) throws -> URL {
+        let url: URL
+        do {
+            url = try self.url(forRelativePath: relativePath)
+        } catch {
+            throw CCPathError.outsideDataRoot(relativePath)
+        }
+        // 両側を解いて比べる（/var → /private/var のようにデータルート自体がリンク配下のこともある）。
+        let root = dataRoot.resolvingSymlinksInPath().standardizedFileURL.path
+        let real = url.resolvingSymlinksInPath().standardizedFileURL.path
+        let rootPrefix = root.hasSuffix("/") ? root : root + "/"
+        guard real.hasPrefix(rootPrefix) else { throw CCPathError.outsideDataRoot(relativePath) }
+
+        var isDir: ObjCBool = false
+        guard fileManager.fileExists(atPath: real, isDirectory: &isDir), !isDir.boolValue,
+              (try? fileManager.attributesOfItem(atPath: real))?[.type] as? FileAttributeType == .typeRegular
+        else { throw CCPathError.notRegularFile(relativePath) }
+        return URL(fileURLWithPath: real)
+    }
 }
 
 /// 添付の種類。同じ id で拡張子が重なっても衝突しないよう、ファイル名の接尾辞を持つ。
 public enum AttachmentKind: String, Sendable, CaseIterable {
-    /// スクショ（`<id>.webp`）。
+    /// スクショ（`<id>.<ext>`。MVP は HEIC（ImageIO が WebP を書けないため）。読み込み側は WebP・PNG なども受け付ける）。
     case screenshot
-    /// マスク版スクショ（`<id>-masked.webp`）。
+    /// マスク版スクショ（`<id>-masked.<ext>`。形式はスクショと同じ）。
     case maskedScreenshot
-    /// 音声（`<id>.m4a` など）。
+    /// 音声（`<id>.<ext>`。MVP は WAV 16kHz/16bit）。
     case audio
 
     /// ファイル名で id の後ろに付ける接尾辞。
@@ -115,7 +140,7 @@ public enum AttachmentKind: String, Sendable, CaseIterable {
 public enum ModelSlot: String, Sendable, CaseIterable {
     /// d1-3B 言語モデル部の 8bit 量子化（MLX）。
     case d1
-    /// EmbeddingGemma 2（MLX）。
+    /// EmbeddingGemma 2（Core ML。FluidInference/embeddinggemma-2-coreml をコンパイルした `.mlmodelc`）。
     case embedding
     /// WhisperKit の Core ML モデル。
     case whisper
@@ -132,4 +157,8 @@ public enum ModelSlot: String, Sendable, CaseIterable {
 public enum CCPathError: Error, Equatable {
     /// データルート外を指しうる相対パス。
     case invalidRelativePath(String)
+    /// シンボリックリンクを解いた実体がデータルート外（`resolveRegularFileInsideDataRoot`）。
+    case outsideDataRoot(String)
+    /// ファイルが無い・通常ファイルでない（`resolveRegularFileInsideDataRoot`）。
+    case notRegularFile(String)
 }

@@ -71,10 +71,11 @@ let package = Package(
         .executableTarget(name: "cc-mcp", dependencies: ["CCCore", "CCMCP", "CCStore", "CCEmbedding", mcp, argumentParser]),
 
         .testTarget(name: "CCCoreTests", dependencies: ["CCCore"], resources: [.copy("Fixtures")]),
-        .testTarget(name: "CCStoreTests", dependencies: ["CCStore"]),
+        .testTarget(name: "CCStoreTests", dependencies: ["CCStore", grdb]),
         .testTarget(name: "CCCaptureTests", dependencies: ["CCCapture"]),
         .testTarget(name: "CCSTTTests", dependencies: ["CCSTT"]),
-        .testTarget(name: "CCIntentTests", dependencies: ["CCIntent", mlx]),
+        // Fixtures は #filePath から相対で読む（バンドルに入れない。生成スクリプト .py も含むため exclude）。
+        .testTarget(name: "CCIntentTests", dependencies: ["CCIntent", mlx], exclude: ["Fixtures"]),
         .testTarget(name: "CCEmbeddingTests", dependencies: ["CCEmbedding"]),
         .testTarget(name: "CCGuardTests", dependencies: ["CCGuard"]),
         .testTarget(name: "CCTriageTests", dependencies: ["CCTriage"]),

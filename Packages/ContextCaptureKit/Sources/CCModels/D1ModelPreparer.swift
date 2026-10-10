@@ -34,6 +34,9 @@ public struct D1ModelPreparer: Sendable {
     public var bits: Int = 8
     /// 元 checkpoint の sha256 を確かめるか（テストで別の checkpoint を使うときだけ false）。
     public var verifySourceChecksum: Bool = true
+    /// `prepare` が HF から取得した元モデル（`<destination の親>/.downloads/`、約 5.8GB）を変換の成功後に消すか。
+    /// 既定は消す。`source` を渡したとき・Python の HF キャッシュを使ったときは、取得していないので何も消さない。
+    public var removeDownloadsAfterConversion: Bool = true
 
     public init(destination: URL = CCPaths.resolve().modelDirectory(.d1)) {
         self.destination = destination
@@ -44,9 +47,11 @@ public struct D1ModelPreparer: Sendable {
 
     /// 元モデルを用意して変換する。`source` を渡せばそのディレクトリ（HF snapshot と同じ構成）を使い、
     /// nil なら Python の HF キャッシュに同じ revision があればそれを、無ければ HF から取得する。
+    /// HF から取得した場合は、変換の成功後に取得物を消す（`removeDownloadsAfterConversion`）。失敗したときは残す（再実行で取り直さない）。
     @discardableResult
     public func prepare(source: URL? = nil, progress: Progress = { _, _ in }) async throws -> D1ModelManifest {
         let src: URL
+        var downloaded = false
         if let source {
             src = source
         } else if let cached = Self.pythonHFCacheSnapshot() {
@@ -54,8 +59,32 @@ public struct D1ModelPreparer: Sendable {
         } else {
             progress(0, "downloading \(Self.repoId)@\(Self.revision.prefix(7))")
             src = try await download()
+            downloaded = true
         }
-        return try convert(source: src, progress: progress)
+        let manifest = try convert(source: src, progress: progress)
+        if downloaded, removeDownloadsAfterConversion { removeDownloads() }
+        return manifest
+    }
+
+    /// HF からの取得先（`<destination の親>/.downloads/`）。embedding の取得物と共有する。
+    public var downloadsDirectory: URL {
+        destination.deletingLastPathComponent().appendingPathComponent(".downloads", isDirectory: true)
+    }
+
+    /// `download()` の取得物（`.downloads/models/LiquidAI/d1-3B/`）を消し、空になった親ディレクトリも
+    /// `.downloads` まで消す（他のモデルの取得物があれば残す）。失敗しても throw しない（変換物は既に置けている）。
+    public func removeDownloads() {
+        let fm = FileManager.default
+        let base = downloadsDirectory.standardizedFileURL
+        var dir = base.appendingPathComponent("models/\(Self.repoId)", isDirectory: true)
+        try? fm.removeItem(at: dir)
+        dir = dir.deletingLastPathComponent()
+        while dir.path.hasPrefix(base.path) {
+            guard (try? fm.contentsOfDirectory(atPath: dir.path))?.isEmpty == true else { break }
+            try? fm.removeItem(at: dir)
+            if dir.path == base.path { break }
+            dir = dir.deletingLastPathComponent()
+        }
     }
 
     /// Python の HF キャッシュ（`HF_HUB_CACHE` / `HF_HOME/hub` / `~/.cache/huggingface/hub`）にある同 revision の snapshot。
@@ -78,8 +107,7 @@ public struct D1ModelPreparer: Sendable {
 
     /// HF から revision 固定で取得する（`<destination の親>/.downloads/` 配下）。
     public func download(files: [String] = D1ModelPreparer.sourceFiles) async throws -> URL {
-        let base = destination.deletingLastPathComponent().appendingPathComponent(".downloads", isDirectory: true)
-        let hub = HubApi(downloadBase: base)
+        let hub = HubApi(downloadBase: downloadsDirectory)
         return try await hub.snapshot(from: HubApi.Repo(id: Self.repoId), revision: Self.revision, matching: files)
     }
 
@@ -142,9 +170,7 @@ public struct D1ModelPreparer: Sendable {
             source: ["model.safetensors": srcSHA],
             quantization: .init(bits: bits, groupSize: groupSize, mode: "affine"),
             tensorCount: tensorCount, files: files)
-        let enc = JSONEncoder()
-        enc.outputFormatting = [.prettyPrinted, .sortedKeys]
-        try enc.encode(manifest).write(to: work.appendingPathComponent(CCPaths.manifestFileName))
+        try D1ModelManifest.encoder().encode(manifest).write(to: work.appendingPathComponent(CCPaths.manifestFileName))
 
         // ---- 置き換え
         try fm.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -257,36 +283,8 @@ public struct D1ModelPreparer: Sendable {
     }
 }
 
-/// `Models/d1-3b-text-q8/manifest.json`。
-public struct D1ModelManifest: Codable, Sendable, Equatable {
-    public struct FileEntry: Codable, Sendable, Equatable {
-        public var sha256: String
-        public var bytes: Int
-    }
-    public struct Quantization: Codable, Sendable, Equatable {
-        public var bits: Int
-        public var groupSize: Int
-        public var mode: String
-        enum CodingKeys: String, CodingKey { case bits, groupSize = "group_size", mode }
-    }
-    public var repo: String
-    public var revision: String
-    public var conversionVersion: String
-    public var createdAt: String
-    /// 元ファイル → sha256。
-    public var source: [String: String]
-    public var quantization: Quantization
-    public var tensorCount: Int
-    /// 変換物の各ファイル（manifest.json 自身を除く）。
-    public var files: [String: FileEntry]
-
-    enum CodingKeys: String, CodingKey {
-        case repo, revision, source, quantization, files
-        case conversionVersion = "conversion_version"
-        case createdAt = "created_at"
-        case tensorCount = "tensor_count"
-    }
-}
+// `D1ModelManifest` は CCCore（ModelManifest.swift）へ移した。下の型エイリアスで `CCModels.D1ModelManifest` も使える。
+public typealias D1ModelManifest = CCCore.D1ModelManifest
 
 public enum D1PrepareError: Error, CustomStringConvertible {
     case missingSourceFile(String)

@@ -180,7 +180,7 @@ public struct MCPToolHandlers: Sendable {
             }
             if image != nil {
                 // 実際に画像を渡したときだけ受け渡しを記録する。
-                record = try await store.appendHandoff(id: id, Handoff(to: client, at: now(), via: "mcp"))
+                record = try await store.appendHandoff(id: id, Handoff(to: client, at: now().roundedToMilliseconds, via: "mcp"))
             }
 
             let detail = CaptureDetail(record, imageIncluded: image != nil, imageOmittedReason: omitted)
@@ -227,7 +227,7 @@ public struct MCPToolHandlers: Sendable {
         guard let text = try args.string("text", required: true, maxLength: CCMCPToolCatalog.maxNoteLength) else {
             throw args.invalid("text は必須")
         }
-        let note = Note(author: client, text: text, at: now())
+        let note = Note(author: client, text: text, at: now().roundedToMilliseconds)
         return try await storeOperation {
             do {
                 let record = try await store.appendNote(id: id, note: note)
