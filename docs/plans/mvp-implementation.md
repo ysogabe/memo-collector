@@ -177,5 +177,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 4 e2e（docs/e2e/report.md。解放→保存 p90 1.72〜1.80 秒（続けて録ると 4.38 秒、起動後最初の 1 件は 5.2〜8.4 秒）、アイドル CPU 0.02%、アイドルメモリ 121MB〜591MB、トリアージ中ピーク 7.22GB、d1 の SwiftPM / Xcode 差 0.0。修正項目は Wave 7）
 - [x] Wave 7 fix（arm64 限定＋CCEmbedding の Float16 を `#if arch(arm64)`、MLX キャッシュ上限 256MB（ピーク 7.2→4.1GB）、Whisper の起動時ウォームアップ（初回 STT 5.2→1.4 秒）、キャプチャ中のトリアージ一時停止（効果は実機で確認: m1.md W7-5）、notice ログ、隠れた HUD のアニメーションが CPU を使い続ける不具合。アプリのテスト 66 件）
 - [x] main による e2e 再計測（docs/e2e/report.md §9: 解放→保存 p90 1.39〜1.54 秒、続けて録ると 2.69 秒、初回 STT 1.38 秒、ピーク 4.09GB、d1 誤差不変）
-- [ ] セキュリティレビュー（security-review skill）
-- [ ] PR（github-pr-workflow。M1 実機確認が未了なら `Refs #1`）
+- [x] セキュリティレビュー（信頼度 7 以上 0 件。7 未満の 2 件は #3）（security-review skill）
+- [x] PR #4 作成（Refs #1。フォロー Issue #2 意図の調整、#3 供給網・表示の残件）
+- [ ] PR #4 自己レビュー（A: code-review、C: テスト・QA）と対応
+- [ ] W7 修正後の単独起動での実機確認（m1.md W7-5〜7）
