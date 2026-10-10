@@ -9,6 +9,9 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MACOSX_DEPLOYMENT_TARGET: "15.0"
+    # Apple Silicon 専用（PRD §3。MLX / ANE 前提）。Release の既定（ONLY_ACTIVE_ARCH=NO）は universal を作り、
+    # CCEmbedding の Float16（x86_64 macOS では使えない）でビルドが落ちる（docs/e2e/report.md §7 問題 1）。Debug / Release とも arm64 だけ。
+    ARCHS: arm64
     # Apple Development 証明書で署名する（キーチェーンの `Apple Development: sogabeyoshio.dev@gmail.com (3H5DM2CR45)`）。
     # Team ID は証明書の OU の `PJH36NNFL6`（名前の括弧内 `3H5DM2CR45` は証明書の識別子で Team ID ではない。指定すると「No certificate for team」になる）。
     # ad-hoc（"-"）署名はビルドのたびに cdhash が変わり、TCC（マイク・画面収録・アクセシビリティ）の許可が外れる。
