@@ -26,6 +26,17 @@ enum GuardFixtures {
         return img
     }
 
+    /// RGBA8 のビットマップ（先頭行が画像の上端）。
+    static func rgba(_ image: CGImage) -> [UInt8] {
+        let w = image.width, h = image.height
+        var buf = [UInt8](repeating: 0, count: w * h * 4)
+        let ctx = CGContext(data: &buf, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                            space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+        return buf
+    }
+
     /// RGBA8 に描き直して (x, y)（ピクセル、左上原点）の色を返す。
     static func pixel(_ image: CGImage, x: Int, y: Int) -> (r: UInt8, g: UInt8, b: UInt8) {
         let w = image.width, h = image.height

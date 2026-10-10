@@ -73,6 +73,95 @@ final class RedactionCompletenessTests: XCTestCase {
         XCTAssertGreaterThan(outside.r, 200)
     }
 
+    /// END が見えず、本体に OCR の誤読（base64 外の文字が少し・1 行まるごと崩れた行）と短い最終行があっても、
+    /// 本体の最後まで覆い、大きな空きの後の行は覆わない。
+    func testPrivateKeyFallbackToleratesOCRNoiseAndShortLastLine() {
+        let body = [
+            "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW",
+            "QyNTUxOQAAACBGQUtFRk-FLRUZBS0VGQU.tFRkFLRUZBS0VGQUtFRkFLRUZBAAAAoFAKEFAK", // 誤読 2 文字（3%）
+            "~~ ##: |-- ;;",                                                                 // 1 行まるごと崩れた
+            "RUZBS0VGQUtFRkFLRUZBS0VGQUtFRkFLRUZBS0VGQUtFRkFLRUZBS0VGQUtFRkFLRUZBS0",
+            "AAAA==",                                                                        // 短い最終行
+        ]
+        var lines = [line("-----BEGIN OPENSSH PRIVATE KEY-----", y: 0.10, w: 0.3)]
+        for (k, b) in body.enumerated() { lines.append(line(b, y: 0.125 + CGFloat(k) * 0.025, w: k == 4 ? 0.06 : 0.6)) }
+        // 大きな空き（3 行分）の後のプロンプト行は鍵ではない。
+        lines.append(line("AAAABBBBCCCCDDDD", y: 0.125 + 4 * 0.025 + 0.08, w: 0.2))
+        let box = try! XCTUnwrap(detector.detect(lines: lines).first { $0.kind == "private_key" }).bbox
+        XCTAssertGreaterThanOrEqual(box.maxY, 0.125 + 4 * 0.025 + 0.02 - 1e-6, "短い最終行まで覆っていない")
+        XCTAssertLessThan(box.maxY, 0.125 + 4 * 0.025 + 0.08, "大きな空きの後の行まで覆った")
+    }
+
+    func testPrivateKeyFallbackStopsAfterTwoConsecutiveNonBodyLines() {
+        var lines = [line("-----BEGIN RSA PRIVATE KEY-----", y: 0.10, w: 0.3)]
+        lines.append(line(pemBody[0], y: 0.125, w: 0.6))
+        lines.append(line("$ echo done", y: 0.15, w: 0.2))
+        lines.append(line("[exit 0] ok.", y: 0.175, w: 0.1))  // 短い英単語だけの行は base64 と区別できない（塗り過ぎは許容）ので記号入りにする
+        lines.append(line(pemBody[1], y: 0.20, w: 0.6))
+        let box = try! XCTUnwrap(detector.detect(lines: lines).first { $0.kind == "private_key" }).bbox
+        XCTAssertEqual(box.maxY, 0.145, accuracy: 1e-6)
+    }
+
+    func testBase64BodyHeuristic() {
+        XCTAssertTrue(SecretDetector.looksLikeBase64Body("AAAA=="))
+        XCTAssertTrue(SecretDetector.looksLikeBase64Body("QyNTUxOQAAACBGQUtFRk-FLRUZBS0VGQU.tFRkFLRUZB"))
+        XCTAssertFalse(SecretDetector.looksLikeBase64Body("$ echo done"))
+        XCTAssertFalse(SecretDetector.looksLikeBase64Body(""))
+    }
+
+    /// END の無い PEM（画面の途中で切れた表示）を描いて OCR → マスクし、短い最終行まで塗られることを確かめる。
+    func testRenderedPEMWithoutEndMasksShortLastLine() async throws {
+        let text = ["-----BEGIN OPENSSH PRIVATE KEY-----"] + pemBody + ["AAAAC3Nz==", "", "", "", "done."]
+        let (image, centers) = Self.renderMonospace(lines: text, width: 1440, height: 900)
+        let findings = try await VisionSecretScanner().scan(image: image)
+        let masked = try XCTUnwrap(SecretMasker.mask(image: image, findings: findings))
+        for row in 1...4 {
+            let p = GuardFixtures.pixel(masked, x: 60, y: Int(centers[row]))
+            XCTAssertTrue(p.r < 10 && p.g < 10 && p.b < 10, "行 \(row) が塗られていない: \(p)")
+        }
+        XCTAssertGreaterThan(GuardFixtures.pixel(masked, x: 60, y: Int(centers[8])).r, 200, "空きの後の行まで塗った")
+    }
+
+    // MARK: - 1 行の余白
+
+    /// 1 行の検出には余白の上限をかけない（大きな文字でも上下端・ディセンダが塗られる）。
+    func testSingleLinePaddingIsNotCappedByBlockLimit() {
+        let tall = SecretFinding(kind: "openai_key", bbox: CGRect(x: 0.1, y: 0.5, width: 0.5, height: 0.06))
+        let r = SecretMasker.pixelRects(findings: [tall], width: 1000, height: 1000)[0]
+        XCTAssertEqual(r.height, 60 + 2 * 21, accuracy: 1, "1 行は bbox の高さ基準の余白（0.35 × 60px = 21px）")
+        let block = SecretFinding(kind: "private_key", bbox: CGRect(x: 0.1, y: 0.1, width: 0.5, height: 0.3))
+        let b = SecretMasker.pixelRects(findings: [block], width: 1000, height: 1000)[0]
+        XCTAssertEqual(b.height, 300 + 2 * 14, accuracy: 1, "ブロックは 1 行分（0.04 × 1000 × 0.35 = 14px）で頭打ち")
+    }
+
+    /// 大きな文字で描いたキー 1 行を OCR → マスクし、元画像のインク（暗い画素）が 1 つも残らないことを確かめる。
+    func testSingleLineMaskCoversAllInkIncludingDescenders() async throws {
+        let ctx = CGContext(data: nil, width: 1440, height: 300, bitsPerComponent: 8, bytesPerRow: 0,
+                            space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        ctx.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
+        ctx.fill(CGRect(x: 0, y: 0, width: 1440, height: 300))
+        let font = CTFontCreateWithName("Menlo" as CFString, 34, nil)
+        let attr = NSAttributedString(string: "sk-proj-FAKEgjpqyQjgpyJ0kLmNoPqRsTuvgjpq", attributes: [
+            NSAttributedString.Key(kCTFontAttributeName as String): font,
+            NSAttributedString.Key(kCTForegroundColorAttributeName as String): CGColor(red: 0, green: 0, blue: 0, alpha: 1),
+        ])
+        ctx.textPosition = CGPoint(x: 40, y: 140)
+        CTLineDraw(CTLineCreateWithAttributedString(attr), ctx)
+        let image = ctx.makeImage()!
+        let findings = try await VisionSecretScanner().scan(image: image)
+        XCTAssertEqual(findings.map(\.kind), ["openai_key"])
+        let masked = try XCTUnwrap(SecretMasker.mask(image: image, findings: findings))
+        let before = GuardFixtures.rgba(image), after = GuardFixtures.rgba(masked)
+        var inkLeft = 0, ink = 0
+        for i in stride(from: 0, to: before.count, by: 4) where before[i] < 128 {
+            ink += 1
+            if !(after[i] < 10 && after[i + 1] < 10 && after[i + 2] < 10) { inkLeft += 1 }
+        }
+        XCTAssertGreaterThan(ink, 100)
+        XCTAssertEqual(inkLeft, 0, "塗り残したインク画素がある")
+    }
+
     /// 白地に Menlo で行を描く。各行の中心 y（ピクセル、左上原点）を返す。
     static func renderMonospace(lines: [String], width: Int, height: Int) -> (CGImage, [CGFloat]) {
         let ctx = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,

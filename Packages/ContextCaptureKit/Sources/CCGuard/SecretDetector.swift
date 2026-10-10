@@ -98,9 +98,21 @@ public struct SecretDetector: Sendable {
 
     /// PEM の END 行（見出しと対）と、END が見えないときの本体行（base64 らしい行）。
     static let blockEnd = try! NSRegularExpression(pattern: #"END [A-Z ]*PRIVATE KEY"#)
-    static let base64Line = try! NSRegularExpression(pattern: #"^[A-Za-z0-9+/=]{16,}$"#)
-    /// 本体の行と行の間に許す隙間（行の高さの何倍まで）。
+    static let base64Characters = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=")
+    /// 本体の行と行の間に許す隙間（行の高さの何倍まで）。これより大きい空きでブロックの終わりとみなす。
     static let blockLineMaxGap: CGFloat = 1.5
+    /// 本体行に許す base64 以外の文字の割合（OCR の誤読で `-` `.` `|` 等が 1〜2 個混ざる分）。
+    static let blockMaxForeignRatio = 0.1
+    /// 本体らしくない行が連続していくつまでなら走査を続けるか（OCR が 1 行だけ崩れても残りを塗り残さない）。
+    static let blockMaxConsecutiveMismatches = 1
+
+    /// PEM 本体の行らしいか。長さは問わない（最終行は短く `=` で終わることがある）。base64 外の文字は 10% 未満まで許す。
+    static func looksLikeBase64Body(_ text: String) -> Bool {
+        let compact = text.unicodeScalars.filter { !CharacterSet.whitespaces.contains($0) }
+        guard !compact.isEmpty else { return false }
+        let foreign = compact.filter { !base64Characters.contains($0) }.count
+        return Double(foreign) / Double(compact.count) < blockMaxForeignRatio
+    }
 
     /// 鍵ブロック全体の bbox。見出し → END（同じ列で下にある最も近いもの）までの行をすべて含める。
     /// END が無ければ（画面外・OCR 漏れ）、見出しの下に縦に連続する base64 らしい行の塊の終わりまで。
@@ -118,22 +130,31 @@ public struct SecretDetector: Sendable {
         }) {
             let endBox = lines[endIndex].bbox
             var box = header.union(endBox)
+            let column = box
+            // 見出しと END の間で、見出し〜END の列と横に重なる行はすべて本体とみなす（OCR の崩れた行も含める）。
             for j in lines.indices where j != headerIndex {
                 let r = lines[j].bbox
-                if r.midY > header.minY, r.midY < endBox.maxY, sameColumn(r) { box = box.union(r) }
+                if r.midY > header.minY, r.midY < endBox.maxY, r.minX < column.maxX, r.maxX > column.minX { box = box.union(r) }
             }
             return box
         }
 
+        // END が無い: 縦の間隔が小さいうちは走査を続ける。本体らしくない行は連続
+        // `blockMaxConsecutiveMismatches` 行まで保留し、その後に本体らしい行が続けば保留分ごと含める。
         var box = header
         var bottom = header.maxY
+        var pending: [CGRect] = []
         for j in below {
             let r = lines[j].bbox
             guard r.minY - bottom <= h * Self.blockLineMaxGap else { break }
-            let compact = lines[j].text.filter { !$0.isWhitespace }
-            guard Self.base64Line.firstMatch(in: compact, range: NSRange(location: 0, length: (compact as NSString).length)) != nil
-            else { break }
-            box = box.union(r)
+            if Self.looksLikeBase64Body(lines[j].text) {
+                for p in pending { box = box.union(p) }
+                pending = []
+                box = box.union(r)
+            } else {
+                guard pending.count < Self.blockMaxConsecutiveMismatches else { break }
+                pending.append(r)
+            }
             bottom = r.maxY
         }
         return box
