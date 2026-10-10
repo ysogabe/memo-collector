@@ -230,7 +230,7 @@ public actor TriageQueue {
         return await write(record.id) { r in
             guard r.guardInfo.status == .pending else { return .skipped(.alreadyReviewed) }
             // 処理中にスクショが差し替わった・消えたなら、この結果は別の画像のもの。pending のまま次回に回す。
-            guard r.screenshotPath == expectedPath else { return .skipped(.annotationChanged) }
+            guard r.screenshotPath == expectedPath else { return .skipped(.screenshotChanged) }
             r.guardInfo = newInfo
             return .succeeded
         }

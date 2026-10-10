@@ -39,6 +39,8 @@ public enum TriageSkipReason: String, Sendable, Equatable {
     case annotationChanged
     /// ガードが既に pending ではない（ユーザーが clear / masked にした等）。
     case alreadyReviewed
+    /// 処理中にスクショが差し替わった・消えた（ガード結果は別の画像のものなので書かない）。
+    case screenshotChanged
     /// 処理中にレコードが削除された。
     case recordMissing
 }
