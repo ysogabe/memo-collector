@@ -1,10 +1,11 @@
+import AppKit
 import CCCore
 import Foundation
 
 /// UI が使う依存の組み立て点（ここ 1 か所）。
 ///
 /// - `--fake` 起動引数か環境変数 `CC_UI_FAKE=1` → `fake()`（メモリ上のストア・サンプル 10 件・偽の録音イベント）
-/// - それ以外 → `live()`。**wiring 担当が本物を差し込む場所**（`// WIRING:` の行）
+/// - それ以外 → `live()`（本物。部品の組み立ては `LiveServices`）。M2 で差し替える箇所に `// M2:` / `// WIRING(M2):` を付けてある
 @MainActor
 struct AppEnvironment {
     var store: any RecordStore
@@ -20,6 +21,8 @@ struct AppEnvironment {
     var fakeCapture: FakeCaptureController?
     /// 「今日」「昨日」の判定に使う時計（スナップショットで固定するため）。
     var now: @Sendable () -> Date = { Date() }
+    /// 本番の部品と起動時の配線（ホットキー・保持期間・診断）。フェイクでは nil。
+    var live: LiveServices?
 
     static func shouldUseFake(
         arguments: [String] = ProcessInfo.processInfo.arguments,
@@ -54,37 +57,35 @@ struct AppEnvironment {
         return env
     }
 
-    /// 本番の組み立て。Wave 2 UI 時点では本物が無いので、空のストアと何も流さないキャプチャで起動する。
+    /// 本番の組み立て（M1: 撮影 + 録音 → STT → 保存。トリアージ・ガード・埋め込み検索は M2）。
     static func live() -> AppEnvironment {
-        let store = FakeRecordStore()                              // WIRING: SQLiteRecordStore（1 プロセス 1 インスタンス）
-        return AppEnvironment(
+        let settings = UserDefaultsSettingsStore()
+        let services: LiveServices
+        do {
+            services = try LiveServices(settings: settings)
+        } catch {
+            // SQLite を開けない（ディスク・権限・壊れた DB）。黙ってメモリに保存すると記録が消えるので、知らせて終える。
+            let paths = CCPaths.resolve()
+            CCLog.store.fault("store open failed at \(paths.dataRoot.path, privacy: .public): \(String(describing: error), privacy: .public)")
+            let alert = NSAlert()
+            alert.messageText = "記録の保存先を開けませんでした"
+            alert.informativeText = "\(paths.dataRoot.path)\n\(error.localizedDescription)"
+            alert.runModal()
+            exit(1)
+        }
+        let store = services.store
+        var env = AppEnvironment(
             store: store,
-            search: FakeSearchService(store: store),               // WIRING: Embedder.embedQuery → RecordStore.search
-            capture: UnwiredCaptureController(),                   // WIRING: AppCoordinator（ホットキー → 撮影+録音 → STT → 保存）
-            guardReview: FakeGuardReviewer(store: store),          // WIRING: CCGuard のマスク生成 + store.update
-            settings: UserDefaultsSettingsStore(),                 // 本物（このまま使う）
-            permissions: SystemPermissions(),                      // 本物（このまま使う。オートメーションだけ状態を取れない）
-            models: UnwiredModelPreparation(),                     // WIRING: cc-models prepare 相当（CCModels）+ 各モデルの prepare()
+            search: SubstringSearchService(store: store),          // M2: Embedder.embedQuery → RecordStore.search に替える
+            capture: services.coordinator,
+            guardReview: FakeGuardReviewer(store: store),          // WIRING(M2): CCGuard のマスク生成 + store.update
+            settings: settings,
+            permissions: SystemPermissions(),
+            models: services.models,                               // M2: d1・EmbeddingGemma を足す
             isFake: false,
             fakeCapture: nil
         )
-    }
-}
-
-/// 本物が差し込まれるまでの、何も流さないキャプチャ。
-struct UnwiredCaptureController: CaptureControlling {
-    func events() -> AsyncStream<CaptureEvent> { AsyncStream { _ in } }
-    func undo(recordID: String) async throws {}
-    func retryTranscription(recordID: String) async {}
-}
-
-/// 本物が差し込まれるまでのモデル準備。準備済み扱いにする（オンボーディングは進捗を出さずに通る）。
-struct UnwiredModelPreparation: ModelPreparationProviding {
-    func isPrepared() async -> Bool { true }
-    func prepare() -> AsyncThrowingStream<ModelPreparationProgress, Error> {
-        AsyncThrowingStream { c in
-            c.yield(ModelPreparationProgress(phase: .finished, fractionCompleted: 1, completedBytes: 0, totalBytes: 0))
-            c.finish()
-        }
+        env.live = services
+        return env
     }
 }

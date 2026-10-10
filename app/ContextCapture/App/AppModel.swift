@@ -17,6 +17,11 @@ final class AppModel {
     /// 記録が変わるたびに増える。Inbox はこれを見て読み直す。
     /// wiring: 本物の保存は `.saved` イベントで、それ以外（トリアージ完了・ガード完了など）で記録を書き換えたら `recordsDidChange()` を呼ぶこと。
     private(set) var recordsRevision = 0
+    /// ホットキーを登録できないときの説明と対処（メニューバーとオンボーディングに出す）。
+    private(set) var hotKeyIssue: HotKeyIssue?
+    private(set) var hotKeyStatus: HotKeyStatus = .notRegistered
+    /// ⌥ を押しながらメニューを開いたらデバッグメニューを出す（このプロセスの間ずっと）。
+    private(set) var debugMenuRevealed = false
 
     @ObservationIgnored let hud = HUDController()
     @ObservationIgnored private(set) lazy var toast = ToastController(model: self)
@@ -44,6 +49,22 @@ final class AppModel {
             MainActor.assumeIsolated { self?.reloadSettings() }
         }
         Task { await refreshCounts() }
+        env.live?.start(model: self)
+    }
+
+    /// デバッグメニューを出すか（本番の部品があるときだけ。`--debug` 起動か、⌥ を押しながらメニューを開いたとき）。
+    var showsDebugMenu: Bool {
+        guard let live = env.live else { return false }
+        return live.debugLaunch || debugMenuRevealed
+    }
+
+    func revealDebugMenu() {
+        debugMenuRevealed = true
+    }
+
+    func setHotKeyStatus(_ status: HotKeyStatus, hotkey: String) {
+        hotKeyStatus = status
+        hotKeyIssue = HotKeyIssue.from(status, hotkey: hotkey)
     }
 
     func reloadSettings() {
@@ -76,13 +97,12 @@ final class AppModel {
             isRecording = false
             hud.hide()
         case let .saved(record, notice):
-            isRecording = false
-            hud.hide()
+            // 前の記録の保存が、次の録音中に終わることがある（文字起こし中でも次の押下を受ける）。HUD は録音側に任せる。
+            if !isRecording { hud.hide() }
             toast.show(CaptureMessages.saved(record, notice: notice))
             recordsDidChange()
         case let .failed(failure):
-            isRecording = false
-            hud.hide()
+            if !isRecording { hud.hide() }
             toast.show(CaptureMessages.failure(failure, hotkey: settings.hotkey.display))
             if case .transcriptionFailed = failure { recordsDidChange() }
         }

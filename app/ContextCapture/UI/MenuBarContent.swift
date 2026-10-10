@@ -32,6 +32,17 @@ struct MenuBarContent: View {
         Button("Inbox を開く") { model.windows.showInbox() }
             .keyboardShortcut("i")
         Text("今日の記録 \(model.todayCount) 件・未処理 \(model.unprocessedCount) 件")
+        if let issue = model.hotKeyIssue {
+            Divider()
+            Text(issue.message)
+            if let kind = issue.settingsKind {
+                Button("システム設定を開く（アクセシビリティ）") {
+                    Task { await model.env.permissions.openSystemSettings(for: kind) }
+                }
+            } else {
+                Button("設定でキーを変える…") { model.windows.showSettings() }
+            }
+        }
         Divider()
         Button("設定…") { model.windows.showSettings() }
             .keyboardShortcut(",")
@@ -50,6 +61,10 @@ struct MenuBarContent: View {
                 Divider()
                 Button("オンボーディングを開く") { model.windows.showOnboarding() }
             }
+        }
+        if model.showsDebugMenu, let live = model.env.live {
+            Divider()
+            DebugMenu(model: model, live: live)
         }
         Divider()
         Button("Context Capture を終了") { NSApplication.shared.terminate(nil) }

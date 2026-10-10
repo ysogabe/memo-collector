@@ -28,6 +28,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return AppModel(env: AppEnvironment.resolve())
     }()
 
+    private var menuTrackingObserver: NSObjectProtocol?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let dir = SnapshotRenderer.requestedDirectory() {
             Task { @MainActor in
@@ -37,6 +39,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         model.start()
+        // ⌥ を押しながらメニューバーのメニューを開いたらデバッグメニューを出す（以降このプロセスの間ずっと）。
+        // SwiftUI の MenuBarExtra は開く瞬間を知らせないので、メニューの追跡開始の通知で修飾キーを見る。
+        // 反映が次に開いたときになることがある（その場合はもう一度開く）。
+        menuTrackingObserver = NotificationCenter.default.addObserver(
+            forName: NSMenu.didBeginTrackingNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                if NSEvent.modifierFlags.contains(.option) { self?.model.revealDebugMenu() }
+            }
+        }
         if !model.settings.onboardingCompleted {
             model.windows.showOnboarding()
         }
