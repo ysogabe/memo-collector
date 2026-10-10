@@ -73,6 +73,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
   # 2) cd app && xcodegen generate && xcodebuild -scheme ContextCapture -configuration Debug build
 ```
 
+- 性能（レイテンシ）のアサートは `CC_PERF_ASSERT=1` のときだけ実行する（共有 ANE/GPU の負荷で 2〜4 倍揺れるため）。性能の受け入れは M1 と Wave 4 e2e で、他の処理を止めた状態で main が測る
 - モデルが必要なテストは `CC_MODELS_DIR` にモデルが無ければ `XCTSkip`。main は QA 時に `CC_MODELS_DIR=spikes/runtime/models`（または準備済みの Models）を付けて回す
 - MLX Swift のビルドには Metal Toolchain が必要（導入済み 2026-10-10）
 
@@ -125,7 +126,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] 追加調査: FluidUse / embeddinggemma-2-coreml → 埋め込みは Core ML 版に切替（§5.1）
 - [x] Wave 1 store（21 テスト成功、検索 1 万件 中央値 19.6ms。アプリは SQLiteRecordStore を 1 プロセス 1 インスタンスで持つこと。保持期間の削除はアプリ側が定期実行）
 - [x] Wave 1 intent（トークン 104/104 一致、意図最大誤差 0.043、未見 21/22、p50 0.85 秒、8bit 2.9GB、Swift のみの変換が Python 版とビット一致）
-- [ ] Wave 1 stt（dispatch 済み。worktree: ../memo-collector-worktrees/{store,stt,intent}、ブランチ wave1/*）
+- [x] Wave 1 stt（CER 6.75%（語彙の後処理）、空いた状態で p90 1.69 秒・負荷時 2.4〜6.6 秒。語彙プロンプトは CER を悪化させるため不採用）
 - [x] Wave 1 capture（47 テスト成功。権限・実機の経路は未検証 → docs/manual-tests/capture.md で M1 時にユーザー確認）
 - [x] Wave 2 ui（check.sh green、スナップショット 12 枚 docs/ui-snapshots/。組み立て点は app/ContextCapture/App/AppEnvironment.swift の `// WIRING:`）
 - [ ] Wave 2 wiring → M1 動作確認
