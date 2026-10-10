@@ -77,10 +77,10 @@ public struct D1ModelPreparer: Sendable {
     }
 
     /// HF から revision 固定で取得する（`<destination の親>/.downloads/` 配下）。
-    public func download() async throws -> URL {
+    public func download(files: [String] = D1ModelPreparer.sourceFiles) async throws -> URL {
         let base = destination.deletingLastPathComponent().appendingPathComponent(".downloads", isDirectory: true)
         let hub = HubApi(downloadBase: base)
-        return try await hub.snapshot(from: HubApi.Repo(id: Self.repoId), revision: Self.revision, matching: Self.sourceFiles)
+        return try await hub.snapshot(from: HubApi.Repo(id: Self.repoId), revision: Self.revision, matching: files)
     }
 
     /// 変換する（数分・メモリ数 GB）。成功したら `destination` を置き換える。

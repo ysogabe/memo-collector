@@ -106,4 +106,20 @@ final class D1ModelPreparerTests: XCTestCase {
         print("D1PREPARE converted in \(String(format: "%.1f", seconds)) s, peak MLX \(Memory.peakMemory / 1_000_000) MB, "
               + "tensors \(a.count), differing \(differing.count), config diff \(configDiff.count)")
     }
+
+    /// HF から revision 固定で取れること（CC_RUN_NETWORK=1 のときだけ。小さいファイル 1 つだけ取る）。
+    func testDownloadPinnedRevisionSmallFile() async throws {
+        guard ProcessInfo.processInfo.environment["CC_RUN_NETWORK"] == "1" else { throw XCTSkip("CC_RUN_NETWORK=1 のときだけ") }
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("d1dl-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let p = D1ModelPreparer(destination: root.appendingPathComponent("d1-3b-text-q8"))
+        let dir = try await p.download(files: ["config.json"])
+        let local = dir.appendingPathComponent("config.json")
+        let cached = Self.hfSnapshot.appendingPathComponent("config.json")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: local.path))
+        if FileManager.default.fileExists(atPath: cached.path) {
+            XCTAssertEqual(try D1ModelPreparer.sha256(of: local), try D1ModelPreparer.sha256(of: cached))
+        }
+        print("D1DOWNLOAD \(dir.path)")
+    }
 }
