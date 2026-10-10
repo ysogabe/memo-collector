@@ -51,7 +51,7 @@
 |---|---|---|
 | F-01 | メニューバー常駐 | Dock に出ない。メニューバーにアイコンと未処理件数を表示 |
 | F-02 | グローバルホットキーの Push-to-Talk | 既定 `⌥Space` 長押し。押している間だけ録音。キー変更可。0.3 秒未満の押下は誤操作として破棄 |
-| F-03 | 前面ウインドウのスクショ | 押下時点のフォーカス中ウインドウ 1 枚を ScreenCaptureKit で撮影、WebP 保存。取得失敗時は画面全体にフォールバックし、それも失敗したらスクショなしで保存 |
+| F-03 | 前面ウインドウのスクショ | 押下時点のフォーカス中ウインドウ 1 枚を ScreenCaptureKit で撮影、HEIC 保存（この macOS の ImageIO は WebP を書けないため。書ける環境では WebP）。取得失敗時は画面全体にフォールバックし、それも失敗したらスクショなしで保存 |
 | F-04 | コンテキスト取得 | アプリ名・バンドル ID・ウインドウタイトルは必須。URL は Safari / Chrome / Arc / Edge で取得（失敗時は空） |
 | F-05 | 日本語 STT | ローカル実行。解放から保存可能まで p90 ≤ 2 秒（PoC: STT 単体 1.1 秒、意図推定と索引まで含めて 1.64 秒）。カスタム語彙（固有名詞辞書）を設定可能 |
 | F-06 | 録音中 HUD と保存トースト | 押下中は小さな HUD に波形と「話してください」。保存後 1.5 秒トースト「保存しました」と文字起こしを表示。トーストから 5 秒以内は取り消し可能 |
@@ -143,8 +143,8 @@
   "window": { "title": "Support streaming events · Issue #128", "frame": [0, 38, 1440, 862] },
   "url": "https://github.com/opendots/opendots/issues/128",   // null 可
   "extra": {},                         // P1: file_path, line, cwd, selected_file …
-  "screenshot": "captures/2026/10/08/231532.webp",           // null 可
-  "audio": "captures/2026/10/08/231532.m4a",                 // 保持期間の設定に従い削除
+  "screenshot": "captures/2026/10/08/231532.heic",           // null 可
+  "audio": "captures/2026/10/08/231532.wav",                 // 保持期間の設定に従い削除
   "annotation": { "text": "このissueの修正、Claude Codeにやらせて", "stt_engine": "whisper-large-v3-turbo", "edited": false },
   "triage": {                          // 非同期で埋まる。null 可
     "intent": "code", "intent_confidence": 0.84, "mentions_datetime": false,

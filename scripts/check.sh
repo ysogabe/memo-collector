@@ -47,6 +47,20 @@ else
   fi
   grep -E "\*\* BUILD" $log
   print "app: $derived/Build/Products/Debug/ContextCapture.app"
+
+  step "[2/2] app: xcodebuild test（AppCoordinator の状態機械など）"
+  log=$logs/app-test.log
+  if ! (cd $root/app && xcodebuild \
+        -project ContextCapture.xcodeproj \
+        -scheme ContextCapture \
+        -derivedDataPath $derived \
+        -skipMacroValidation -skipPackagePluginValidation \
+        test >| $log 2>&1); then
+    grep -E "error:|failed|\*\* TEST" $log | tail -n 40 || true
+    print "xcodebuild test failed. full log: $log"
+    exit 1
+  fi
+  grep -E "Executed [0-9]+ tests|\*\* TEST" $log | tail -n 2
 fi
 
 step "check.sh: all green"

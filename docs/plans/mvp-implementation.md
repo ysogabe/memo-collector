@@ -70,7 +70,7 @@ Wave 0 がこの骨子で `CCCore` を実装し、確定したシグネチャは
 ```zsh
 scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら非 0
   # 1) cd Packages/ContextCaptureKit && swift build && swift test（この環境では swift test でも MLX の metallib が作られる。確認済み）
-  # 2) cd app && xcodegen generate && xcodebuild -scheme ContextCapture -configuration Debug build
+  # 2) cd app && xcodegen generate && xcodebuild -scheme ContextCapture -configuration Debug build && xcodebuild test
 ```
 
 - 性能（レイテンシ）のアサートは `CC_PERF_ASSERT=1` のときだけ実行する（共有 ANE/GPU の負荷で 2〜4 倍揺れるため）。性能の受け入れは M1 と Wave 4 e2e で、他の処理を止めた状態で main が測る
@@ -119,6 +119,9 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - CCStore に `idsWithoutEmbedding()` を追加（現状は零ベクトルで全件 search して代用、O(N)）。`modify(id:_:)` を CCCore の RecordStore に移す
 - guard: 初回 OCR が 24 秒かかることがある（インストール後の最初のガード処理）。横並びのログインフォームのラベル右の値は未対応
 - MCP: `search(vector:limit:)` に statuses の絞り込みを足す（archived が多いと件数不足）。append 系を RecordStore プロトコルに入れるか具体型依存を正式にするか。シンボリックリンク検査を CCPaths へ
+- 署名の Team ID は PJH36NNFL6（証明書名の括弧内 3H5DM2CR45 は Team ID ではない）
+- 保存形式: スクショ HEIC（ImageIO が WebP を書けない）、音声 WAV 16kHz/16bit
+- wiring 所見: `WhisperModelPreparer.prepare()` が manifest 無しの既存モデルを取り直そうとする（既存採用の経路を足す）、`roundedToMilliseconds` を CCCore へ、`runHotKeyCheck` が同じ組み合わせを別登録する旨をコメントに、`AttachmentKind.screenshot` のコメントが .webp 前提、画面収録の権限状態が `.denied` を返さない、オンボーディングの容量表記
 - 調査書 runtime-coreml-mlx.md §4.2 のトークナイザ原因を更新（ignore_merges ではなく、swift-transformers の前分割が書記素クラスタ単位で照合し単独 LF に `[\r\n]` が一致しない）
 
 ## 7. 進捗（main が Wave ごとに更新）
@@ -133,7 +136,8 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 1 stt（CER 6.75%（語彙の後処理）、空いた状態で p90 1.69 秒・負荷時 2.4〜6.6 秒。語彙プロンプトは CER を悪化させるため不採用）
 - [x] Wave 1 capture（47 テスト成功。権限・実機の経路は未検証 → docs/manual-tests/capture.md で M1 時にユーザー確認）
 - [x] Wave 2 ui（check.sh green、スナップショット 12 枚 docs/ui-snapshots/。組み立て点は app/ContextCapture/App/AppEnvironment.swift の `// WIRING:`）
-- [ ] Wave 2 wiring（dispatch 済み。worktree ../memo-collector-worktrees/wiring。署名を Apple Development に切替）→ M1 動作確認
+- [x] Wave 2 wiring（check.sh green、アプリのテスト 25 件、署名 Apple Development / Team PJH36NNFL6 + Hardened Runtime、metallib 同梱）
+- [ ] M1 実機確認（ユーザー。手順 docs/manual-tests/m1.md）
 - [x] Wave 3 guard+triage（14 画面 4/4・誤検知 0、PEM・重なり・余白のマスク漏れ 4 件をセキュリティレビュー指摘で修正、56 テスト、本物の d1 で結合テスト）
 - [ ] Wave 3 embedding（stt 完了後に dispatch。ANE の取り合いを避ける）
 - [x] Wave 4 mcp（27 テスト、stdio 往復の結合テストあり。画像は clear/masked のみ・データルート外を読まない。cc-mcp の埋め込みは `makeEmbedderProvider()` が nil → embedding マージ後に CoreMLEmbedder(.cpuAndGPU) を差す）
