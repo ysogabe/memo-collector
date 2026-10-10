@@ -18,6 +18,17 @@ enum HotKeyStatus: Equatable, Sendable {
         if case .active = self { return true }
         return false
     }
+
+    /// デバッグメニュー用の短い説明。
+    var debugDescription: String {
+        switch self {
+        case let .active(b): return b == .carbon ? "Carbon" : "CGEventTap"
+        case .notRegistered: return "未登録"
+        case .alreadyInUse: return "使用中（他アプリ）"
+        case let .needsAccessibility(s): return "失敗（Carbon \(s)、アクセシビリティなし）"
+        case let .failed(m): return "失敗（\(m)）"
+        }
+    }
 }
 
 /// 登録できないときにユーザーへ出す 1 行と、対処のボタン。
@@ -134,15 +145,5 @@ final class HotKeyController {
     private func stopTrustPolling() {
         trustPoll?.invalidate()
         trustPoll = nil
-    }
-
-    var activeBackendDescription: String {
-        switch status {
-        case let .active(b): return b == .carbon ? "Carbon" : "CGEventTap"
-        case .notRegistered: return "未登録"
-        case .alreadyInUse: return "使用中（他アプリ）"
-        case let .needsAccessibility(s): return "失敗（Carbon \(s)、アクセシビリティなし）"
-        case let .failed(m): return "失敗（\(m)）"
-        }
     }
 }

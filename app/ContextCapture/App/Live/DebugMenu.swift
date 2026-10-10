@@ -9,7 +9,7 @@ struct DebugMenu: View {
 
     var body: some View {
         Menu("デバッグ") {
-            Text("ホットキー: \(live.hotKeys.activeBackendDescription)")
+            Text("ホットキー: \(model.hotKeyStatus.debugDescription)")
             Divider()
             ForEach(CaptureLatencyMonitor.Metric.allCases, id: \.self) { m in
                 Text("\(m.title): \(live.latency.summary(m))")
