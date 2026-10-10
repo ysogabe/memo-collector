@@ -48,7 +48,6 @@ final class LiveServices {
     private weak var model: AppModel?
     private var settingsObserver: NSObjectProtocol?
     private var retentionTask: Task<Void, Never>?
-    private var debugStatusTask: Task<Void, Never>?
     private var started = false
     /// 診断の実行中（二重起動を防ぐ）。
     private(set) var isRunningDiagnostics = false
@@ -200,12 +199,9 @@ final class LiveServices {
             self?.searchIndex.activate(imageTokens: imageTokens)
         }
 
-        debugStatusTask = Task { [weak self, weak model] in
-            while !Task.isCancelled {
-                if model?.showsDebugMenu == true { await self?.refreshDebugStatus() }
-                try? await Task.sleep(for: .seconds(5))
-            }
-        }
+        // デバッグメニューのモデルの状態は、メニューを開いたとき（AppDelegate の NSMenu の追跡開始）と d1 の解放時・
+        // 「モデルの状態を更新」で読み直す（以前の 5 秒ごとのポーリングはやめた。開いていない間に読む理由が無い）。
+        if debugLaunch { refreshDebugStatusSoon() }
 
         // 保持期間: 起動時と 1 日 1 回。
         retentionTask = Task { [weak self] in
@@ -315,7 +311,7 @@ final class LiveServices {
         )
     }
 
-    private func refreshDebugStatusSoon() {
+    func refreshDebugStatusSoon() {
         Task { await refreshDebugStatus() }
     }
 

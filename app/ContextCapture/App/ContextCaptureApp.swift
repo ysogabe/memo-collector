@@ -46,7 +46,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             forName: NSMenu.didBeginTrackingNotification, object: nil, queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated {
-                if NSEvent.modifierFlags.contains(.option) { self?.model.revealDebugMenu() }
+                guard let model = self?.model else { return }
+                if NSEvent.modifierFlags.contains(.option) { model.revealDebugMenu() }
+                // デバッグメニューのモデルの状態は開いたときに読み直す（常時のポーリングはしない）。
+                if model.showsDebugMenu { model.env.live?.refreshDebugStatusSoon() }
             }
         }
         if !model.settings.onboardingCompleted {
