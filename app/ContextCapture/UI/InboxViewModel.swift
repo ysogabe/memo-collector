@@ -55,6 +55,8 @@ final class InboxViewModel {
     private(set) var searchResults: [SearchHit]?
     /// 結果を出している検索語。
     private(set) var searchedQuery: String?
+    /// 検索結果に添える一言（埋め込みが準備中で文字の一致で探したときなど）。
+    private(set) var searchNotice: String?
     private(set) var isSearching = false
     private(set) var errorMessage: String?
     private(set) var hasLoaded = false
@@ -99,9 +101,10 @@ final class InboxViewModel {
         defer { isSearching = false }
         do {
             // 検索は状態を問わず探す（完了にしたものも見つけられる）。意図フィルタは結果にも掛ける。
-            let hits = try await search.search(q, limit: 30)
-            searchResults = hits.filter { InboxViewModel.matchesScope($0.record, scope) }
+            let response = try await search.searchWithNotice(q, limit: 30)
+            searchResults = response.hits.filter { InboxViewModel.matchesScope($0.record, scope) }
             searchedQuery = q
+            searchNotice = response.notice
             selection = searchResults?.first?.record.id
             errorMessage = nil
         } catch {
@@ -113,6 +116,7 @@ final class InboxViewModel {
         query = ""
         searchResults = nil
         searchedQuery = nil
+        searchNotice = nil
     }
 
     func record(id: String) -> ContextRecord? {

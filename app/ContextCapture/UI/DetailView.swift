@@ -21,7 +21,8 @@ struct DetailContainer: View {
         }
         .task(id: recordID) {
             guard let r = try? await app.env.store.get(id: recordID) else { missing = true; return }
-            let model = DetailViewModel(record: r, store: app.env.store, guardReview: app.env.guardReview) { [app] in
+            let model = DetailViewModel(record: r, store: app.env.store, guardReview: app.env.guardReview,
+                                        triage: app.env.triage) { [app] in
                 app.recordsDidChange()
             }
             await model.load()

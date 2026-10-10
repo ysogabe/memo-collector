@@ -29,8 +29,8 @@ targets:
         excludes:
           - "Resources/Info.plist"
     dependencies:
-      # アプリがリンクする ContextCaptureKit の product。M2 で CCTriage / CCGuard / CCEmbedding、M3 で CCMCP を足す
-      # （1 項目ずつ足すだけ。Package.swift 側の product 名と合わせる）。
+      # アプリがリンクする ContextCaptureKit の product（Package.swift 側の product 名と合わせる）。
+      # MCP はアプリではなく別プロセスの cc-mcp が持つので、アプリは CCMCP をリンクしない。
       - package: ContextCaptureKit
         product: CCCore
       - package: ContextCaptureKit
@@ -40,7 +40,15 @@ targets:
       - package: ContextCaptureKit
         product: CCStore        # SQLite + 添付（M1）
       - package: ContextCaptureKit
-        product: CCModels       # モデルの取得・検証（M1 は Whisper だけ使う。MLX をリンクするので metallib が同梱される）
+        product: CCModels       # モデルの取得・検証・変換（Whisper / 埋め込み / d1。MLX をリンクするので metallib が同梱される）
+      - package: ContextCaptureKit
+        product: CCTriage       # 保存後の非同期処理（ガード → 意図 → 索引）（M2）
+      - package: ContextCaptureKit
+        product: CCIntent       # d1-3B on MLX Swift（意図・日時言及）（M2）
+      - package: ContextCaptureKit
+        product: CCGuard        # Vision OCR + パターン、マスク画像（M2 / M3）
+      - package: ContextCaptureKit
+        product: CCEmbedding    # EmbeddingGemma 2 Core ML（検索の索引とクエリ）（M2）
     settings:
       base:
         PRODUCT_NAME: ContextCapture
@@ -59,8 +67,8 @@ targets:
         ENABLE_USER_SCRIPT_SANDBOXING: YES
         COMBINE_HIDPI_IMAGES: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-  # AppCoordinator（状態機械・保存の流れ）の単体テスト。アプリをホストにせず（起動時に本物のホットキー等を触らないため）、
-  # 必要なソースだけをこのバンドルに直接コンパイルする。依存はすべて CCCore のプロトコルのフェイク。
+  # AppCoordinator（状態機械・保存の流れ）と M2 / M3 の配線の単体テスト。アプリをホストにせず（起動時に本物のホットキー等を触らないため）、
+  # 必要なソースだけをこのバンドルに直接コンパイルする。モデル・権限に触る部品はフェイク。
   #   cd app && xcodebuild -project ContextCapture.xcodeproj -scheme ContextCapture -derivedDataPath ../DerivedData test
   ContextCaptureTests:
     type: bundle.unit-test
@@ -74,6 +82,13 @@ targets:
       - path: ContextCapture/App/Live/ScreenshotEncoder.swift
       - path: ContextCapture/App/Live/AudioFileIO.swift
       - path: ContextCapture/App/Live/SubstringSearchService.swift
+      # M2 / M3 の配線（トリアージ・ガードの確認・検索・索引・モデル準備）。本物のモデルはフェイクに差し替えて確かめる。
+      - path: ContextCapture/App/Live/SwitchableEmbedder.swift
+      - path: ContextCapture/App/Live/SearchIndex.swift
+      - path: ContextCapture/App/Live/TriageWiring.swift
+      - path: ContextCapture/App/Live/TriageAssembly.swift
+      - path: ContextCapture/App/Live/LiveGuardReviewer.swift
+      - path: ContextCapture/App/Live/ModelPreparationPipeline.swift
     dependencies:
       - package: ContextCaptureKit
         product: CCCore
@@ -81,6 +96,12 @@ targets:
         product: CCCapture
       - package: ContextCaptureKit
         product: CCSTT
+      - package: ContextCaptureKit
+        product: CCTriage       # TriageQueue（本物のキューをフェイクの分類器・埋め込みで回す）
+      - package: ContextCaptureKit
+        product: CCEmbedding    # TriageAssembly（CoreMLEmbedder の適合。テストでは読み込まない）
+      - package: ContextCaptureKit
+        product: CCGuard        # SecretMasker
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.ysogabe.ContextCaptureTests

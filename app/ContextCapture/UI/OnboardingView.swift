@@ -62,8 +62,10 @@ final class OnboardingViewModel {
                     guard let self else { return }
                     self.modelState = p.phase == .finished ? .finished : .running(p)
                 }
+            } catch let error as InsufficientDiskSpace {
+                self?.modelState = .failed(error.errorDescription ?? "空き容量が足りません。")
             } catch {
-                self?.modelState = .failed("ダウンロードできませんでした。ネットワークにつながっているか確かめて、もう一度始めてください。")
+                self?.modelState = .failed("準備できませんでした。ネットワークにつながっているか確かめて、もう一度始めてください。")
             }
         }
     }
@@ -188,7 +190,7 @@ struct OnboardingView: View {
     private var models: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("モデルの準備").font(.system(size: 20, weight: .bold))
-            Text("文字起こし・意図の推定・検索に使うモデルを、この Mac にダウンロードします（合計 約 5GB）。そのあと、この Mac に合わせた初回の最適化に数分かかります。通信するのはこのときだけで、以降はオフラインで動きます。")
+            Text("文字起こし・検索・意図の推定に使う 3 つのモデルを、この Mac にダウンロードします（合計 約 8GB。意図の推定モデルは取得後にこの Mac で変換し、変換後のモデルは合計 約 5.3GB）。作業中は一時的に 約 13GB の空きが要ります。変換と初回の最適化に数分かかります。通信するのはこのときだけで、以降はオフラインで動きます。")
                 .font(.system(size: 13))
                 .fixedSize(horizontal: false, vertical: true)
             VStack(alignment: .leading, spacing: 10) {
