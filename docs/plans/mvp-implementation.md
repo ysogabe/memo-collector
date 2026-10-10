@@ -162,10 +162,10 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [ ] M1 実機確認（ユーザー。手順 docs/manual-tests/m1.md）
 - [x] Wave 3 guard+triage（14 画面 4/4・誤検知 0、PEM・重なり・余白のマスク漏れ 4 件をセキュリティレビュー指摘で修正、56 テスト、本物の d1 で結合テスト）
 - [x] Wave 3 embedding（コサイン最小 0.9988、融合 256 R@3 0.933 / MRR 0.950、release で融合 0.59 秒・テキスト 6ms、ピーク 375MB。HF の縮小は torchvision の uint8 bicubic とビット一致させた）
-- [x] Wave 4 mcp（27 テスト、stdio 往復の結合テストあり。画像は clear/masked のみ・データルート外を読まない。cc-mcp の埋め込みは `makeEmbedderProvider()` が nil → embedding マージ後に CoreMLEmbedder(.cpuAndGPU) を差す）
+- [x] Wave 4 mcp（27 テスト、stdio 往復の結合テストあり。画像は clear/masked のみ・データルート外を読まない。cc-mcp の埋め込みは Wave 5/6 で `makeQueryEmbedder` → `WarmingQueryEmbedder`（.cpuAndGPU、起動時に裏で温める）に置き換え済み）
 - [x] Wave 5 wiring-m2（アプリのテスト 46 件。非 fake 起動で resumePending・needs_review 判定・埋め込み初回準備 158 秒・d1 の 10 分解放・cc-mcp の vector 検索をログで確認。実機確認手順 docs/manual-tests/m2-m3.md）
 - [x] Wave 5 cleanup（§6 の Packages 側 10 項目。自前コードの警告 0）
-- [ ] Wave 6 polish（dispatch 済み: 正しさと MCP 契約に関わる 7 項目）
+- [x] Wave 6 polish（7 項目。パッケージ 304 件・アプリ 54 件のテスト。degraded 中のアプリ検索はベクトルを続けて注意書き。d1 は manifest がある置き場で余計なファイルがあると取り直しになる）
 - [ ] Wave 4 e2e（Release ビルド・サブエージェント停止・load average を記録して main が計測: 解放→トースト p90、3 モデル同時常駐のメモリ（MLX アクティブ + footprint）、アイドル CPU、アプリ内での d1 数値一致）
 - [ ] セキュリティレビュー（security-review skill）
 - [ ] PR（github-pr-workflow。M1 実機確認が未了なら `Refs #1`）
