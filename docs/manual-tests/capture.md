@@ -31,10 +31,11 @@
 | 2-2 | テキストエディタ（TextEdit）を前面にして ⌥Space を 1 秒押して離す | events に pressed → released が 1 組。`press_duration_s` ≈ 1.0、`short_press`=false。**TextEdit に文字（ノーブレークスペース）が入らない** | [ ] |
 | 2-3 | ⌥Space を 3 秒押し続ける（キーリピートが起きる長さ） | pressed は 1 回だけ。released も 1 回 | [ ] |
 | 2-4 | ⌥Space を素早く叩く（0.1 秒程度） | released の `short_press`=true（0.3 秒未満） | [ ] |
-| 2-5 | ⌥ を押す → Space を押す → **⌥ を先に離す** → Space を離す | released が届く（押しっぱなしにならない） | [ ] |
+| 2-5 | ⌥ を押す → Space を押す → **⌥ を先に離す** → Space を離す | released が届く（押しっぱなしにならない）。Carbon 方式で ⌥ を先に離したときに `kEventHotKeyReleased` が来るかを確かめる項目 | [ ] |
 | 2-6 | 2-1 で Carbon が失敗した場合: アクセシビリティを許可して再実行 | `backend`="eventTap"。2-2〜2-5 が同じく通る（文字が入らないことを特に確認） | [ ] |
 | 2-7 | Raycast / Alfred / Spotlight 等が ⌥Space を使っている環境 | `error` が「ほかのアプリが同じショートカットを使っています」（alreadyInUse）になる、または OS 側が優先される。挙動を記録 | [ ] |
 | 2-8 | ショートカットを ⌃⌥Space 等へ変更（`setShortcut`） | 新しい組み合わせで 2-2 が通り、古い ⌥Space は反応しない | [ ] |
+| 2-10 | 画面ロック解除を数回挟んでから 2-2 | 引き続き届く。Carbon で届かなくなったら `start(preferEventTap: true)`（アクセシビリティ要）で再確認し、結果を記録 | [ ] |
 | 2-9 | アイドル時の CPU（アクティビティモニタ、ホットキー登録のみ・録音なし） | ≤ 1%（PRD §10） | [ ] |
 
 ## 3. 前面コンテキスト（アプリ・ウインドウ・URL）
@@ -45,7 +46,7 @@
 |---|---|---|---|
 | 3-1 | Finder | app.name="Finder"、bundle_id="com.apple.finder"、window.title がフォルダ名、frame が実際の位置・大きさ（ポイント、左上原点） | [ ] |
 | 3-2 | Safari（オートメーション未許可） | url=null（ダイアログは出ない）。`automation_front_browser`="notDetermined" | [ ] |
-| 3-3 | アプリ本体で Safari を前面にしてキャプチャ（`.askOnFirstUse`） | 初回だけ「“ContextCapture”が“Safari”を制御」のダイアログ。許可後の 2 回目以降は url が前面タブの URL | [ ] |
+| 3-3 | アプリ本体で Safari を前面にしてキャプチャ（`.askOnFirstUse`） | 初回だけ「“ContextCapture”が“Safari”を制御」のダイアログ。許可後の 2 回目以降は url が前面タブの URL。NSAppleScript を**バックグラウンドの直列キュー**で実行しているので、落ちる・固まる場合はまずここを疑う | [ ] |
 | 3-4 | Google Chrome / Arc / Microsoft Edge で 3-3 と同じ | それぞれ前面タブの URL。`timings_ms.url` を記録（目安 < 300ms。超えると url=null・`url_timed_out`=true） | [ ] |
 | 3-5 | ブラウザのウインドウが 0 枚（アプリだけ起動） | url=null、エラーにならない | [ ] |
 | 3-6 | オートメーションを拒否したブラウザ | url=null、待たされない | [ ] |

@@ -199,6 +199,7 @@ public final class GlobalPushToTalkHotKey {
     private var carbon: CarbonHotKeyRegistration?
     private var tap: EventTapHotKey?
     private var allowEventTapFallback = true
+    private var preferEventTap = false
 
     public init(shortcut: HotKeyShortcut = .optionSpace) {
         self.shortcut = shortcut
@@ -213,10 +214,19 @@ public final class GlobalPushToTalkHotKey {
     }
 
     /// 登録して監視を始める。既に動いていれば一度止めて登録し直す。
+    /// - Parameters:
+    ///   - allowEventTapFallback: Carbon の登録に失敗したら CGEventTap に切り替える（アクセシビリティ権限が要る）。
+    ///   - preferEventTap: 最初から CGEventTap を使う（Carbon が登録には成功するのに届かない環境向けの逃げ道。権限が無ければ Carbon を試す）。
     @discardableResult
-    public func start(allowEventTapFallback: Bool = true) throws -> Backend {
+    public func start(allowEventTapFallback: Bool = true, preferEventTap: Bool = false) throws -> Backend {
         stop()
         self.allowEventTapFallback = allowEventTapFallback
+        self.preferEventTap = preferEventTap
+        if preferEventTap, AXIsProcessTrusted(), let t = makeEventTap() {
+            tap = t
+            activeBackend = .eventTap
+            return .eventTap
+        }
         let id = CarbonHotKeyCenter.register(owner: self)
         let (status, registration) = CarbonHotKeyRegistration.register(shortcut: shortcut, id: id)
         lastCarbonStatus = status
@@ -230,16 +240,18 @@ public final class GlobalPushToTalkHotKey {
             throw HotKeyError.alreadyInUse
         }
         let trusted = AXIsProcessTrusted()
-        if allowEventTapFallback, trusted,
-           let t = EventTapHotKey(shortcut: shortcut, handler: { [weak self] kind, uptime in
-               self?.deliver(kind, uptime: uptime)
-           })
-        {
+        if allowEventTapFallback, trusted, let t = makeEventTap() {
             tap = t
             activeBackend = .eventTap
             return .eventTap
         }
         throw HotKeyError.registrationFailed(carbonStatus: status, accessibilityTrusted: trusted)
+    }
+
+    private func makeEventTap() -> EventTapHotKey? {
+        EventTapHotKey(shortcut: shortcut, handler: { [weak self] kind, uptime in
+            self?.deliver(kind, uptime: uptime)
+        })
     }
 
     /// 登録を解いて監視をやめる（押下中なら解放は通知しない）。
@@ -259,7 +271,7 @@ public final class GlobalPushToTalkHotKey {
         let wasActive = activeBackend != nil
         shortcut = newValue
         if wasActive {
-            try start(allowEventTapFallback: allowEventTapFallback)
+            try start(allowEventTapFallback: allowEventTapFallback, preferEventTap: preferEventTap)
         }
     }
 
@@ -425,7 +437,12 @@ final class EventTapHotKey: @unchecked Sendable {
         CGEvent.tapEnable(tap: tap, enable: true)
     }
 
+    private var invalidated = false
+
+    /// メインスレッドから呼ぶ。2 回目以降は何もしない。
     func invalidate() {
+        guard !invalidated else { return }
+        invalidated = true
         CGEvent.tapEnable(tap: tap, enable: false)
         CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
         CFMachPortInvalidate(tap)

@@ -240,8 +240,13 @@ public final class PushToTalkRecorder: AudioRecording, @unchecked Sendable {
         guard let e = engine else { return }
         e.inputNode.removeTap(onBus: 0)
         e.stop()
-        // stop で資源が解放されるので、次の start 前に prepare し直す。
-        isPrepared = false
+        // stop で資源が解放されるので、次の押下に備えてすぐ prepare し直す（マイクは開かない想定。実機で要確認）。
+        if Self.isUsable(e.inputNode.outputFormat(forBus: 0)) {
+            e.prepare()
+            isPrepared = true
+        } else {
+            isPrepared = false
+        }
     }
 
     private func finishLevels() {
