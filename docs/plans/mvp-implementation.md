@@ -108,6 +108,10 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - CCTriage: 注釈中の特殊トークン文字列（`<|im_end|>` 等）は分類前に除去する（main 決定）。長い注釈の切り詰め、d1 の `load()` 3〜4 秒を非同期化するか
 - CCModels: HF から取得した元モデル（5.8GB）を変換後に `Models/.downloads/` から消す
 - アプリ本体（xcodebuild）でも d1 数値テストを回す（MLX カーネルの差で誤差が 0.05 に近づく恐れ。余裕 0.007）
+- ホットキー: macOS 15 以降は ⌥ のみのショートカットを Carbon が拒否することがある。失敗時はアクセシビリティ権限で CGEventTap に切替（PRD §8.2 のとおりアクセシビリティ必須）。M1 実機で確認
+- 画面収録の許可後はアプリの再起動が要る（オンボーディング文言に反映）
+- NSAppleScript をバックグラウンドの直列キューで実行している（Apple はメイン推奨）。実機で問題があればメインへ
+- wiring: `CaptureDiagnostics` の 3 関数をデバッグメニューから呼べるようにする
 - 調査書 runtime-coreml-mlx.md §4.2 のトークナイザ原因を更新（ignore_merges ではなく、swift-transformers の前分割が書記素クラスタ単位で照合し単独 LF に `[\r\n]` が一致しない）
 
 ## 7. 進捗（main が Wave ごとに更新）
@@ -120,7 +124,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 1 store（21 テスト成功、検索 1 万件 中央値 19.6ms。アプリは SQLiteRecordStore を 1 プロセス 1 インスタンスで持つこと。保持期間の削除はアプリ側が定期実行）
 - [x] Wave 1 intent（トークン 104/104 一致、意図最大誤差 0.043、未見 21/22、p50 0.85 秒、8bit 2.9GB、Swift のみの変換が Python 版とビット一致）
 - [ ] Wave 1 stt（dispatch 済み。worktree: ../memo-collector-worktrees/{store,stt,intent}、ブランチ wave1/*）
-- [ ] Wave 1 capture（dispatch 済み。FluidUse 調査の結論: 計画どおり、AX の読み方のみ参考）
+- [x] Wave 1 capture（47 テスト成功。権限・実機の経路は未検証 → docs/manual-tests/capture.md で M1 時にユーザー確認）
 - [ ] Wave 2 ui（前倒しで dispatch 済み。worktree ../memo-collector-worktrees/ui、フェイク実装で単独動作）
 - [ ] Wave 2 wiring → M1 動作確認
 - [ ] Wave 3 embedding / guard+triage
