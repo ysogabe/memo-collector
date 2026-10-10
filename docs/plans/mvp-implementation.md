@@ -121,7 +121,8 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 1 intent（トークン 104/104 一致、意図最大誤差 0.043、未見 21/22、p50 0.85 秒、8bit 2.9GB、Swift のみの変換が Python 版とビット一致）
 - [ ] Wave 1 stt（dispatch 済み。worktree: ../memo-collector-worktrees/{store,stt,intent}、ブランチ wave1/*）
 - [ ] Wave 1 capture（dispatch 済み。FluidUse 調査の結論: 計画どおり、AX の読み方のみ参考）
-- [ ] Wave 2 ui / wiring → M1 動作確認
+- [ ] Wave 2 ui（前倒しで dispatch 済み。worktree ../memo-collector-worktrees/ui、フェイク実装で単独動作）
+- [ ] Wave 2 wiring → M1 動作確認
 - [ ] Wave 3 embedding / guard+triage
 - [ ] Wave 4 mcp / e2e
 - [ ] PR
