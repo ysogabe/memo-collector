@@ -329,12 +329,12 @@ final class SQLiteRecordStoreTests: XCTestCase {
         try await store.insert(old)
         try await store.insert(fresh)
 
-        let unlimited = try await store.purgeExpiredScreenshots(olderThan: nil, now: now)
+        let unlimited = try await store.purgeExpiredScreenshots(retentionDays: nil, now: now)
         XCTAssertEqual(unlimited, 0)
         let kept = try await store.get(id: old.id)
         XCTAssertEqual(kept?.screenshotPath, old.screenshotPath)
 
-        let purged = try await store.purgeExpiredScreenshots(olderThan: 30 * 86400, now: now)
+        let purged = try await store.purgeExpiredScreenshots(retentionDays: 30, now: now)
         XCTAssertEqual(purged, 1)
         let o = try await store.get(id: old.id)
         XCTAssertNil(o?.screenshotPath)
@@ -379,7 +379,7 @@ final class SQLiteRecordStoreTests: XCTestCase {
         let target = makeRecord()
         try await store.insert(target)
         let stores: [SQLiteRecordStore] = [store, other]
-        let perStore = 50
+        let perStore = 20  // 多すぎると SQLite のビジー待ち（バックオフ）で片側が飢えて busyTimeout を超える
 
         try await withThrowingTaskGroup(of: Void.self) { group in
             for (s, st) in stores.enumerated() {

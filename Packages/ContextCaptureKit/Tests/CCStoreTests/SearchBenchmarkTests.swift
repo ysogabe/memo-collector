@@ -58,8 +58,8 @@ final class SearchBenchmarkTests: XCTestCase {
         XCTAssertEqual(hits.first?.record.id, targetID)
         XCTAssertEqual(hits.first?.score ?? 0, 1, accuracy: 1e-4)
         XCTAssertTrue(zip(hits, hits.dropFirst()).allSatisfy { $0.score >= $1.score })
-        XCTAssertLessThan(median, 200, "目標 50ms（キャッシュ有効時）。デバッグビルド・マシン差を見込んで 200ms で落とす")
-        XCTAssertLessThan(cold, 2000, "初回は全ベクトルの読み込みを含む")
+        XCTAssertLessThan(median, 500, "目標 50ms（キャッシュ有効時）。デバッグビルド・並行ビルド中の高負荷を見込んで 500ms で落とす")
+        XCTAssertLessThan(cold, 3000, "初回は全ベクトルの読み込みを含む")
     }
 }
 

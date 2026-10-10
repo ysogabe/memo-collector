@@ -6,7 +6,7 @@ import GRDB
 /// `RecordStore` の SQLite（GRDB）実装。
 ///
 /// - `DatabasePool`（WAL）で開く。アプリと別プロセスの `cc-mcp` が同じ DB を同時に開く前提で、
-///   ロック待ちは `busyTimeout` まで待つ（既定 5 秒）。GRDB の書き込みトランザクションは IMMEDIATE なので、
+///   ロック待ちは `busyTimeout` まで待つ（既定 10 秒）。GRDB の書き込みトランザクションは IMMEDIATE なので、
 ///   `modify(id:_:)` 系の read-modify-write はプロセスをまたいでも直列化され、上書き事故が起きない。
 /// - インスタンスは Sendable（中身は不変の値と `DatabasePool` だけ）。複数作ってよい。
 public final class SQLiteRecordStore: RecordStore, Sendable {
@@ -29,7 +29,7 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
         paths: CCPaths,
         dimension: Int = SQLiteRecordStore.defaultDimension,
         timeZone: TimeZone = .current,
-        busyTimeout: TimeInterval = 5
+        busyTimeout: TimeInterval = 10
     ) throws {
         self.paths = paths
         self.dimension = dimension
@@ -296,14 +296,14 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
         }
     }
 
-    /// 撮影から `olderThan` 秒より古いレコードのスクショ（マスク版も）を消し、パスを nil にする。
-    /// `olderThan` が nil なら無期限保持で何もしない。処理したレコード数を返す。
+    /// 撮影から `retentionDays` 日（24 時間 × 日数）より古いレコードのスクショ（マスク版も）を消し、パスを nil にする。
+    /// `retentionDays` が nil なら無期限保持で何もしない。処理したレコード数を返す。
     @discardableResult
-    public func purgeExpiredScreenshots(olderThan: TimeInterval?, now: Date = Date()) async throws -> Int {
-        guard let olderThan else { return 0 }
+    public func purgeExpiredScreenshots(retentionDays: Int?, now: Date = Date()) async throws -> Int {
+        guard let retentionDays else { return 0 }
         return try await purge(
             where: "screenshot_path IS NOT NULL OR masked_screenshot_path IS NOT NULL",
-            cutoff: now.addingTimeInterval(-olderThan)
+            cutoff: now.addingTimeInterval(-TimeInterval(retentionDays) * 24 * 60 * 60)
         ) { record in
             defer { record.screenshotPath = nil; record.maskedScreenshotPath = nil }
             return [record.screenshotPath, record.maskedScreenshotPath].compactMap { $0 }
