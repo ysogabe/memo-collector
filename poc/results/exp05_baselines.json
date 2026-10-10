@@ -1,0 +1,332 @@
+{
+  "intent_rules_gold": {
+    "accuracy": 0.933,
+    "confusion": {
+      "code": {
+        "code": 7,
+        "note": 0,
+        "research": 0,
+        "schedule": 0,
+        "todo": 0
+      },
+      "note": {
+        "code": 0,
+        "note": 4,
+        "research": 0,
+        "schedule": 1,
+        "todo": 0
+      },
+      "research": {
+        "code": 0,
+        "note": 0,
+        "research": 5,
+        "schedule": 0,
+        "todo": 1
+      },
+      "schedule": {
+        "code": 0,
+        "note": 0,
+        "research": 0,
+        "schedule": 4,
+        "todo": 0
+      },
+      "todo": {
+        "code": 0,
+        "note": 0,
+        "research": 0,
+        "schedule": 0,
+        "todo": 8
+      }
+    }
+  },
+  "intent_rules_stt": {
+    "accuracy": 0.9,
+    "confusion": {
+      "code": {
+        "code": 7,
+        "note": 0,
+        "research": 0,
+        "schedule": 0,
+        "todo": 0
+      },
+      "note": {
+        "code": 0,
+        "note": 4,
+        "research": 0,
+        "schedule": 1,
+        "todo": 0
+      },
+      "research": {
+        "code": 0,
+        "note": 0,
+        "research": 5,
+        "schedule": 0,
+        "todo": 1
+      },
+      "schedule": {
+        "code": 0,
+        "note": 0,
+        "research": 0,
+        "schedule": 4,
+        "todo": 0
+      },
+      "todo": {
+        "code": 0,
+        "note": 1,
+        "research": 0,
+        "schedule": 0,
+        "todo": 7
+      }
+    }
+  },
+  "intent_embed_zeroshot": {
+    "accuracy": 0.6,
+    "confusion": {
+      "code": {
+        "code": 3,
+        "note": 1,
+        "research": 1,
+        "schedule": 0,
+        "todo": 2
+      },
+      "note": {
+        "code": 0,
+        "note": 5,
+        "research": 0,
+        "schedule": 0,
+        "todo": 0
+      },
+      "research": {
+        "code": 0,
+        "note": 3,
+        "research": 1,
+        "schedule": 0,
+        "todo": 2
+      },
+      "schedule": {
+        "code": 0,
+        "note": 0,
+        "research": 0,
+        "schedule": 4,
+        "todo": 0
+      },
+      "todo": {
+        "code": 0,
+        "note": 2,
+        "research": 0,
+        "schedule": 1,
+        "todo": 5
+      }
+    }
+  },
+  "intent_embed_knn1_loo": {
+    "accuracy": 0.467,
+    "confusion": {
+      "code": {
+        "code": 5,
+        "note": 2,
+        "research": 0,
+        "schedule": 0,
+        "todo": 0
+      },
+      "note": {
+        "code": 1,
+        "note": 1,
+        "research": 0,
+        "schedule": 1,
+        "todo": 2
+      },
+      "research": {
+        "code": 1,
+        "note": 1,
+        "research": 2,
+        "schedule": 0,
+        "todo": 2
+      },
+      "schedule": {
+        "code": 0,
+        "note": 0,
+        "research": 0,
+        "schedule": 4,
+        "todo": 0
+      },
+      "todo": {
+        "code": 0,
+        "note": 2,
+        "research": 3,
+        "schedule": 1,
+        "todo": 2
+      }
+    }
+  },
+  "intent_embed_knn3_loo": {
+    "accuracy": 0.5,
+    "confusion": {
+      "code": {
+        "code": 4,
+        "note": 3,
+        "research": 0,
+        "schedule": 0,
+        "todo": 0
+      },
+      "note": {
+        "code": 1,
+        "note": 1,
+        "research": 0,
+        "schedule": 1,
+        "todo": 2
+      },
+      "research": {
+        "code": 1,
+        "note": 0,
+        "research": 2,
+        "schedule": 0,
+        "todo": 3
+      },
+      "schedule": {
+        "code": 0,
+        "note": 0,
+        "research": 0,
+        "schedule": 4,
+        "todo": 0
+      },
+      "todo": {
+        "code": 0,
+        "note": 2,
+        "research": 1,
+        "schedule": 1,
+        "todo": 4
+      }
+    }
+  },
+  "secret_ocr_regex": {
+    "metrics": {
+      "threshold": 0.5,
+      "tp": 4,
+      "fn": 0,
+      "fp": 0,
+      "tn": 10,
+      "recall": 1.0,
+      "precision": 1.0,
+      "accuracy": 1.0
+    },
+    "ocr_latency": {
+      "n": 14,
+      "p50_s": 0.154,
+      "p90_s": 0.24,
+      "max_s": 17.232,
+      "mean_s": 1.3811
+    },
+    "swift_wall_incl_compile_s": 26.42,
+    "rows": [
+      {
+        "id": "s01",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 17232,
+        "ocr_chars": 551
+      },
+      {
+        "id": "s02",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 153,
+        "ocr_chars": 208
+      },
+      {
+        "id": "s03",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 221,
+        "ocr_chars": 701
+      },
+      {
+        "id": "s04",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 132,
+        "ocr_chars": 372
+      },
+      {
+        "id": "s05",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 240,
+        "ocr_chars": 725
+      },
+      {
+        "id": "s06",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 156,
+        "ocr_chars": 321
+      },
+      {
+        "id": "s07",
+        "gold": true,
+        "hits": [
+          "openai_key",
+          "anthropic_key"
+        ],
+        "ocr_ms": 176,
+        "ocr_chars": 427
+      },
+      {
+        "id": "s08",
+        "gold": true,
+        "hits": [
+          "aws_access_key",
+          "aws_secret_label"
+        ],
+        "ocr_ms": 154,
+        "ocr_chars": 411
+      },
+      {
+        "id": "s09",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 125,
+        "ocr_chars": 196
+      },
+      {
+        "id": "s10",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 145,
+        "ocr_chars": 278
+      },
+      {
+        "id": "s11",
+        "gold": true,
+        "hits": [
+          "github_token"
+        ],
+        "ocr_ms": 186,
+        "ocr_chars": 439
+      },
+      {
+        "id": "s12",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 175,
+        "ocr_chars": 379
+      },
+      {
+        "id": "s13",
+        "gold": true,
+        "hits": [
+          "password_field"
+        ],
+        "ocr_ms": 116,
+        "ocr_chars": 205
+      },
+      {
+        "id": "s14",
+        "gold": false,
+        "hits": [],
+        "ocr_ms": 124,
+        "ocr_chars": 195
+      }
+    ]
+  }
+}

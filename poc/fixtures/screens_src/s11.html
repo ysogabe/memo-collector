@@ -1,0 +1,24 @@
+<html><head><meta charset=utf-8><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Hiragino Sans',sans-serif;width:1440px;height:900px;overflow:hidden;background:#fff;color:#1f2328;font-size:14px}
+.chrome{height:76px;background:#dee1e6;border-bottom:1px solid #c4c7cc}
+.tabs{height:36px;display:flex;align-items:flex-end;padding-left:80px}
+.tab{background:#fff;border-radius:8px 8px 0 0;padding:8px 16px;width:260px;font-size:12px;white-space:nowrap;overflow:hidden}
+.omni{height:40px;background:#fff;display:flex;align-items:center;padding:0 12px}
+.omni .bar{flex:1;background:#f1f3f4;border-radius:16px;padding:6px 14px;font-size:13px;color:#333}
+.mono{font-family:Menlo,monospace}
+.term{background:#1d1f21;color:#c5c8c6;height:900px}.tb{height:28px;background:#38393b;color:#bbb;text-align:center;font-size:12px;line-height:28px}
+pre{font-family:Menlo,monospace;font-size:14px;line-height:1.5;padding:12px}.r{color:#cc6666}.g{color:#b5bd68}.y{color:#f0c674}</style></head><body><div class=term><div class=tb>yoshio — zsh — 120×40</div><pre>
+<span class=g>yoshio@mbp</span> ~ % gh auth status
+github.com
+  <span class=r>X Failed to log in to github.com account yoshio (/Users/yoshio/.config/gh/hosts.yml)</span>
+  - The token in /Users/yoshio/.config/gh/hosts.yml is invalid.
+<span class=g>yoshio@mbp</span> ~ % cat ~/.config/gh/hosts.yml
+github.com:
+    users:
+        yoshio:
+            oauth_token: <span class=y>gho_FAKE16C7e42F292c6912E7710c838347Ae178B4a</span>
+    git_protocol: https
+    oauth_token: <span class=y>gho_FAKE16C7e42F292c6912E7710c838347Ae178B4a</span>
+    user: yoshio
+<span class=g>yoshio@mbp</span> ~ % █</pre></div></body></html>

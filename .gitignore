@@ -1,0 +1,21 @@
+.DS_Store
+.playwright-mcp/
+.serena/
+__pycache__/
+*.pyc
+
+# Python 環境
+.venv/
+.venv-*/
+
+# Swift / Xcode
+.build/
+.swiftpm/
+DerivedData/
+xcuserdata/
+*.xcodeproj/
+build/
+
+# 変換済みモデル・ダウンロード物（大容量）
+spikes/runtime/models/
+spikes/runtime/swift/*/Packages/

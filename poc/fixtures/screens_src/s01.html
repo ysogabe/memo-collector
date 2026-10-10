@@ -1,0 +1,18 @@
+<html><head><meta charset=utf-8><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Hiragino Sans',sans-serif;width:1440px;height:900px;overflow:hidden;background:#fff;color:#1f2328;font-size:14px}
+.chrome{height:76px;background:#dee1e6;border-bottom:1px solid #c4c7cc}
+.tabs{height:36px;display:flex;align-items:flex-end;padding-left:80px}
+.tab{background:#fff;border-radius:8px 8px 0 0;padding:8px 16px;width:260px;font-size:12px;white-space:nowrap;overflow:hidden}
+.omni{height:40px;background:#fff;display:flex;align-items:center;padding:0 12px}
+.omni .bar{flex:1;background:#f1f3f4;border-radius:16px;padding:6px 14px;font-size:13px;color:#333}
+.mono{font-family:Menlo,monospace}
+</style></head><body>
+<div class=chrome><div class=tabs><div class=tab>Support streaming events · Issue #128</div></div><div class=omni><div class=bar>github.com/opendots/opendots/issues/128</div></div></div>
+<div style="padding:20px 40px;border-bottom:1px solid #d0d7de"><b>opendots</b> / <b>opendots</b> &nbsp; <span style="color:#57606a">Code &nbsp; Issues 42 &nbsp; Pull requests 7 &nbsp; Actions</span></div>
+<div style="padding:24px 40px"><h1 style="font-weight:400;font-size:30px">Support streaming events in adapter API <span style="color:#57606a">#128</span></h1>
+<p style="margin:12px 0"><span style="background:#1f883d;color:#fff;border-radius:16px;padding:4px 12px">Open</span> &nbsp; <b>kmori</b> opened this issue 3 days ago · 5 comments</p>
+<div style="border:1px solid #d0d7de;border-radius:6px;margin-top:16px;width:900px"><div style="background:#f6f8fa;padding:10px">kmori commented 3 days ago</div>
+<div style="padding:16px;line-height:1.7">Currently adapters can only return a single response. We need <code>AsyncIterator&lt;Event&gt;</code> support so that agents (e.g. Hermes) can receive partial results.<br><br>
+<b>Proposal</b><ul style="margin-left:24px"><li>Add <code>stream()</code> to <code>Adapter</code> interface</li><li>Backpressure via <code>highWaterMark</code></li><li>Keep <code>call()</code> for backwards compatibility</li></ul></div></div>
+<div style="margin-top:16px;color:#57606a">Labels: <span style="background:#a2eeef;padding:2px 8px;border-radius:10px">enhancement</span> <span style="background:#d4c5f9;padding:2px 8px;border-radius:10px">adapter</span></div></div></body></html>

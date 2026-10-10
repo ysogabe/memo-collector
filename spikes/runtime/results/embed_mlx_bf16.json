@@ -1,0 +1,105 @@
+{
+ "quant": null,
+ "load_s": 0.11,
+ "active_mem_after_load_mb": 1488.8,
+ "cos_vs_torch": {
+  "text_docs": {
+   "min": 0.9998468160629272,
+   "mean": 0.9999034404754639
+  },
+  "text_queries": {
+   "min": 0.9999197125434875,
+   "mean": 0.9999494552612305
+  },
+  "image_queries": {
+   "min": 0.9982766509056091,
+   "mean": 0.9997686147689819
+  },
+  "fused": {
+   "min": 0.9995155334472656,
+   "mean": 0.9997589588165283
+  },
+  "images": {
+   "min": 0.9989228248596191,
+   "mean": 0.9996100068092346
+  }
+ },
+ "fused_latency_p50_s": 0.561,
+ "image_latency_p50_s": 0.5548,
+ "image_status": "ok",
+ "retrieval": {
+  "768": {
+   "text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.9
+   },
+   "torch_ref text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.9
+   },
+   "text→screenshot(image only)": {
+    "recall@3": 0.8,
+    "mrr": 0.729
+   },
+   "torch_ref text→screenshot(image only)": {
+    "recall@3": 0.8,
+    "mrr": 0.731
+   },
+   "text→capture(fused text+image)": {
+    "recall@3": 0.883,
+    "mrr": 0.95
+   },
+   "torch_ref text→capture(fused text+image)": {
+    "recall@3": 0.883,
+    "mrr": 0.9
+   }
+  },
+  "256": {
+   "text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.85
+   },
+   "torch_ref text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.85
+   },
+   "text→screenshot(image only)": {
+    "recall@3": 0.65,
+    "mrr": 0.712
+   },
+   "torch_ref text→screenshot(image only)": {
+    "recall@3": 0.65,
+    "mrr": 0.712
+   },
+   "text→capture(fused text+image)": {
+    "recall@3": 0.933,
+    "mrr": 0.95
+   },
+   "torch_ref text→capture(fused text+image)": {
+    "recall@3": 0.933,
+    "mrr": 0.95
+   }
+  }
+ },
+ "bench": {
+  "started_at": "2026-10-08T11:19:58.732830+00:00",
+  "text_doc": {
+   "median_s_each_rep": [
+    0.0129,
+    0.0137,
+    0.013
+   ],
+   "median_s": 0.013
+  },
+  "query": {
+   "median_s_each_rep": [
+    0.009,
+    0.0087,
+    0.0083
+   ],
+   "median_s": 0.0087
+  },
+  "finished_at": "2026-10-08T11:20:00.316046+00:00"
+ },
+ "peak_mem_mb": 2269.6
+}

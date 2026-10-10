@@ -1,0 +1,48 @@
+Converting PyTorch Frontend ==> MIL Ops:   0%|          | 0/472 [00:00<?, ? ops/s]Saving value type of int64 into a builtin type of int32, might lose precision!
+Converting PyTorch Frontend ==> MIL Ops:  55%|█████▌    | 260/472 [00:00<00:00, 2589.67 ops/s]Converting PyTorch Frontend ==> MIL Ops: 100%|█████████▉| 471/472 [00:00<00:00, 3559.93 ops/s]
+Running MIL frontend_pytorch pipeline:   0%|          | 0/5 [00:00<?, ? passes/s]Running MIL frontend_pytorch pipeline: 100%|██████████| 5/5 [00:00<00:00, 282.36 passes/s]
+Running MIL default pipeline:   0%|          | 0/95 [00:00<?, ? passes/s]Running MIL default pipeline:  34%|███▎      | 32/95 [00:00<00:00, 316.10 passes/s]Running MIL default pipeline:  67%|██████▋   | 64/95 [00:12<00:07,  4.37 passes/s] Running MIL default pipeline:  97%|█████████▋| 92/95 [00:13<00:00,  6.83 passes/s]Running MIL default pipeline: 100%|██████████| 95/95 [00:13<00:00,  7.06 passes/s]
+Running MIL backend_mlprogram pipeline:   0%|          | 0/12 [00:00<?, ? passes/s]Running MIL backend_mlprogram pipeline: 100%|██████████| 12/12 [00:00<00:00, 381.18 passes/s]
+chunk 0 29.1
+Converting PyTorch Frontend ==> MIL Ops:   0%|          | 0/410 [00:00<?, ? ops/s]Saving value type of int64 into a builtin type of int32, might lose precision!
+Converting PyTorch Frontend ==> MIL Ops: 100%|█████████▉| 409/410 [00:00<00:00, 8239.61 ops/s]
+Running MIL frontend_pytorch pipeline:   0%|          | 0/5 [00:00<?, ? passes/s]Running MIL frontend_pytorch pipeline: 100%|██████████| 5/5 [00:00<00:00, 377.38 passes/s]
+Running MIL default pipeline:   0%|          | 0/95 [00:00<?, ? passes/s]Running MIL default pipeline:  36%|███▌      | 34/95 [00:00<00:00, 144.90 passes/s]Running MIL default pipeline:  59%|█████▉    | 56/95 [00:00<00:00, 122.81 passes/s]Running MIL default pipeline:  73%|███████▎  | 69/95 [00:04<00:02, 10.50 passes/s] Running MIL default pipeline:  97%|█████████▋| 92/95 [00:05<00:00, 15.03 passes/s]Running MIL default pipeline: 100%|██████████| 95/95 [00:05<00:00, 18.59 passes/s]
+Running MIL backend_mlprogram pipeline:   0%|          | 0/12 [00:00<?, ? passes/s]Running MIL backend_mlprogram pipeline: 100%|██████████| 12/12 [00:00<00:00, 443.79 passes/s]
+chunk 1 17.1
+Converting PyTorch Frontend ==> MIL Ops:   0%|          | 0/468 [00:00<?, ? ops/s]Saving value type of int64 into a builtin type of int32, might lose precision!
+Converting PyTorch Frontend ==> MIL Ops: 100%|█████████▉| 467/468 [00:00<00:00, 7816.95 ops/s]
+Running MIL frontend_pytorch pipeline:   0%|          | 0/5 [00:00<?, ? passes/s]Running MIL frontend_pytorch pipeline: 100%|██████████| 5/5 [00:00<00:00, 306.54 passes/s]
+Running MIL default pipeline:   0%|          | 0/95 [00:00<?, ? passes/s]Running MIL default pipeline:  36%|███▌      | 34/95 [00:00<00:00, 128.01 passes/s]Running MIL default pipeline:  59%|█████▉    | 56/95 [00:00<00:00, 107.77 passes/s]Running MIL default pipeline:  71%|███████   | 67/95 [00:04<00:02,  9.42 passes/s] Running MIL default pipeline:  97%|█████████▋| 92/95 [00:05<00:00, 13.99 passes/s]Running MIL default pipeline: 100%|██████████| 95/95 [00:05<00:00, 17.18 passes/s]
+Running MIL backend_mlprogram pipeline:   0%|          | 0/12 [00:00<?, ? passes/s]Running MIL backend_mlprogram pipeline: 100%|██████████| 12/12 [00:00<00:00, 370.64 passes/s]
+chunk 2 16.0
+Converting PyTorch Frontend ==> MIL Ops:   0%|          | 0/410 [00:00<?, ? ops/s]Saving value type of int64 into a builtin type of int32, might lose precision!
+Converting PyTorch Frontend ==> MIL Ops: 100%|█████████▉| 409/410 [00:00<00:00, 8636.51 ops/s]
+Running MIL frontend_pytorch pipeline:   0%|          | 0/5 [00:00<?, ? passes/s]Running MIL frontend_pytorch pipeline: 100%|██████████| 5/5 [00:00<00:00, 378.36 passes/s]
+Running MIL default pipeline:   0%|          | 0/95 [00:00<?, ? passes/s]Running MIL default pipeline:  36%|███▌      | 34/95 [00:00<00:00, 130.41 passes/s]Running MIL default pipeline:  59%|█████▉    | 56/95 [00:00<00:00, 115.08 passes/s]Running MIL default pipeline:  72%|███████▏  | 68/95 [00:04<00:02,  9.64 passes/s] Running MIL default pipeline:  97%|█████████▋| 92/95 [00:05<00:00, 14.23 passes/s]Running MIL default pipeline: 100%|██████████| 95/95 [00:05<00:00, 17.49 passes/s]
+Running MIL backend_mlprogram pipeline:   0%|          | 0/12 [00:00<?, ? passes/s]Running MIL backend_mlprogram pipeline: 100%|██████████| 12/12 [00:00<00:00, 431.22 passes/s]
+chunk 3 22.1
+Converting PyTorch Frontend ==> MIL Ops:   0%|          | 0/494 [00:00<?, ? ops/s]Saving value type of int64 into a builtin type of int32, might lose precision!
+Converting PyTorch Frontend ==> MIL Ops: 100%|█████████▉| 493/494 [00:00<00:00, 7226.43 ops/s]
+Running MIL frontend_pytorch pipeline:   0%|          | 0/5 [00:00<?, ? passes/s]Running MIL frontend_pytorch pipeline: 100%|██████████| 5/5 [00:00<00:00, 290.49 passes/s]
+Running MIL default pipeline:   0%|          | 0/95 [00:00<?, ? passes/s]Running MIL default pipeline:  31%|███       | 29/95 [00:00<00:00, 282.72 passes/s]Running MIL default pipeline:  61%|██████    | 58/95 [00:00<00:00, 86.47 passes/s] Running MIL default pipeline:  78%|███████▊  | 74/95 [00:05<00:02,  9.81 passes/s]Running MIL default pipeline:  97%|█████████▋| 92/95 [00:06<00:00, 12.53 passes/s]Running MIL default pipeline: 100%|██████████| 95/95 [00:06<00:00, 15.79 passes/s]
+Running MIL backend_mlprogram pipeline:   0%|          | 0/12 [00:00<?, ? passes/s]Running MIL backend_mlprogram pipeline: 100%|██████████| 12/12 [00:00<00:00, 354.47 passes/s]
+chunk 4 29.3
+      143.90 real        38.84 user        22.72 sys
+         16483680256  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             8674104  page reclaims
+             2014923  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+              113328  voluntary context switches
+              558139  involuntary context switches
+        784686354809  instructions retired
+        223724855813  cycles elapsed
+         47413562168  peak memory footprint

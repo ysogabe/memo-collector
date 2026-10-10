@@ -1,0 +1,10 @@
+[project]
+name = "runtime-spike"
+version = "0.0.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "mlx-vlm==0.7.6",
+  "mlx-lm==0.32.0",
+  "numpy",
+  "psutil",
+]

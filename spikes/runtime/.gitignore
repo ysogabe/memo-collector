@@ -1,0 +1,11 @@
+models/
+.venv/
+.build/
+*.mlpackage
+*.mlmodelc
+__pycache__/
+swift/**/.build/
+swift/**/.swiftpm/
+.venv-coreml/
+.venv-embed/
+swift/**/Packages/

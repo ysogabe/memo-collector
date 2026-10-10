@@ -1,0 +1,269 @@
+{
+ "bench": {
+  "finished_at": "2026-10-08T11:14:07Z",
+  "started_at": "2026-10-08T11:12:05Z"
+ },
+ "load_s": 58.246371030807495,
+ "meta": {
+  "engine": "whisperkit",
+  "model_folder": "/Users/yoshio/works/60-misc/memo-collector/spikes/runtime/models/stt/whisperkit/models/argmaxinc/whisperkit-coreml/openai_whisper-large-v3-v20240930",
+  "prompt": false,
+  "variant": "openai_whisper-large-v3-v20240930"
+ },
+ "rows": [
+  {
+   "duration_s": 6.512875,
+   "file": "c01.wav",
+   "hyp": "これHRMESのアダプタとして使えそう。後で実装方法を調べる。",
+   "id": 1,
+   "latency_s_median3": 1.455649971961975,
+   "cer": 0.0968
+  },
+  {
+   "duration_s": 7.50725,
+   "file": "c02.wav",
+   "hyp": "このISSUEの修正、CLAUD CODにやらせて、ストリーミング対応のところ、",
+   "id": 2,
+   "latency_s_median3": 1.4438369274139404,
+   "cer": 0.0526
+  },
+  {
+   "duration_s": 7.456375,
+   "file": "c03.wav",
+   "hyp": "今のAPI以降の話、HERMESの設計にも関係する。後で確認。",
+   "id": 3,
+   "latency_s_median3": 1.4342459440231323,
+   "cer": 0.1379
+  },
+  {
+   "duration_s": 5.081,
+   "file": "c04.wav",
+   "hyp": "これ重要認証はOA明日に寄せる方針メモしておいて",
+   "id": 4,
+   "latency_s_median3": 1.3749890327453613,
+   "cer": 0.12
+  },
+  {
+   "duration_s": 4.0289375,
+   "file": "c05.wav",
+   "hyp": "ここでNULになる理由を調べて、直しておいて。",
+   "id": 5,
+   "latency_s_median3": 1.3087190389633179,
+   "cer": 0.0455
+  },
+  {
+   "duration_s": 5.634125,
+   "file": "c06.wav",
+   "hyp": "このADFTR.tsの関数、テストを書いておいて、",
+   "id": 6,
+   "latency_s_median3": 1.3564389944076538,
+   "cer": 0.125
+  },
+  {
+   "duration_s": 3.761,
+   "file": "c07.wav",
+   "hyp": "この論文、TSOのところを明日までに読む。",
+   "id": 7,
+   "latency_s_median3": 1.3240458965301514,
+   "cer": 0.0526
+  },
+  {
+   "duration_s": 2.7585,
+   "file": "c08.wav",
+   "hyp": "この図、実装資料に使えそう。",
+   "id": 8,
+   "latency_s_median3": 1.2913150787353516,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 4.1080625,
+   "file": "c09.wav",
+   "hyp": "テストが落ちてる原因を特定して修正して",
+   "id": 9,
+   "latency_s_median3": 1.2863589525222778,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 4.4548125,
+   "file": "c10.wav",
+   "hyp": "TYDESTのこのエラー、基地の問題か調べておいて。",
+   "id": 10,
+   "latency_s_median3": 1.351963996887207,
+   "cer": 0.1667
+  },
+  {
+   "duration_s": 3.102125,
+   "file": "c11.wav",
+   "hyp": "田中さんへの返信、金曜までにする。",
+   "id": 11,
+   "latency_s_median3": 1.3095790147781372,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 3.904,
+   "file": "c12.wav",
+   "hyp": "来週火曜の15時から田中さんと打ち合わせ。",
+   "id": 12,
+   "latency_s_median3": 1.366582989692688,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 3.379625,
+   "file": "c13.wav",
+   "hyp": "環境変数の読み込み処理をリファクタリングして",
+   "id": 13,
+   "latency_s_median3": 1.3929060697555542,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 3.7448125,
+   "file": "c14.wav",
+   "hyp": "アクセスキーをローテーションする手順を調べておいて、",
+   "id": 14,
+   "latency_s_median3": 1.4030719995498657,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 3.1019375,
+   "file": "c15.wav",
+   "hyp": "この設計書のレビューを僕用までに返す。",
+   "id": 15,
+   "latency_s_median3": 1.338215947151184,
+   "cer": 0.1111
+  },
+  {
+   "duration_s": 3.6858125,
+   "file": "c16.wav",
+   "hyp": "次回の定例は10月15日の10時から。",
+   "id": 16,
+   "latency_s_median3": 1.3175569772720337,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 2.8196875,
+   "file": "c17.wav",
+   "hyp": "USB-Cケーブルを注文する",
+   "id": 17,
+   "latency_s_median3": 1.2610549926757812,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 7.576625,
+   "file": "c18.wav",
+   "hyp": "このケーブル、TH-UNDERBOLT4、太陽化他の製品と比較して調べて、",
+   "id": 18,
+   "latency_s_median3": 1.4645969867706299,
+   "cer": 0.1212
+  },
+  {
+   "duration_s": 4.2069375,
+   "file": "c19.wav",
+   "hyp": "GHの認証トークンが古い。後で更新する。",
+   "id": 19,
+   "latency_s_median3": 1.3621410131454468,
+   "cer": 0.1053
+  },
+  {
+   "duration_s": 3.9543125,
+   "file": "c20.wav",
+   "hyp": "この仕様、キャプチャのデータ構造の参考になる。",
+   "id": 20,
+   "latency_s_median3": 1.4154349565505981,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 2.9400625,
+   "file": "c21.wav",
+   "hyp": "この仕様を基にデータモデルを実装して、",
+   "id": 21,
+   "latency_s_median3": 1.3662470579147339,
+   "cer": 0.1053
+  },
+  {
+   "duration_s": 3.4256875,
+   "file": "c22.wav",
+   "hyp": "このパスワード、今週中に変更しておく。",
+   "id": 22,
+   "latency_s_median3": 1.3071280717849731,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 2.66925,
+   "file": "c23.wav",
+   "hyp": "明後日の午後3時に、会社。",
+   "id": 23,
+   "latency_s_median3": 1.251592993736267,
+   "cer": 0.25
+  },
+  {
+   "duration_s": 3.4744375,
+   "file": "c24.wav",
+   "hyp": "来月の出張、空いてる日を確認する。",
+   "id": 24,
+   "latency_s_median3": 1.3136019706726074,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 3.20125,
+   "file": "c25.wav",
+   "hyp": "似たライブラリが他にないか調べて比較して",
+   "id": 25,
+   "latency_s_median3": 1.3433059453964233,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 4.0918125,
+   "file": "c26.wav",
+   "hyp": "参加者は5人、議事録は佐藤さん担当。",
+   "id": 26,
+   "latency_s_median3": 1.357551097869873,
+   "cer": 0.0
+  },
+  {
+   "duration_s": 2.537375,
+   "file": "c27.wav",
+   "hyp": "ここの肩えら、直しておいて。",
+   "id": 27,
+   "latency_s_median3": 1.2963310480117798,
+   "cer": 0.3077
+  },
+  {
+   "duration_s": 3.67625,
+   "file": "c28.wav",
+   "hyp": "層の最新の改良手法をサーベイしておいて",
+   "id": 28,
+   "latency_s_median3": 1.3446530103683472,
+   "cer": 0.1429
+  },
+  {
+   "duration_s": 3.634,
+   "file": "c29.wav",
+   "hyp": "今日の気づき。レビューは午前中が赤ドル。",
+   "id": 29,
+   "latency_s_median3": 1.3871949911117554,
+   "cer": 0.1765
+  },
+  {
+   "duration_s": 2.739,
+   "file": "c30.wav",
+   "hyp": "水曜の11日に使用レビュー会議",
+   "id": 30,
+   "latency_s_median3": 1.3077600002288818,
+   "cer": 0.2
+  }
+ ],
+ "rss_mb_after": 1558.429696,
+ "rss_mb_before_load": 21.315584,
+ "score": {
+  "mean_cer": 0.0772,
+  "median_cer": 0.0526,
+  "max_cer": 0.3077,
+  "latency": {
+   "n": 30,
+   "p50_s": 1.3447,
+   "p90_s": 1.4342,
+   "max_s": 1.4646,
+   "mean_s": 1.3511
+  }
+ }
+}

@@ -1,0 +1,9 @@
+Loading weights:   0%|          | 0/1084 [00:00<?, ?it/s]Loading weights:  16%|█▌        | 174/1084 [00:00<00:00, 1728.88it/s]Loading weights:  32%|███▏      | 347/1084 [00:00<00:00, 1511.86it/s]Loading weights:  46%|████▋     | 503/1084 [00:00<00:00, 1517.68it/s]Loading weights:  61%|██████    | 656/1084 [00:00<00:00, 1489.10it/s]Loading weights:  74%|███████▍  | 806/1084 [00:01<00:00, 409.92it/s] Loading weights:  84%|████████▍ | 908/1084 [00:01<00:00, 360.49it/s]Loading weights:  93%|█████████▎| 1008/1084 [00:01<00:00, 430.79it/s]Loading weights: 100%|██████████| 1084/1084 [00:01<00:00, 576.91it/s]
+omni text_gold_en 0.533 0.867 0.0963
+omni text_gold_ja 0.6 0.867 0.1065
+omni text_stt_en 0.533 0.867 0.1045
+omni stt_plus_screen_en 0.333 0.767 1.9493
+omni audio_direct_en 0.167 0.733 0.2753
+omni img_only 0.429 {'threshold': 0.5, 'tp': 0, 'fn': 4, 'fp': 0, 'tn': 10, 'recall': 0.0, 'precision': None, 'accuracy': 0.714}
+omni img_plus_meta 0.857 {'threshold': 0.5, 'tp': 1, 'fn': 3, 'fp': 0, 'tn': 10, 'recall': 0.25, 'precision': 1.0, 'accuracy': 0.786}
+saved results/exp02_d1_omni.json

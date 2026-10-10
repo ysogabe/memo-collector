@@ -1,0 +1,1961 @@
+{
+  "env": {
+    "chip": "Apple M3",
+    "memory_gb": 24,
+    "macos": "27.0.1",
+    "python": "3.12.11",
+    "torch": "2.14.1",
+    "transformers": "5.19.0"
+  },
+  "model": "LiquidAI/d1-3B",
+  "revision": "051bcc464b01b9f92942b364d9586b0ef5912432",
+  "dtype": "torch.bfloat16",
+  "load": {
+    "load_s": 8.4188,
+    "rss_delta_mb": -314.1,
+    "mps_allocated_mb": 6265.0,
+    "mps_driver_mb": 7290.2
+  },
+  "first_text_call_s": 4.00395445805043,
+  "first_image_call_s": 11.619320791913196,
+  "intent": {
+    "text_gold_en": {
+      "accuracy": 0.833,
+      "correct": 25,
+      "n": 30,
+      "selective": {
+        "0.5": {
+          "coverage": 0.933,
+          "accuracy": 0.893
+        },
+        "0.7": {
+          "coverage": 0.833,
+          "accuracy": 0.88
+        }
+      },
+      "deadline": {
+        "threshold": 0.5,
+        "tp": 8,
+        "fn": 0,
+        "fp": 2,
+        "tn": 20,
+        "recall": 1.0,
+        "precision": 0.8,
+        "accuracy": 0.933
+      },
+      "latency": {
+        "n": 30,
+        "p50_s": 0.5338,
+        "p90_s": 0.6541,
+        "max_s": 1.3762,
+        "mean_s": 0.5817
+      },
+      "confusion": {
+        "code": {
+          "code": 5,
+          "note": 0,
+          "research": 2,
+          "schedule": 0,
+          "todo": 0
+        },
+        "note": {
+          "code": 0,
+          "note": 5,
+          "research": 0,
+          "schedule": 0,
+          "todo": 0
+        },
+        "research": {
+          "code": 1,
+          "note": 0,
+          "research": 5,
+          "schedule": 0,
+          "todo": 0
+        },
+        "schedule": {
+          "code": 0,
+          "note": 0,
+          "research": 0,
+          "schedule": 4,
+          "todo": 0
+        },
+        "todo": {
+          "code": 0,
+          "note": 0,
+          "research": 2,
+          "schedule": 0,
+          "todo": 6
+        }
+      },
+      "rows": [
+        {
+          "id": 1,
+          "gold": "research",
+          "pred": "code",
+          "confidence": 0.486,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 182,
+          "latency_s": 1.3762
+        },
+        {
+          "id": 2,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.96,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 180,
+          "latency_s": 0.5277
+        },
+        {
+          "id": 3,
+          "gold": "todo",
+          "pred": "research",
+          "confidence": 0.38,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 180,
+          "latency_s": 0.5006
+        },
+        {
+          "id": 4,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.972,
+          "deadline_gold": false,
+          "deadline_p": 0.011,
+          "input_tokens": 178,
+          "latency_s": 0.5405
+        },
+        {
+          "id": 5,
+          "gold": "code",
+          "pred": "research",
+          "confidence": 0.754,
+          "deadline_gold": false,
+          "deadline_p": 0.023,
+          "input_tokens": 170,
+          "latency_s": 0.6767
+        },
+        {
+          "id": 6,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.807,
+          "deadline_gold": false,
+          "deadline_p": 0.053,
+          "input_tokens": 173,
+          "latency_s": 0.5805
+        },
+        {
+          "id": 7,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.925,
+          "deadline_gold": true,
+          "deadline_p": 0.953,
+          "input_tokens": 174,
+          "latency_s": 0.5632
+        },
+        {
+          "id": 8,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.545,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 171,
+          "latency_s": 0.6139
+        },
+        {
+          "id": 9,
+          "gold": "code",
+          "pred": "research",
+          "confidence": 0.835,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 172,
+          "latency_s": 0.5829
+        },
+        {
+          "id": 10,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.951,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 177,
+          "latency_s": 0.5632
+        },
+        {
+          "id": 11,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.919,
+          "deadline_gold": true,
+          "deadline_p": 0.984,
+          "input_tokens": 172,
+          "latency_s": 0.4935
+        },
+        {
+          "id": 12,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.94,
+          "deadline_gold": true,
+          "deadline_p": 0.974,
+          "input_tokens": 174,
+          "latency_s": 0.5112
+        },
+        {
+          "id": 13,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.957,
+          "deadline_gold": false,
+          "deadline_p": 0.047,
+          "input_tokens": 174,
+          "latency_s": 0.6049
+        },
+        {
+          "id": 14,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.932,
+          "deadline_gold": false,
+          "deadline_p": 0.016,
+          "input_tokens": 174,
+          "latency_s": 0.5526
+        },
+        {
+          "id": 15,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.774,
+          "deadline_gold": true,
+          "deadline_p": 0.986,
+          "input_tokens": 172,
+          "latency_s": 0.5119
+        },
+        {
+          "id": 16,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.883,
+          "deadline_gold": true,
+          "deadline_p": 0.967,
+          "input_tokens": 173,
+          "latency_s": 0.526
+        },
+        {
+          "id": 17,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.521,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 168,
+          "latency_s": 0.6541
+        },
+        {
+          "id": 18,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.958,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 179,
+          "latency_s": 0.4904
+        },
+        {
+          "id": 19,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.784,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 175,
+          "latency_s": 0.4675
+        },
+        {
+          "id": 20,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.811,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 173,
+          "latency_s": 0.5326
+        },
+        {
+          "id": 21,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.668,
+          "deadline_gold": false,
+          "deadline_p": 0.068,
+          "input_tokens": 170,
+          "latency_s": 0.5077
+        },
+        {
+          "id": 22,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.872,
+          "deadline_gold": true,
+          "deadline_p": 0.94,
+          "input_tokens": 171,
+          "latency_s": 0.5121
+        },
+        {
+          "id": 23,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.931,
+          "deadline_gold": true,
+          "deadline_p": 0.963,
+          "input_tokens": 170,
+          "latency_s": 0.5106
+        },
+        {
+          "id": 24,
+          "gold": "todo",
+          "pred": "research",
+          "confidence": 0.752,
+          "deadline_gold": false,
+          "deadline_p": 0.755,
+          "input_tokens": 172,
+          "latency_s": 0.6215
+        },
+        {
+          "id": 25,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.972,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 174,
+          "latency_s": 0.5338
+        },
+        {
+          "id": 26,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.701,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 174,
+          "latency_s": 0.6078
+        },
+        {
+          "id": 27,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.912,
+          "deadline_gold": false,
+          "deadline_p": 0.016,
+          "input_tokens": 170,
+          "latency_s": 0.5235
+        },
+        {
+          "id": 28,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.935,
+          "deadline_gold": false,
+          "deadline_p": 0.012,
+          "input_tokens": 176,
+          "latency_s": 0.6786
+        },
+        {
+          "id": 29,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.742,
+          "deadline_gold": false,
+          "deadline_p": 0.651,
+          "input_tokens": 175,
+          "latency_s": 0.5108
+        },
+        {
+          "id": 30,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.915,
+          "deadline_gold": true,
+          "deadline_p": 0.974,
+          "input_tokens": 169,
+          "latency_s": 0.575
+        }
+      ]
+    },
+    "text_gold_ja": {
+      "accuracy": 0.833,
+      "correct": 25,
+      "n": 30,
+      "selective": {
+        "0.5": {
+          "coverage": 0.967,
+          "accuracy": 0.828
+        },
+        "0.7": {
+          "coverage": 0.833,
+          "accuracy": 0.88
+        }
+      },
+      "deadline": {
+        "threshold": 0.5,
+        "tp": 8,
+        "fn": 0,
+        "fp": 2,
+        "tn": 20,
+        "recall": 1.0,
+        "precision": 0.8,
+        "accuracy": 0.933
+      },
+      "latency": {
+        "n": 30,
+        "p50_s": 0.6531,
+        "p90_s": 0.7676,
+        "max_s": 0.8666,
+        "mean_s": 0.675
+      },
+      "confusion": {
+        "code": {
+          "code": 7,
+          "note": 0,
+          "research": 0,
+          "schedule": 0,
+          "todo": 0
+        },
+        "note": {
+          "code": 2,
+          "note": 3,
+          "research": 0,
+          "schedule": 0,
+          "todo": 0
+        },
+        "research": {
+          "code": 1,
+          "note": 0,
+          "research": 5,
+          "schedule": 0,
+          "todo": 0
+        },
+        "schedule": {
+          "code": 0,
+          "note": 0,
+          "research": 0,
+          "schedule": 4,
+          "todo": 0
+        },
+        "todo": {
+          "code": 0,
+          "note": 0,
+          "research": 2,
+          "schedule": 0,
+          "todo": 6
+        }
+      },
+      "rows": [
+        {
+          "id": 1,
+          "gold": "research",
+          "pred": "code",
+          "confidence": 0.671,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 202,
+          "latency_s": 0.8666
+        },
+        {
+          "id": 2,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.977,
+          "deadline_gold": false,
+          "deadline_p": 0.016,
+          "input_tokens": 200,
+          "latency_s": 0.6108
+        },
+        {
+          "id": 3,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.547,
+          "deadline_gold": false,
+          "deadline_p": 0.016,
+          "input_tokens": 200,
+          "latency_s": 0.6326
+        },
+        {
+          "id": 4,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.954,
+          "deadline_gold": false,
+          "deadline_p": 0.011,
+          "input_tokens": 198,
+          "latency_s": 0.8359
+        },
+        {
+          "id": 5,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.776,
+          "deadline_gold": false,
+          "deadline_p": 0.023,
+          "input_tokens": 190,
+          "latency_s": 0.6329
+        },
+        {
+          "id": 6,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.917,
+          "deadline_gold": false,
+          "deadline_p": 0.053,
+          "input_tokens": 193,
+          "latency_s": 0.6505
+        },
+        {
+          "id": 7,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.89,
+          "deadline_gold": true,
+          "deadline_p": 0.953,
+          "input_tokens": 194,
+          "latency_s": 0.727
+        },
+        {
+          "id": 8,
+          "gold": "note",
+          "pred": "code",
+          "confidence": 0.808,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 191,
+          "latency_s": 0.5656
+        },
+        {
+          "id": 9,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.402,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 192,
+          "latency_s": 0.6301
+        },
+        {
+          "id": 10,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.842,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 197,
+          "latency_s": 0.6899
+        },
+        {
+          "id": 11,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.801,
+          "deadline_gold": true,
+          "deadline_p": 0.984,
+          "input_tokens": 192,
+          "latency_s": 0.585
+        },
+        {
+          "id": 12,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.96,
+          "deadline_gold": true,
+          "deadline_p": 0.974,
+          "input_tokens": 194,
+          "latency_s": 0.7274
+        },
+        {
+          "id": 13,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.947,
+          "deadline_gold": false,
+          "deadline_p": 0.047,
+          "input_tokens": 194,
+          "latency_s": 0.7676
+        },
+        {
+          "id": 14,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.764,
+          "deadline_gold": false,
+          "deadline_p": 0.016,
+          "input_tokens": 194,
+          "latency_s": 0.6439
+        },
+        {
+          "id": 15,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.682,
+          "deadline_gold": true,
+          "deadline_p": 0.986,
+          "input_tokens": 192,
+          "latency_s": 0.57
+        },
+        {
+          "id": 16,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.929,
+          "deadline_gold": true,
+          "deadline_p": 0.963,
+          "input_tokens": 193,
+          "latency_s": 0.745
+        },
+        {
+          "id": 17,
+          "gold": "todo",
+          "pred": "research",
+          "confidence": 0.77,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 188,
+          "latency_s": 0.5835
+        },
+        {
+          "id": 18,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.967,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 199,
+          "latency_s": 0.6531
+        },
+        {
+          "id": 19,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.848,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 195,
+          "latency_s": 0.8255
+        },
+        {
+          "id": 20,
+          "gold": "note",
+          "pred": "code",
+          "confidence": 0.748,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 193,
+          "latency_s": 0.7104
+        },
+        {
+          "id": 21,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.854,
+          "deadline_gold": false,
+          "deadline_p": 0.068,
+          "input_tokens": 190,
+          "latency_s": 0.6344
+        },
+        {
+          "id": 22,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.86,
+          "deadline_gold": true,
+          "deadline_p": 0.947,
+          "input_tokens": 191,
+          "latency_s": 0.6647
+        },
+        {
+          "id": 23,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.96,
+          "deadline_gold": true,
+          "deadline_p": 0.958,
+          "input_tokens": 190,
+          "latency_s": 0.548
+        },
+        {
+          "id": 24,
+          "gold": "todo",
+          "pred": "research",
+          "confidence": 0.588,
+          "deadline_gold": false,
+          "deadline_p": 0.755,
+          "input_tokens": 192,
+          "latency_s": 0.5322
+        },
+        {
+          "id": 25,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.965,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 194,
+          "latency_s": 0.7043
+        },
+        {
+          "id": 26,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.71,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 194,
+          "latency_s": 0.707
+        },
+        {
+          "id": 27,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.912,
+          "deadline_gold": false,
+          "deadline_p": 0.016,
+          "input_tokens": 190,
+          "latency_s": 0.711
+        },
+        {
+          "id": 28,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.93,
+          "deadline_gold": false,
+          "deadline_p": 0.012,
+          "input_tokens": 196,
+          "latency_s": 0.7649
+        },
+        {
+          "id": 29,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.875,
+          "deadline_gold": false,
+          "deadline_p": 0.651,
+          "input_tokens": 195,
+          "latency_s": 0.7366
+        },
+        {
+          "id": 30,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.953,
+          "deadline_gold": true,
+          "deadline_p": 0.974,
+          "input_tokens": 189,
+          "latency_s": 0.5924
+        }
+      ]
+    },
+    "text_stt_en": {
+      "accuracy": 0.833,
+      "correct": 25,
+      "n": 30,
+      "selective": {
+        "0.5": {
+          "coverage": 0.867,
+          "accuracy": 0.846
+        },
+        "0.7": {
+          "coverage": 0.733,
+          "accuracy": 0.818
+        }
+      },
+      "deadline": {
+        "threshold": 0.5,
+        "tp": 7,
+        "fn": 1,
+        "fp": 3,
+        "tn": 19,
+        "recall": 0.875,
+        "precision": 0.7,
+        "accuracy": 0.867
+      },
+      "latency": {
+        "n": 30,
+        "p50_s": 0.5654,
+        "p90_s": 0.6729,
+        "max_s": 0.696,
+        "mean_s": 0.5905
+      },
+      "confusion": {
+        "code": {
+          "code": 5,
+          "note": 0,
+          "research": 2,
+          "schedule": 0,
+          "todo": 0
+        },
+        "note": {
+          "code": 0,
+          "note": 5,
+          "research": 0,
+          "schedule": 0,
+          "todo": 0
+        },
+        "research": {
+          "code": 0,
+          "note": 0,
+          "research": 6,
+          "schedule": 0,
+          "todo": 0
+        },
+        "schedule": {
+          "code": 0,
+          "note": 0,
+          "research": 0,
+          "schedule": 4,
+          "todo": 0
+        },
+        "todo": {
+          "code": 0,
+          "note": 2,
+          "research": 1,
+          "schedule": 0,
+          "todo": 5
+        }
+      },
+      "rows": [
+        {
+          "id": 1,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.429,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 181,
+          "latency_s": 0.6468
+        },
+        {
+          "id": 2,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.959,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 180,
+          "latency_s": 0.5585
+        },
+        {
+          "id": 3,
+          "gold": "todo",
+          "pred": "note",
+          "confidence": 0.707,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 179,
+          "latency_s": 0.5602
+        },
+        {
+          "id": 4,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.94,
+          "deadline_gold": false,
+          "deadline_p": 0.963,
+          "input_tokens": 179,
+          "latency_s": 0.6926
+        },
+        {
+          "id": 5,
+          "gold": "code",
+          "pred": "research",
+          "confidence": 0.77,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 171,
+          "latency_s": 0.5837
+        },
+        {
+          "id": 6,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.694,
+          "deadline_gold": false,
+          "deadline_p": 0.068,
+          "input_tokens": 174,
+          "latency_s": 0.5496
+        },
+        {
+          "id": 7,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.912,
+          "deadline_gold": true,
+          "deadline_p": 0.963,
+          "input_tokens": 174,
+          "latency_s": 0.6049
+        },
+        {
+          "id": 8,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.488,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 171,
+          "latency_s": 0.576
+        },
+        {
+          "id": 9,
+          "gold": "code",
+          "pred": "research",
+          "confidence": 0.804,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 172,
+          "latency_s": 0.5498
+        },
+        {
+          "id": 10,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.908,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 176,
+          "latency_s": 0.5756
+        },
+        {
+          "id": 11,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.915,
+          "deadline_gold": true,
+          "deadline_p": 0.984,
+          "input_tokens": 172,
+          "latency_s": 0.6232
+        },
+        {
+          "id": 12,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.941,
+          "deadline_gold": true,
+          "deadline_p": 0.974,
+          "input_tokens": 174,
+          "latency_s": 0.5495
+        },
+        {
+          "id": 13,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.957,
+          "deadline_gold": false,
+          "deadline_p": 0.047,
+          "input_tokens": 174,
+          "latency_s": 0.671
+        },
+        {
+          "id": 14,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.932,
+          "deadline_gold": false,
+          "deadline_p": 0.016,
+          "input_tokens": 174,
+          "latency_s": 0.6267
+        },
+        {
+          "id": 15,
+          "gold": "todo",
+          "pred": "note",
+          "confidence": 0.456,
+          "deadline_gold": true,
+          "deadline_p": 0.085,
+          "input_tokens": 172,
+          "latency_s": 0.5291
+        },
+        {
+          "id": 16,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.878,
+          "deadline_gold": true,
+          "deadline_p": 0.971,
+          "input_tokens": 173,
+          "latency_s": 0.5336
+        },
+        {
+          "id": 17,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.554,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 169,
+          "latency_s": 0.548
+        },
+        {
+          "id": 18,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.953,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 184,
+          "latency_s": 0.696
+        },
+        {
+          "id": 19,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.731,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 175,
+          "latency_s": 0.5533
+        },
+        {
+          "id": 20,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.801,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 171,
+          "latency_s": 0.5638
+        },
+        {
+          "id": 21,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.458,
+          "deadline_gold": false,
+          "deadline_p": 0.085,
+          "input_tokens": 172,
+          "latency_s": 0.6876
+        },
+        {
+          "id": 22,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.877,
+          "deadline_gold": true,
+          "deadline_p": 0.947,
+          "input_tokens": 171,
+          "latency_s": 0.5834
+        },
+        {
+          "id": 23,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.806,
+          "deadline_gold": true,
+          "deadline_p": 0.94,
+          "input_tokens": 171,
+          "latency_s": 0.5325
+        },
+        {
+          "id": 24,
+          "gold": "todo",
+          "pred": "research",
+          "confidence": 0.753,
+          "deadline_gold": false,
+          "deadline_p": 0.731,
+          "input_tokens": 172,
+          "latency_s": 0.5863
+        },
+        {
+          "id": 25,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.972,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 174,
+          "latency_s": 0.5559
+        },
+        {
+          "id": 26,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.692,
+          "deadline_gold": false,
+          "deadline_p": 0.016,
+          "input_tokens": 174,
+          "latency_s": 0.55
+        },
+        {
+          "id": 27,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.561,
+          "deadline_gold": false,
+          "deadline_p": 0.023,
+          "input_tokens": 170,
+          "latency_s": 0.5502
+        },
+        {
+          "id": 28,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.935,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 176,
+          "latency_s": 0.6729
+        },
+        {
+          "id": 29,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.828,
+          "deadline_gold": false,
+          "deadline_p": 0.679,
+          "input_tokens": 174,
+          "latency_s": 0.5654
+        },
+        {
+          "id": 30,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.942,
+          "deadline_gold": true,
+          "deadline_p": 0.971,
+          "input_tokens": 169,
+          "latency_s": 0.6394
+        }
+      ]
+    },
+    "stt_plus_screen_en": {
+      "accuracy": 0.7,
+      "correct": 21,
+      "n": 30,
+      "selective": {
+        "0.5": {
+          "coverage": 0.867,
+          "accuracy": 0.808
+        },
+        "0.7": {
+          "coverage": 0.733,
+          "accuracy": 0.864
+        }
+      },
+      "deadline": {
+        "threshold": 0.5,
+        "tp": 6,
+        "fn": 2,
+        "fp": 1,
+        "tn": 21,
+        "recall": 0.75,
+        "precision": 0.857,
+        "accuracy": 0.9
+      },
+      "latency": {
+        "n": 30,
+        "p50_s": 10.0884,
+        "p90_s": 10.6746,
+        "max_s": 11.1062,
+        "mean_s": 10.2499
+      },
+      "confusion": {
+        "code": {
+          "code": 4,
+          "note": 1,
+          "research": 2,
+          "schedule": 0,
+          "todo": 0
+        },
+        "note": {
+          "code": 0,
+          "note": 5,
+          "research": 0,
+          "schedule": 0,
+          "todo": 0
+        },
+        "research": {
+          "code": 0,
+          "note": 1,
+          "research": 4,
+          "schedule": 0,
+          "todo": 1
+        },
+        "schedule": {
+          "code": 0,
+          "note": 0,
+          "research": 0,
+          "schedule": 4,
+          "todo": 0
+        },
+        "todo": {
+          "code": 0,
+          "note": 4,
+          "research": 0,
+          "schedule": 0,
+          "todo": 4
+        }
+      },
+      "rows": [
+        {
+          "id": 1,
+          "gold": "research",
+          "pred": "note",
+          "confidence": 0.488,
+          "deadline_gold": false,
+          "deadline_p": 0.042,
+          "input_tokens": 2012,
+          "latency_s": 11.1062
+        },
+        {
+          "id": 2,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.961,
+          "deadline_gold": false,
+          "deadline_p": 0.042,
+          "input_tokens": 2010,
+          "latency_s": 10.859
+        },
+        {
+          "id": 3,
+          "gold": "todo",
+          "pred": "note",
+          "confidence": 0.754,
+          "deadline_gold": false,
+          "deadline_p": 0.148,
+          "input_tokens": 1979,
+          "latency_s": 10.6746
+        },
+        {
+          "id": 4,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.681,
+          "deadline_gold": false,
+          "deadline_p": 0.731,
+          "input_tokens": 1979,
+          "latency_s": 10.6382
+        },
+        {
+          "id": 5,
+          "gold": "code",
+          "pred": "research",
+          "confidence": 0.611,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 1973,
+          "latency_s": 10.5443
+        },
+        {
+          "id": 6,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.967,
+          "deadline_gold": false,
+          "deadline_p": 0.02,
+          "input_tokens": 1975,
+          "latency_s": 10.5846
+        },
+        {
+          "id": 7,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.938,
+          "deadline_gold": true,
+          "deadline_p": 0.818,
+          "input_tokens": 1979,
+          "latency_s": 10.0884
+        },
+        {
+          "id": 8,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.919,
+          "deadline_gold": false,
+          "deadline_p": 0.182,
+          "input_tokens": 1976,
+          "latency_s": 9.8487
+        },
+        {
+          "id": 9,
+          "gold": "code",
+          "pred": "research",
+          "confidence": 0.571,
+          "deadline_gold": false,
+          "deadline_p": 0.029,
+          "input_tokens": 1980,
+          "latency_s": 9.9896
+        },
+        {
+          "id": 10,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.957,
+          "deadline_gold": false,
+          "deadline_p": 0.026,
+          "input_tokens": 1982,
+          "latency_s": 9.5792
+        },
+        {
+          "id": 11,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.714,
+          "deadline_gold": true,
+          "deadline_p": 0.932,
+          "input_tokens": 1978,
+          "latency_s": 9.7912
+        },
+        {
+          "id": 12,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.961,
+          "deadline_gold": true,
+          "deadline_p": 0.967,
+          "input_tokens": 1980,
+          "latency_s": 9.9622
+        },
+        {
+          "id": 13,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.955,
+          "deadline_gold": false,
+          "deadline_p": 0.294,
+          "input_tokens": 1976,
+          "latency_s": 9.9258
+        },
+        {
+          "id": 14,
+          "gold": "research",
+          "pred": "todo",
+          "confidence": 0.464,
+          "deadline_gold": false,
+          "deadline_p": 0.014,
+          "input_tokens": 2007,
+          "latency_s": 10.2298
+        },
+        {
+          "id": 15,
+          "gold": "todo",
+          "pred": "note",
+          "confidence": 0.494,
+          "deadline_gold": true,
+          "deadline_p": 0.349,
+          "input_tokens": 1974,
+          "latency_s": 9.9905
+        },
+        {
+          "id": 16,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.843,
+          "deadline_gold": true,
+          "deadline_p": 0.905,
+          "input_tokens": 1976,
+          "latency_s": 9.9456
+        },
+        {
+          "id": 17,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.923,
+          "deadline_gold": false,
+          "deadline_p": 0.037,
+          "input_tokens": 1998,
+          "latency_s": 10.4547
+        },
+        {
+          "id": 18,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.962,
+          "deadline_gold": false,
+          "deadline_p": 0.047,
+          "input_tokens": 2013,
+          "latency_s": 10.387
+        },
+        {
+          "id": 19,
+          "gold": "todo",
+          "pred": "note",
+          "confidence": 0.838,
+          "deadline_gold": false,
+          "deadline_p": 0.029,
+          "input_tokens": 1982,
+          "latency_s": 10.2016
+        },
+        {
+          "id": 20,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.861,
+          "deadline_gold": false,
+          "deadline_p": 0.033,
+          "input_tokens": 1976,
+          "latency_s": 10.0047
+        },
+        {
+          "id": 21,
+          "gold": "code",
+          "pred": "code",
+          "confidence": 0.884,
+          "deadline_gold": false,
+          "deadline_p": 0.076,
+          "input_tokens": 1977,
+          "latency_s": 9.9512
+        },
+        {
+          "id": 22,
+          "gold": "todo",
+          "pred": "todo",
+          "confidence": 0.689,
+          "deadline_gold": true,
+          "deadline_p": 0.349,
+          "input_tokens": 1972,
+          "latency_s": 9.9967
+        },
+        {
+          "id": 23,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.947,
+          "deadline_gold": true,
+          "deadline_p": 0.818,
+          "input_tokens": 1995,
+          "latency_s": 10.0333
+        },
+        {
+          "id": 24,
+          "gold": "todo",
+          "pred": "note",
+          "confidence": 0.362,
+          "deadline_gold": false,
+          "deadline_p": 0.269,
+          "input_tokens": 1996,
+          "latency_s": 11.0636
+        },
+        {
+          "id": 25,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.963,
+          "deadline_gold": false,
+          "deadline_p": 0.06,
+          "input_tokens": 2005,
+          "latency_s": 9.9945
+        },
+        {
+          "id": 26,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.776,
+          "deadline_gold": false,
+          "deadline_p": 0.202,
+          "input_tokens": 1974,
+          "latency_s": 9.7965
+        },
+        {
+          "id": 27,
+          "gold": "code",
+          "pred": "note",
+          "confidence": 0.886,
+          "deadline_gold": false,
+          "deadline_p": 0.018,
+          "input_tokens": 1972,
+          "latency_s": 10.2055
+        },
+        {
+          "id": 28,
+          "gold": "research",
+          "pred": "research",
+          "confidence": 0.855,
+          "deadline_gold": false,
+          "deadline_p": 0.202,
+          "input_tokens": 1982,
+          "latency_s": 10.6321
+        },
+        {
+          "id": 29,
+          "gold": "note",
+          "pred": "note",
+          "confidence": 0.755,
+          "deadline_gold": false,
+          "deadline_p": 0.223,
+          "input_tokens": 1979,
+          "latency_s": 10.473
+        },
+        {
+          "id": 30,
+          "gold": "schedule",
+          "pred": "schedule",
+          "confidence": 0.965,
+          "deadline_gold": true,
+          "deadline_p": 0.967,
+          "input_tokens": 1974,
+          "latency_s": 10.5447
+        }
+      ]
+    }
+  },
+  "screen": {
+    "img_only": {
+      "context_accuracy": 0.786,
+      "context_confusion": {
+        "browser": {
+          "browser": 4,
+          "chat": 0,
+          "code": 0,
+          "document": 0,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 0
+        },
+        "chat": {
+          "browser": 0,
+          "chat": 1,
+          "code": 0,
+          "document": 0,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 0
+        },
+        "code": {
+          "browser": 0,
+          "chat": 0,
+          "code": 1,
+          "document": 0,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 1
+        },
+        "document": {
+          "browser": 0,
+          "chat": 0,
+          "code": 0,
+          "document": 2,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 0
+        },
+        "meeting": {
+          "browser": 0,
+          "chat": 0,
+          "code": 0,
+          "document": 1,
+          "meeting": 1,
+          "other": 0,
+          "terminal": 0
+        },
+        "other": {
+          "browser": 1,
+          "chat": 0,
+          "code": 0,
+          "document": 0,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 0
+        },
+        "terminal": {
+          "browser": 0,
+          "chat": 0,
+          "code": 0,
+          "document": 0,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 2
+        }
+      },
+      "secret@0.5": {
+        "threshold": 0.5,
+        "tp": 2,
+        "fn": 2,
+        "fp": 0,
+        "tn": 10,
+        "recall": 0.5,
+        "precision": 1.0,
+        "accuracy": 0.857
+      },
+      "secret@0.3": {
+        "threshold": 0.3,
+        "tp": 3,
+        "fn": 1,
+        "fp": 1,
+        "tn": 9,
+        "recall": 0.75,
+        "precision": 0.75,
+        "accuracy": 0.857
+      },
+      "latency": {
+        "n": 14,
+        "p50_s": 11.0554,
+        "p90_s": 11.3913,
+        "max_s": 12.08,
+        "mean_s": 10.9358
+      },
+      "rows": [
+        {
+          "id": "s01",
+          "context_gold": "browser",
+          "context_pred": "browser",
+          "secret_gold": false,
+          "secret_p": 0.047,
+          "input_tokens": 1921,
+          "latency_s": 10.6211
+        },
+        {
+          "id": "s02",
+          "context_gold": "meeting",
+          "context_pred": "meeting",
+          "secret_gold": false,
+          "secret_p": 0.068,
+          "input_tokens": 1921,
+          "latency_s": 10.4294
+        },
+        {
+          "id": "s03",
+          "context_gold": "code",
+          "context_pred": "code",
+          "secret_gold": false,
+          "secret_p": 0.133,
+          "input_tokens": 1921,
+          "latency_s": 10.6358
+        },
+        {
+          "id": "s04",
+          "context_gold": "document",
+          "context_pred": "document",
+          "secret_gold": false,
+          "secret_p": 0.042,
+          "input_tokens": 1921,
+          "latency_s": 11.0554
+        },
+        {
+          "id": "s05",
+          "context_gold": "terminal",
+          "context_pred": "terminal",
+          "secret_gold": false,
+          "secret_p": 0.349,
+          "input_tokens": 1921,
+          "latency_s": 11.2148
+        },
+        {
+          "id": "s06",
+          "context_gold": "chat",
+          "context_pred": "chat",
+          "secret_gold": false,
+          "secret_p": 0.047,
+          "input_tokens": 1921,
+          "latency_s": 11.3913
+        },
+        {
+          "id": "s07",
+          "context_gold": "code",
+          "context_pred": "terminal",
+          "secret_gold": true,
+          "secret_p": 0.881,
+          "input_tokens": 1921,
+          "latency_s": 11.215
+        },
+        {
+          "id": "s08",
+          "context_gold": "browser",
+          "context_pred": "browser",
+          "secret_gold": true,
+          "secret_p": 0.269,
+          "input_tokens": 1921,
+          "latency_s": 12.08
+        },
+        {
+          "id": "s09",
+          "context_gold": "meeting",
+          "context_pred": "document",
+          "secret_gold": false,
+          "secret_p": 0.042,
+          "input_tokens": 1921,
+          "latency_s": 11.2219
+        },
+        {
+          "id": "s10",
+          "context_gold": "browser",
+          "context_pred": "browser",
+          "secret_gold": false,
+          "secret_p": 0.026,
+          "input_tokens": 1921,
+          "latency_s": 11.2848
+        },
+        {
+          "id": "s11",
+          "context_gold": "terminal",
+          "context_pred": "terminal",
+          "secret_gold": true,
+          "secret_p": 0.651,
+          "input_tokens": 1921,
+          "latency_s": 11.1267
+        },
+        {
+          "id": "s12",
+          "context_gold": "document",
+          "context_pred": "document",
+          "secret_gold": false,
+          "secret_p": 0.06,
+          "input_tokens": 1921,
+          "latency_s": 10.7897
+        },
+        {
+          "id": "s13",
+          "context_gold": "other",
+          "context_pred": "browser",
+          "secret_gold": true,
+          "secret_p": 0.469,
+          "input_tokens": 1921,
+          "latency_s": 10.4602
+        },
+        {
+          "id": "s14",
+          "context_gold": "browser",
+          "context_pred": "browser",
+          "secret_gold": false,
+          "secret_p": 0.033,
+          "input_tokens": 1921,
+          "latency_s": 9.5754
+        }
+      ]
+    },
+    "img_plus_meta": {
+      "context_accuracy": 0.857,
+      "context_confusion": {
+        "browser": {
+          "browser": 4,
+          "chat": 0,
+          "code": 0,
+          "document": 0,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 0
+        },
+        "chat": {
+          "browser": 0,
+          "chat": 1,
+          "code": 0,
+          "document": 0,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 0
+        },
+        "code": {
+          "browser": 0,
+          "chat": 0,
+          "code": 1,
+          "document": 0,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 1
+        },
+        "document": {
+          "browser": 0,
+          "chat": 0,
+          "code": 0,
+          "document": 2,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 0
+        },
+        "meeting": {
+          "browser": 0,
+          "chat": 1,
+          "code": 0,
+          "document": 0,
+          "meeting": 1,
+          "other": 0,
+          "terminal": 0
+        },
+        "other": {
+          "browser": 0,
+          "chat": 0,
+          "code": 0,
+          "document": 0,
+          "meeting": 0,
+          "other": 1,
+          "terminal": 0
+        },
+        "terminal": {
+          "browser": 0,
+          "chat": 0,
+          "code": 0,
+          "document": 0,
+          "meeting": 0,
+          "other": 0,
+          "terminal": 2
+        }
+      },
+      "secret@0.5": {
+        "threshold": 0.5,
+        "tp": 2,
+        "fn": 2,
+        "fp": 0,
+        "tn": 10,
+        "recall": 0.5,
+        "precision": 1.0,
+        "accuracy": 0.857
+      },
+      "secret@0.3": {
+        "threshold": 0.3,
+        "tp": 3,
+        "fn": 1,
+        "fp": 1,
+        "tn": 9,
+        "recall": 0.75,
+        "precision": 0.75,
+        "accuracy": 0.857
+      },
+      "latency": {
+        "n": 14,
+        "p50_s": 10.2454,
+        "p90_s": 10.6981,
+        "max_s": 10.7678,
+        "mean_s": 10.2399
+      },
+      "rows": [
+        {
+          "id": "s01",
+          "context_gold": "browser",
+          "context_pred": "browser",
+          "secret_gold": false,
+          "secret_p": 0.029,
+          "input_tokens": 1964,
+          "latency_s": 9.8811
+        },
+        {
+          "id": "s02",
+          "context_gold": "meeting",
+          "context_pred": "meeting",
+          "secret_gold": false,
+          "secret_p": 0.037,
+          "input_tokens": 1933,
+          "latency_s": 9.9185
+        },
+        {
+          "id": "s03",
+          "context_gold": "code",
+          "context_pred": "code",
+          "secret_gold": false,
+          "secret_p": 0.06,
+          "input_tokens": 1935,
+          "latency_s": 10.09
+        },
+        {
+          "id": "s04",
+          "context_gold": "document",
+          "context_pred": "document",
+          "secret_gold": false,
+          "secret_p": 0.033,
+          "input_tokens": 1939,
+          "latency_s": 10.018
+        },
+        {
+          "id": "s05",
+          "context_gold": "terminal",
+          "context_pred": "terminal",
+          "secret_gold": false,
+          "secret_p": 0.407,
+          "input_tokens": 1941,
+          "latency_s": 10.1662
+        },
+        {
+          "id": "s06",
+          "context_gold": "chat",
+          "context_pred": "chat",
+          "secret_gold": false,
+          "secret_p": 0.042,
+          "input_tokens": 1939,
+          "latency_s": 10.2651
+        },
+        {
+          "id": "s07",
+          "context_gold": "code",
+          "context_pred": "terminal",
+          "secret_gold": true,
+          "secret_p": 0.924,
+          "input_tokens": 1935,
+          "latency_s": 10.031
+        },
+        {
+          "id": "s08",
+          "context_gold": "browser",
+          "context_pred": "browser",
+          "secret_gold": true,
+          "secret_p": 0.165,
+          "input_tokens": 1965,
+          "latency_s": 10.3089
+        },
+        {
+          "id": "s09",
+          "context_gold": "meeting",
+          "context_pred": "chat",
+          "secret_gold": false,
+          "secret_p": 0.029,
+          "input_tokens": 1936,
+          "latency_s": 10.7678
+        },
+        {
+          "id": "s10",
+          "context_gold": "browser",
+          "context_pred": "browser",
+          "secret_gold": false,
+          "secret_p": 0.033,
+          "input_tokens": 1963,
+          "latency_s": 10.2454
+        },
+        {
+          "id": "s11",
+          "context_gold": "terminal",
+          "context_pred": "terminal",
+          "secret_gold": true,
+          "secret_p": 0.798,
+          "input_tokens": 1941,
+          "latency_s": 10.6981
+        },
+        {
+          "id": "s12",
+          "context_gold": "document",
+          "context_pred": "document",
+          "secret_gold": false,
+          "secret_p": 0.037,
+          "input_tokens": 1939,
+          "latency_s": 10.3375
+        },
+        {
+          "id": "s13",
+          "context_gold": "other",
+          "context_pred": "other",
+          "secret_gold": true,
+          "secret_p": 0.438,
+          "input_tokens": 1935,
+          "latency_s": 10.3275
+        },
+        {
+          "id": "s14",
+          "context_gold": "browser",
+          "context_pred": "browser",
+          "secret_gold": false,
+          "secret_p": 0.029,
+          "input_tokens": 1957,
+          "latency_s": 10.3035
+        }
+      ]
+    }
+  },
+  "batch_text_30_s": 17.259,
+  "peak": {
+    "rss_mb": 1143.4,
+    "mps_allocated_mb": 6265.0,
+    "mps_driver_mb": 7323.4
+  }
+}

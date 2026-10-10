@@ -1,0 +1,183 @@
+row 0
+row 1
+row 2
+row 3
+row 4
+row 5
+row 6
+row 7
+row 8
+row 9
+row 10
+row 11
+row 12
+row 13
+row 14
+row 15
+row 16
+row 17
+row 18
+row 19
+row 20
+row 21
+row 22
+row 23
+row 24
+row 25
+row 26
+row 27
+row 28
+row 29
+row 30
+row 31
+row 32
+row 33
+row 34
+row 35
+row 36
+row 37
+row 38
+row 39
+row 40
+row 41
+row 42
+row 43
+row 44
+row 45
+row 46
+row 47
+row 48
+row 49
+row 50
+row 51
+{
+ "dev": {
+  "intent_vs_chain": {
+   "max_abs_dp": 0.021375959806610778,
+   "top1_agree": "29/30"
+  },
+  "intent_vs_tree": {
+   "max_abs_dp": 0.01325224821173343,
+   "top1_agree": "30/30"
+  },
+  "deadline_vs_chain": {
+   "max_abs_dp": 0.008981384708718787,
+   "top1_agree": "30/30"
+  },
+  "deadline_vs_tree": {
+   "max_abs_dp": 0.008981384708718787,
+   "top1_agree": "30/30"
+  },
+  "intent_accuracy": "25/30"
+ },
+ "holdout": {
+  "intent_vs_chain": {
+   "max_abs_dp": 0.027031159431124108,
+   "top1_agree": "22/22"
+  },
+  "intent_vs_tree": {
+   "max_abs_dp": 0.015001142913877885,
+   "top1_agree": "22/22"
+  },
+  "deadline_vs_chain": {
+   "max_abs_dp": 0.004225874687574849,
+   "top1_agree": "22/22"
+  },
+  "deadline_vs_tree": {
+   "max_abs_dp": 0.005014990298202043,
+   "top1_agree": "22/22"
+  },
+  "intent_accuracy": "21/22"
+ },
+ "all": {
+  "intent_vs_chain": {
+   "max_abs_dp": 0.027031159431124108,
+   "top1_agree": "51/52"
+  },
+  "intent_vs_tree": {
+   "max_abs_dp": 0.015001142913877885,
+   "top1_agree": "52/52"
+  },
+  "deadline_vs_chain": {
+   "max_abs_dp": 0.008981384708718787,
+   "top1_agree": "52/52"
+  },
+  "deadline_vs_tree": {
+   "max_abs_dp": 0.008981384708718787,
+   "top1_agree": "52/52"
+  },
+  "intent_accuracy": "46/52"
+ }
+}
+{
+ "load_s": 15.4,
+ "summary": {
+  "dev": {
+   "intent_vs_chain": {
+    "max_abs_dp": 0.021375959806610778,
+    "top1_agree": "29/30"
+   },
+   "intent_vs_tree": {
+    "max_abs_dp": 0.01325224821173343,
+    "top1_agree": "30/30"
+   },
+   "deadline_vs_chain": {
+    "max_abs_dp": 0.008981384708718787,
+    "top1_agree": "30/30"
+   },
+   "deadline_vs_tree": {
+    "max_abs_dp": 0.008981384708718787,
+    "top1_agree": "30/30"
+   },
+   "intent_accuracy": "25/30"
+  },
+  "holdout": {
+   "intent_vs_chain": {
+    "max_abs_dp": 0.027031159431124108,
+    "top1_agree": "22/22"
+   },
+   "intent_vs_tree": {
+    "max_abs_dp": 0.015001142913877885,
+    "top1_agree": "22/22"
+   },
+   "deadline_vs_chain": {
+    "max_abs_dp": 0.004225874687574849,
+    "top1_agree": "22/22"
+   },
+   "deadline_vs_tree": {
+    "max_abs_dp": 0.005014990298202043,
+    "top1_agree": "22/22"
+   },
+   "intent_accuracy": "21/22"
+  },
+  "all": {
+   "intent_vs_chain": {
+    "max_abs_dp": 0.027031159431124108,
+    "top1_agree": "51/52"
+   },
+   "intent_vs_tree": {
+    "max_abs_dp": 0.015001142913877885,
+    "top1_agree": "52/52"
+   },
+   "deadline_vs_chain": {
+    "max_abs_dp": 0.008981384708718787,
+    "top1_agree": "52/52"
+   },
+   "deadline_vs_tree": {
+    "max_abs_dp": 0.008981384708718787,
+    "top1_agree": "52/52"
+   },
+   "intent_accuracy": "46/52"
+  }
+ },
+ "bench": {
+  "started_at": "2026-10-08T11:09:28.866092+00:00",
+  "reps": [
+   0.4461,
+   0.4602,
+   0.4679
+  ],
+  "n_items": 20,
+  "finished_at": "2026-10-08T11:09:56.382654+00:00"
+ }
+}

@@ -1,0 +1,33 @@
+<html><head><meta charset=utf-8><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Hiragino Sans',sans-serif;width:1440px;height:900px;overflow:hidden;background:#fff;color:#1f2328;font-size:14px}
+.chrome{height:76px;background:#dee1e6;border-bottom:1px solid #c4c7cc}
+.tabs{height:36px;display:flex;align-items:flex-end;padding-left:80px}
+.tab{background:#fff;border-radius:8px 8px 0 0;padding:8px 16px;width:260px;font-size:12px;white-space:nowrap;overflow:hidden}
+.omni{height:40px;background:#fff;display:flex;align-items:center;padding:0 12px}
+.omni .bar{flex:1;background:#f1f3f4;border-radius:16px;padding:6px 14px;font-size:13px;color:#333}
+.mono{font-family:Menlo,monospace}
+.term{background:#1d1f21;color:#c5c8c6;height:900px}.tb{height:28px;background:#38393b;color:#bbb;text-align:center;font-size:12px;line-height:28px}
+pre{font-family:Menlo,monospace;font-size:14px;line-height:1.5;padding:12px}.r{color:#cc6666}.g{color:#b5bd68}.y{color:#f0c674}</style></head><body><div class=term><div class=tb>yoshio — pytest — 120×40</div><pre>
+<span class=g>yoshio@mbp</span> mach-runtime % uv run pytest tests/test_stream.py -q
+<span class=g>....</span><span class=r>F</span><span class=g>..</span><span class=r>F</span>
+=================================== FAILURES ===================================
+<span class=r>________________________ test_backpressure_high_water_mark ________________________</span>
+
+    def test_backpressure_high_water_mark():
+        s = Stream(high_water_mark=4)
+        for i in range(10):
+            s.push(i)
+<span class=r>&gt;       assert s.paused is True
+E       AssertionError: assert False is True
+E        +  where False = &lt;Stream buffered=10&gt;.paused</span>
+
+tests/test_stream.py:42: AssertionError
+<span class=r>____________________________ test_event_roundtrip _____________________________</span>
+<span class=r>E       json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)</span>
+tests/test_stream.py:77: JSONDecodeError
+=========================== short test summary info ============================
+<span class=r>FAILED</span> tests/test_stream.py::test_backpressure_high_water_mark
+<span class=r>FAILED</span> tests/test_stream.py::test_event_roundtrip
+<span class=r>========================= 2 failed, 6 passed in 0.41s ==========================</span>
+<span class=g>yoshio@mbp</span> mach-runtime % █</pre></div></body></html>

@@ -1,0 +1,27 @@
+{
+  "_comment": "ルールベース分類器（exp05）を作った後に書いた未見データ。ルールの過適合を測るためのホールドアウト。ラベルは実行前に固定。",
+  "captures": [
+    {"id": 101, "text": "このページの内容を要約してHermesに送っておいて", "intent": "research"},
+    {"id": 102, "text": "競合サービスの料金体系をまとめて", "intent": "research"},
+    {"id": 103, "text": "この記事に出てくるライブラリの評判を調べてほしい", "intent": "research"},
+    {"id": 104, "text": "セキュリティ周りの最新の動向を押さえておいて", "intent": "research"},
+    {"id": 105, "text": "ここのループ、もっと速く書き直して", "intent": "code"},
+    {"id": 106, "text": "このエンドポイントにページネーションを追加して", "intent": "code"},
+    {"id": 107, "text": "このスクリプトをTypeScriptに移植して", "intent": "code"},
+    {"id": 108, "text": "ログ出力をもう少し丁寧にしておいて、コード側で", "intent": "code"},
+    {"id": 109, "text": "このバグ、再現テストを追加してから直して", "intent": "code"},
+    {"id": 110, "text": "牛乳と卵を買って帰る", "intent": "todo"},
+    {"id": 111, "text": "経費精算を月末までに出す", "intent": "todo"},
+    {"id": 112, "text": "母に電話する", "intent": "todo"},
+    {"id": 113, "text": "このスライド、自分でもう一度見直す", "intent": "todo"},
+    {"id": 114, "text": "請求書を発行しておく", "intent": "todo"},
+    {"id": 115, "text": "金曜の朝9時から全社会議", "intent": "schedule"},
+    {"id": 116, "text": "11月3日の夜7時に食事の予約", "intent": "schedule"},
+    {"id": 117, "text": "明日13時に面談", "intent": "schedule"},
+    {"id": 118, "text": "来週水曜の16時に歯科検診", "intent": "schedule"},
+    {"id": 119, "text": "このグラフ、思ったより伸びてるな", "intent": "note"},
+    {"id": 120, "text": "この言い回しは使えそう", "intent": "note"},
+    {"id": 121, "text": "佐藤さんはこの件に反対している", "intent": "note"},
+    {"id": 122, "text": "この画面、前のバージョンより見やすい", "intent": "note"}
+  ]
+}

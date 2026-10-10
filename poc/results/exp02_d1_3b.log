@@ -1,0 +1,9 @@
+Loading weights:   0%|          | 0/707 [00:00<?, ?it/s]Loading weights: 100%|██████████| 707/707 [00:00<00:00, 7536.27it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+3b text_gold_en 0.833 0.933 0.5338
+3b text_gold_ja 0.833 0.933 0.6531
+3b text_stt_en 0.833 0.867 0.5654
+3b stt_plus_screen_en 0.7 0.9 10.0884
+3b img_only 0.786 {'threshold': 0.5, 'tp': 2, 'fn': 2, 'fp': 0, 'tn': 10, 'recall': 0.5, 'precision': 1.0, 'accuracy': 0.857}
+3b img_plus_meta 0.857 {'threshold': 0.5, 'tp': 2, 'fn': 2, 'fp': 0, 'tn': 10, 'recall': 0.5, 'precision': 1.0, 'accuracy': 0.857}
+saved results/exp02_d1_3b.json

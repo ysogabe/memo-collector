@@ -1,0 +1,11 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/1376 [00:00<?, ?it/s]Loading weights:  82%|████████▏ | 1127/1376 [00:00<00:00, 11197.74it/s]Loading weights: 100%|██████████| 1376/1376 [00:00<00:00, 10060.76it/s]
+768 text→capture(text+meta) 0.883 0.9
+768 text→capture(fused text+image) 0.883 0.9
+768 text→capture(audio only) 0.45 0.62
+768 text→screenshot(image only) 0.8 0.731
+256 text→capture(text+meta) 0.883 0.85
+256 text→capture(fused text+image) 0.933 0.95
+256 text→capture(audio only) 0.45 0.574
+256 text→screenshot(image only) 0.65 0.712
+saved results/exp04_embedding.json

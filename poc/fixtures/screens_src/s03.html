@@ -1,0 +1,28 @@
+<html><head><meta charset=utf-8><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Hiragino Sans',sans-serif;width:1440px;height:900px;overflow:hidden;background:#fff;color:#1f2328;font-size:14px}
+.chrome{height:76px;background:#dee1e6;border-bottom:1px solid #c4c7cc}
+.tabs{height:36px;display:flex;align-items:flex-end;padding-left:80px}
+.tab{background:#fff;border-radius:8px 8px 0 0;padding:8px 16px;width:260px;font-size:12px;white-space:nowrap;overflow:hidden}
+.omni{height:40px;background:#fff;display:flex;align-items:center;padding:0 12px}
+.omni .bar{flex:1;background:#f1f3f4;border-radius:16px;padding:6px 14px;font-size:13px;color:#333}
+.mono{font-family:Menlo,monospace}
+.ed{display:flex;height:900px;background:#1e1e1e;color:#d4d4d4}.side{width:260px;background:#252526;padding:12px;font-size:13px;line-height:1.9;color:#ccc}
+.main{flex:1}.tabbar{height:36px;background:#2d2d2d;display:flex}.t{padding:9px 16px;background:#1e1e1e;color:#fff;font-size:13px}
+pre{font-family:Menlo,monospace;font-size:14px;line-height:1.6;padding:12px 0}.ln{color:#858585;display:inline-block;width:50px;text-align:right;margin-right:20px}
+.k{color:#569cd6}.s{color:#ce9178}.f{color:#dcdcaa}.c{color:#6a9955}.err{text-decoration:underline wavy #f14c4c}</style></head><body><div class=ed><div class=side>EXPLORER<br>▾ MACH-RUNTIME<br>&nbsp;▾ src<br>&nbsp;&nbsp;&nbsp;adapter.ts<br>&nbsp;&nbsp;&nbsp;registry.ts<br>&nbsp;&nbsp;&nbsp;stream.ts<br>&nbsp;▸ test<br>&nbsp;package.json</div>
+<div class=main><div class=tabbar><div class=t>adapter.ts</div></div><pre><span class=ln>118</span><span class=k>import</span> { Registry } <span class=k>from</span> <span class=s>"./registry"</span>;
+<span class=ln>119</span>
+<span class=ln>120</span><span class=k>export async function</span> <span class=f>resolveAdapter</span>(name: <span class=k>string</span>, reg: Registry) {
+<span class=ln>121</span>  <span class=k>const</span> entry = reg.<span class=f>lookup</span>(name);
+<span class=ln>122</span>  <span class=c>// TODO: entry may be undefined when plugin failed to load</span>
+<span class=ln>123</span>  <span class=k>const</span> cfg = <span class="err">entry.config</span>;
+<span class=ln>124</span>  <span class=k>const</span> timeout: <span class=k>number</span> = <span class="err">cfg.timeout ?? "30s"</span>;
+<span class=ln>125</span>  <span class=k>return new</span> <span class=f>AdapterClient</span>(cfg.endpoint, { timeout });
+<span class=ln>126</span>}
+<span class=ln>127</span>
+<span class=ln>128</span><span class=k>export function</span> <span class=f>toEvent</span>(raw: <span class=k>unknown</span>): Event {
+<span class=ln>129</span>  <span class=k>return</span> JSON.<span class=f>parse</span>(raw <span class=k>as string</span>);
+<span class=ln>130</span>}
+</pre>
+<div style="position:absolute;bottom:0;width:1180px;height:180px;background:#1e1e1e;border-top:1px solid #444;padding:10px;font-size:13px">PROBLEMS 2<br><br><span style="color:#f14c4c">⊗</span> 'entry' is possibly 'undefined'. ts(18048) [Ln 123, Col 15]<br><span style="color:#f14c4c">⊗</span> Type 'string | number' is not assignable to type 'number'. ts(2322) [Ln 124, Col 9]</div></div></div></body></html>

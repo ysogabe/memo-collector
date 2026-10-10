@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Context Capture｜見ている画面に、声でメモを貼る Mac アプリ</title>
+<meta name="description" content="ホットキーを押して話すだけ。スクショ・アプリ・URL・あなたの一言を1件の記録として Mac の中に残し、Claude Code や自作エージェントにそのまま渡せます。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Context Capture</a>
+  <nav aria-label="ページ内">
+    <a href="#record">残るもの</a>
+    <a href="#handoff">エージェント連携</a>
+    <a href="#privacy">プライバシー</a>
+    <a href="#faq">よくある質問</a>
+  </nav>
+  <a class="btn btn-small" href="#beta">ベータに申し込む</a>
+</header>
+
+<main id="top">
+
+  <!-- Hero: 押して話すと記録が Inbox に落ちる体験そのものを見せる -->
+  <section class="hero">
+    <div class="hero-copy">
+      <h1><span>見ている画面に、</span><span>声でメモを貼る。</span></h1>
+      <p class="lead">
+        <kbd>⌥</kbd><kbd>Space</kbd> を押して、ひと言話して、離すだけ。
+        いま開いているウインドウのスクショ、アプリ名、URL、あなたの一言が 1 件の記録になって Mac の中に残ります。
+        何をするかは、あとで Claude Code や自作のエージェントに任せられます。
+      </p>
+      <div class="hero-actions">
+        <a class="btn" href="#beta">ベータに申し込む</a>
+        <span class="req">Apple Silicon Mac・macOS 15 以降</span>
+      </div>
+    </div>
+
+    <div class="demo" id="demo">
+      <div class="desk">
+        <div class="win" id="demo-win">
+          <div class="win-bar"><i></i><i></i><i></i><span id="demo-title">Support streaming events · Issue #128</span></div>
+          <img id="demo-shot" src="assets/s01.jpg" alt="GitHub の issue ページを見ている画面" width="1440" height="900">
+          <div class="frame" aria-hidden="true"></div>
+        </div>
+        <div class="hud" id="demo-hud" aria-hidden="true">
+          <span class="mic-dot"></span>
+          <span class="hud-wave"><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="hud-text" id="demo-hud-text">話してください</span>
+        </div>
+        <div class="toast" id="demo-toast" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="demo-control">
+        <button class="hold" id="demo-hold" type="button" aria-pressed="false" aria-describedby="demo-hint">
+          <kbd>⌥</kbd><kbd>Space</kbd><span>押したまま</span>
+        </button>
+        <p class="hint" id="demo-hint">ボタンを長押し（または Space キーを押し続ける）で、録音から保存までを試せます。</p>
+      </div>
+
+      <ol class="inbox" id="demo-inbox" aria-label="デモの Context Inbox"></ol>
+    </div>
+  </section>
+
+  <!-- 1 件の記録 -->
+  <section class="record" id="record">
+    <div class="section-head">
+      <h2>1 回押すと、これだけ残ります</h2>
+      <p>入力時に分類も期限も聞きません。あとから読み返したとき、何を見て何を思ったのかが分かる情報だけを自動で集めます。</p>
+    </div>
+
+    <div class="anatomy">
+      <figure class="anatomy-shot">
+        <img src="assets/s03.jpg" alt="VS Code で adapter.ts を開き、型エラーが出ている画面" width="1440" height="900" loading="lazy">
+        <figcaption>押した瞬間の前面ウインドウ 1 枚</figcaption>
+      </figure>
+      <dl class="anatomy-fields">
+        <div><dt>時刻</dt><dd>2026-10-08 22:48</dd></div>
+        <div><dt>アプリ</dt><dd>Visual Studio Code</dd></div>
+        <div><dt>ウインドウ</dt><dd>adapter.ts — mach-runtime</dd></div>
+        <div><dt>URL</dt><dd class="muted">なし（ブラウザのときだけ取得）</dd></div>
+        <div class="voice"><dt>あなたの一言</dt><dd>「ここで null になる理由を調べて直しておいて」</dd></div>
+        <div class="auto"><dt>あとから自動で</dt><dd><span class="tag">code</span> 意図の推定 ・ 検索用の索引 ・ 秘密情報のチェック</dd></div>
+      </dl>
+    </div>
+
+    <ol class="steps" aria-label="使い方">
+      <li><b>押す</b><span>そのときの画面とアプリ情報を記録し、録音を始めます。</span></li>
+      <li><b>話す</b><span>思ったことをそのまま。「あとで」「これ」で通じます。</span></li>
+      <li><b>離す</b><span>約 1.5 秒で文字起こしして保存。5 秒以内なら取り消せます。</span></li>
+    </ol>
+  </section>
+
+  <!-- 場面 -->
+  <section class="scenes">
+    <div class="section-head">
+      <h2>作業を止めずに、その場で</h2>
+    </div>
+    <div class="scene">
+      <img src="assets/s01.jpg" alt="" width="1440" height="900" loading="lazy">
+      <div>
+        <h3>読んでいるとき</h3>
+        <p class="quote">「これ Hermes のアダプタに使えそう。あとで実装方法を調べる」</p>
+        <p>URL ごと残るので、エージェントが元のページを開いて続きを調べられます。</p>
+      </div>
+    </div>
+    <div class="scene">
+      <img src="assets/s02.jpg" alt="" width="1440" height="900" loading="lazy">
+      <div>
+        <h3>会議の最中に</h3>
+        <p class="quote">「今の API 移行の話、認証設計にも関係する。あとで確認」</p>
+        <p>会議アプリ側がミュートでも、Context Capture はあなたの声を録れます。残すのはあなたの一言と画面だけで、会議の音声は録りません。</p>
+      </div>
+    </div>
+    <div class="scene">
+      <img src="assets/s04.jpg" alt="" width="1440" height="900" loading="lazy">
+      <div>
+        <h3>資料や論文を読みながら</h3>
+        <p class="quote">「この図、実装資料に使えそう」</p>
+        <p>あとで「収束のグラフが載ってた論文」と探せば、注釈を付け忘れた画面も見た目から見つかります。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- エージェント連携 -->
+  <section class="handoff" id="handoff">
+    <div class="section-head">
+      <h2>判断と実行は、エージェントに</h2>
+      <p>Context Capture はタスク管理をしません。溜まった記録をローカルの MCP サーバーとして公開するので、Claude Code や Hermes から読んで、そのまま作業に移れます。</p>
+    </div>
+    <div class="handoff-grid">
+      <pre class="terminal" aria-label="Claude Code での利用例"><code><span class="t-prompt">&gt;</span> 今日 Context Capture に入れた code の件を片付けて
+
+<span class="t-tool">● context-capture.list_inbox(intent="code", since="today")</span>
+  3 件: adapter.ts の null / 型エラー / #128 のストリーミング対応
+
+<span class="t-tool">● context-capture.get_capture("01JABC…")</span>
+  VS Code · adapter.ts — mach-runtime · 22:48
+  「ここで null になる理由を調べて直しておいて」
+
+  lookup() が未登録のプラグインで undefined を返すのが原因です。
+  修正案を出します…</code></pre>
+      <dl class="tools">
+        <div><dt><code>list_inbox</code></dt><dd>未処理の記録を意図や期間で絞って一覧</dd></div>
+        <div><dt><code>search_captures</code></dt><dd>自然文で検索（画面の見た目も対象）</dd></div>
+        <div><dt><code>get_capture</code></dt><dd>1 件の詳細とスクショ</dd></div>
+        <div><dt><code>add_note</code></dt><dd>調べた結果やリンクを記録に追記</dd></div>
+        <div><dt><code>mark_done</code> / <code>archive</code></dt><dd>片付いた記録を閉じる</dd></div>
+      </dl>
+    </div>
+    <p class="note">エージェントは記録を削除できません。読み取りと状態の更新だけを許可しています。</p>
+  </section>
+
+  <!-- プライバシー -->
+  <section class="privacy" id="privacy">
+    <div class="section-head">
+      <h2>手元から出しません</h2>
+      <p>文字起こしも、意図の推定も、検索も、すべてこの Mac の中で動きます。外に出るのは、あなたがエージェントに渡したときだけです。</p>
+    </div>
+    <div class="guard">
+      <figure class="guard-shot">
+        <div class="guard-frame">
+          <img src="assets/s11.jpg" alt="ターミナルに GitHub のトークンが表示されている画面" width="1440" height="900" loading="lazy">
+          <span class="guard-box" style="top: 21.5%; left: 15.2%" aria-hidden="true"></span>
+          <span class="guard-box" style="top: 26.5%; left: 10.6%" aria-hidden="true"></span>
+        </div>
+        <figcaption>トークンが写った画面には「要確認」が付きます</figcaption>
+      </figure>
+      <div>
+        <h3>写ってはいけないものに気づきます</h3>
+        <p>保存したスクショを Mac 上で読み取り、API キー、アクセストークン、表示中のパスワードを見つけると「要確認」を付けます。要確認の画像は、あなたが確認してマスクするまでエージェントに渡りません。</p>
+        <p>パスワード管理アプリや銀行アプリなど、指定したアプリが前面にあるときはスクショ自体を撮りません。</p>
+      </div>
+    </div>
+    <table class="perms">
+      <caption>使う権限と理由</caption>
+      <thead><tr><th scope="col">権限</th><th scope="col">何に使うか</th><th scope="col">許可しないと</th></tr></thead>
+      <tbody>
+        <tr><td>マイク</td><td>押している間だけ、あなたの声を録る</td><td>使えません</td></tr>
+        <tr><td>画面収録</td><td>前面ウインドウを 1 枚だけ撮る（動画は撮りません）</td><td>スクショなしで保存します</td></tr>
+        <tr><td>アクセシビリティ</td><td>ホットキーと、ウインドウのタイトル取得</td><td>アプリ名だけ保存します</td></tr>
+        <tr><td>オートメーション</td><td>ブラウザの URL 取得</td><td>URL なしで保存します</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- モデル -->
+  <section class="models">
+    <div class="section-head">
+      <h2>Apple Silicon の中で動くモデル</h2>
+      <p>M3 / 24GB の MacBook で、日本語の注釈を使って事前検証した数字です。</p>
+    </div>
+    <table class="spec">
+      <thead><tr><th scope="col">役割</th><th scope="col">モデル</th><th scope="col">検証結果</th></tr></thead>
+      <tbody>
+        <tr><td>文字起こし</td><td>Whisper large-v3-turbo</td><td>1 件 1.1 秒。意図の推定と索引まで含めても 1.6 秒（90 パーセンタイル）</td></tr>
+        <tr><td>意図の推定</td><td>LiquidAI d1-3B</td><td>未見の注釈 22 件中 21 件を正しく分類、1 件 0.3 秒</td></tr>
+        <tr><td>検索</td><td>Google EmbeddingGemma 2</td><td>上位 3 件に正解が入る割合 93%（注釈とスクショを合わせて索引）</td></tr>
+        <tr><td>秘密情報のチェック</td><td>Apple Vision の文字認識</td><td>ダミーのキーやトークンを含む 4 画面すべて検出、誤検知 0</td></tr>
+      </tbody>
+    </table>
+    <p class="note">検証は合成音声と画面モックで行ったものです。実際の話し方や画面では数字が変わります。<a href="../docs/poc/poc-report.md">検証レポート</a></p>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <div class="section-head"><h2>よくある質問</h2></div>
+    <div class="faq-list">
+      <details>
+        <summary>タスク管理アプリとは何が違いますか？</summary>
+        <p>Context Capture は記録を残す入口だけを担います。プロジェクト、タグ、優先度、期限の入力欄はありません。整理や実行は、あとから Claude Code やエージェントに任せる前提です。入力に 3 秒以上かからないことを最優先にしています。</p>
+      </details>
+      <details>
+        <summary>音声やスクショはどこかに送信されますか？</summary>
+        <p>送信しません。文字起こし、意図の推定、検索、秘密情報のチェックはすべて Mac の中で動きます。通信するのは、初回にモデルをダウンロードするときだけです。記録がエージェントに渡るのは、あなたが MCP 経由で読ませたときだけです。</p>
+      </details>
+      <details>
+        <summary>どの Mac で使えますか？</summary>
+        <p>Apple Silicon（M1 以降）の Mac と macOS 15 以降が必要です。メモリは 16GB 以上をおすすめします。意図の推定に使うモデルは使うときだけ読み込み、しばらく使わなければ解放します。Intel Mac と Windows には対応していません。</p>
+      </details>
+      <details>
+        <summary>ディスクはどれくらい使いますか？</summary>
+        <p>モデルが合わせて約 9GB です。記録 1 件あたりはスクショ（WebP）が 100〜300KB 程度、テキストはごくわずかです。音声は既定で 7 日後に削除し、文字起こしだけを残します。</p>
+      </details>
+      <details>
+        <summary>オンライン会議の最中に使えますか？相手に聞こえませんか？</summary>
+        <p>使えます。macOS では Zoom・Teams・Meet と同じマイクを同時に使えるので、会議アプリ側をミュートにしたまま Context Capture にだけ話しかけられます。ミュートを解除したまま話すと、その声は相手にも聞こえます。</p>
+      </details>
+      <details>
+        <summary>会議の音声も録音されますか？</summary>
+        <p>録音しません。残すのは、あなたが押している間のあなたの声と、画面のスクショだけです。参加者の同意が関わるため、会議音声の取り込みは今のところ予定していません。</p>
+      </details>
+      <details>
+        <summary>パスワードや API キーが写っていたらどうなりますか？</summary>
+        <p>保存後に画面の文字を Mac 上で読み取り、キーやトークン、表示中のパスワードを見つけると「要確認」を付けます。要確認の画像は、確認してマスクするまでエージェントに渡しません。パスワード管理アプリなど、スクショを撮らないアプリも指定できます。</p>
+      </details>
+      <details>
+        <summary>URL はどのブラウザで取れますか？</summary>
+        <p>Safari、Google Chrome、Arc、Microsoft Edge に対応予定です。それ以外のアプリでは URL なしで、スクショとウインドウのタイトルを保存します。URL が取れなくても記録は必ず残ります。</p>
+      </details>
+      <details>
+        <summary>日本語の聞き取りはどのくらい正確ですか？専門用語は？</summary>
+        <p>検証では文字の誤り率が 7% 程度でした。製品名や社内用語のような固有名詞は間違えやすいので、よく使う言葉を辞書に登録できるようにします。保存後に文字起こしを手で直すこともできます。</p>
+      </details>
+      <details>
+        <summary>「意図」とは何ですか？間違っていたら？</summary>
+        <p>一言の内容から、自分でやること・調べてほしいこと・コードの修正・メモ・予定のどれに近いかを推定したラベルです。自信がないときは「未分類」のままにします。ラベルはいつでも付け替えられ、エージェントが記録を絞り込むときに使います。</p>
+      </details>
+      <details>
+        <summary>Claude Code や Hermes とはどうつなぎますか？</summary>
+        <p>Context Capture がローカルの MCP サーバーになります。Claude Code の MCP 設定に追加すれば、一覧、検索、詳細の取得、追記、完了の 6 つのツールが使えるようになります。記録の削除はエージェントからはできません。</p>
+      </details>
+      <details>
+        <summary>オフラインでも使えますか？</summary>
+        <p>使えます。初回にモデルをダウンロードしたあとは、ネットワークなしで録音から検索まで動きます。</p>
+      </details>
+      <details>
+        <summary>料金はかかりますか？</summary>
+        <p>ベータ期間中は無料です。正式版の価格は、ベータの利用状況を見て決めます。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="beta" id="beta">
+    <h2>ベータ版を待っている方へ</h2>
+    <p>最初のベータは、Apple Silicon の Mac で日本語を使う開発者向けに少人数で配布します。</p>
+    <form class="beta-form" onsubmit="event.preventDefault(); this.querySelector('output').textContent = '申し込みを受け付けました。配布の準備ができたらメールでお知らせします。';">
+      <label for="email">メールアドレス</label>
+      <div class="beta-row">
+        <input id="email" type="email" required autocomplete="email" placeholder="you@example.com">
+        <button class="btn" type="submit">ベータに申し込む</button>
+      </div>
+      <output aria-live="polite"></output>
+    </form>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>Context Capture（仮称）は構想段階のプロダクトです。画面はすべてモックで、表示されているキーやトークンはダミーです。</p>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Context Capture",
+  "operatingSystem": "macOS 15+",
+  "applicationCategory": "ProductivityApplication",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
+}
+</script>
+<script src="assets/demo.js"></script>
+</body>
+</html>

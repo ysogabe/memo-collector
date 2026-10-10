@@ -1,0 +1,112 @@
+{
+  "batch_dp" : 0.0092408649857768088,
+  "load_s" : 0.29434490203857422,
+  "mem" : 5394.3971920000004,
+  "peak" : 5617.3835079999999,
+  "reps" : [
+    {
+      "median_s" : 0.51575005054473877,
+      "p90_s" : 0.52404308319091797
+    },
+    {
+      "median_s" : 0.53473997116088867,
+      "p90_s" : 0.5394279956817627
+    },
+    {
+      "median_s" : 0.86378395557403564,
+      "p90_s" : 2.7642450332641602
+    }
+  ],
+  "reps_batch2" : [
+    {
+      "median_s" : 0.93957805633544922,
+      "p90_s" : 1.0070708990097046
+    },
+    {
+      "median_s" : 1.0266820192337036,
+      "p90_s" : 1.0907289981842041
+    },
+    {
+      "median_s" : 0.93498694896697998,
+      "p90_s" : 0.9834820032119751
+    }
+  ],
+  "summary" : {
+    "all" : {
+      "deadline_vs_chain_probs" : {
+        "max_abs_dp" : 0.0083114888816144539,
+        "top1_agree" : "52\/52"
+      },
+      "deadline_vs_tree_probs" : {
+        "max_abs_dp" : 0.0092408649857768088,
+        "top1_agree" : "52\/52"
+      },
+      "intent_accuracy" : "46\/52",
+      "intent_vs_chain_probs" : {
+        "max_abs_dp" : 0.030830913175344976,
+        "top1_agree" : "51\/52"
+      },
+      "intent_vs_tree_probs" : {
+        "max_abs_dp" : 0.028961001136550701,
+        "top1_agree" : "52\/52"
+      }
+    },
+    "dev" : {
+      "deadline_vs_chain_probs" : {
+        "max_abs_dp" : 0.0083114888816144539,
+        "top1_agree" : "30\/30"
+      },
+      "deadline_vs_tree_probs" : {
+        "max_abs_dp" : 0.0083114888816144539,
+        "top1_agree" : "30\/30"
+      },
+      "intent_accuracy" : "25\/30",
+      "intent_vs_chain_probs" : {
+        "max_abs_dp" : 0.030830913175344976,
+        "top1_agree" : "29\/30"
+      },
+      "intent_vs_tree_probs" : {
+        "max_abs_dp" : 0.020962998536896427,
+        "top1_agree" : "30\/30"
+      }
+    },
+    "holdout" : {
+      "deadline_vs_chain_probs" : {
+        "max_abs_dp" : 0.0047608405714895108,
+        "top1_agree" : "22\/22"
+      },
+      "deadline_vs_tree_probs" : {
+        "max_abs_dp" : 0.0092408649857768088,
+        "top1_agree" : "22\/22"
+      },
+      "intent_accuracy" : "21\/22",
+      "intent_vs_chain_probs" : {
+        "max_abs_dp" : 0.02883796750617007,
+        "top1_agree" : "22\/22"
+      },
+      "intent_vs_tree_probs" : {
+        "max_abs_dp" : 0.028961001136550701,
+        "top1_agree" : "22\/22"
+      }
+    }
+  },
+  "tok_mismatch" : 104
+}
+      296.13 real         4.18 user         5.20 sys
+          5611061248  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              345555  page reclaims
+                  67  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                   4  voluntary context switches
+              121126  involuntary context switches
+         61206451783  instructions retired
+         25749294218  cycles elapsed
+         10760966968  peak memory footprint

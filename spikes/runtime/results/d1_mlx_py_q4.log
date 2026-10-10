@@ -1,0 +1,112 @@
+[transformers] The tokenizer you are loading from 'models/d1-3b-text-q4' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+{
+ "load_s": 2.68,
+ "active_mem_after_load_mb": 1517.5,
+ "peak_mem_mb": 1878.9
+}
+{
+ "dev": {
+  "intent_vs_chain_probs": {
+   "max_abs_dp": 0.27528,
+   "mean_max_abs_dp": 0.06109,
+   "top1_agree": "28/30"
+  },
+  "intent_vs_tree_probs": {
+   "max_abs_dp": 0.27599,
+   "mean_max_abs_dp": 0.05996,
+   "top1_agree": "29/30"
+  },
+  "intent_option_logit_abs_diff_max": 1.0,
+  "deadline_vs_chain_probs": {
+   "max_abs_dp": 0.0289,
+   "mean_max_abs_dp": 0.00484,
+   "top1_agree": "30/30"
+  },
+  "deadline_vs_tree_probs": {
+   "max_abs_dp": 0.0289,
+   "mean_max_abs_dp": 0.00459,
+   "top1_agree": "30/30"
+  },
+  "deadline_option_logit_abs_diff_max": 0.375,
+  "intent_accuracy": "26/30",
+  "intent_accuracy_torch_tree": "25/30",
+  "intent_accuracy_torch_chain": "26/30",
+  "deadline_accuracy@0.5": "28/30",
+  "deadline_accuracy@0.5_torch_tree": "28/30"
+ },
+ "holdout": {
+  "intent_vs_chain_probs": {
+   "max_abs_dp": 0.20624,
+   "mean_max_abs_dp": 0.07295,
+   "top1_agree": "20/22"
+  },
+  "intent_vs_tree_probs": {
+   "max_abs_dp": 0.20564,
+   "mean_max_abs_dp": 0.07483,
+   "top1_agree": "20/22"
+  },
+  "intent_option_logit_abs_diff_max": 1.4062,
+  "deadline_vs_chain_probs": {
+   "max_abs_dp": 0.03767,
+   "mean_max_abs_dp": 0.00567,
+   "top1_agree": "22/22"
+  },
+  "deadline_vs_tree_probs": {
+   "max_abs_dp": 0.03767,
+   "mean_max_abs_dp": 0.00559,
+   "top1_agree": "22/22"
+  },
+  "deadline_option_logit_abs_diff_max": 0.625,
+  "intent_accuracy": "19/22",
+  "intent_accuracy_torch_tree": "21/22",
+  "intent_accuracy_torch_chain": "21/22"
+ },
+ "all": {
+  "intent_vs_chain_probs": {
+   "max_abs_dp": 0.27528,
+   "mean_max_abs_dp": 0.06611,
+   "top1_agree": "48/52"
+  },
+  "intent_vs_tree_probs": {
+   "max_abs_dp": 0.27599,
+   "mean_max_abs_dp": 0.06625,
+   "top1_agree": "49/52"
+  },
+  "intent_option_logit_abs_diff_max": 1.4062,
+  "deadline_vs_chain_probs": {
+   "max_abs_dp": 0.03767,
+   "mean_max_abs_dp": 0.00519,
+   "top1_agree": "52/52"
+  },
+  "deadline_vs_tree_probs": {
+   "max_abs_dp": 0.03767,
+   "mean_max_abs_dp": 0.00501,
+   "top1_agree": "52/52"
+  },
+  "deadline_option_logit_abs_diff_max": 0.625,
+  "intent_accuracy": "45/52",
+  "intent_accuracy_torch_tree": "46/52",
+  "intent_accuracy_torch_chain": "47/52",
+  "deadline_accuracy@0.5": "28/30",
+  "deadline_accuracy@0.5_torch_tree": "28/30"
+ }
+}
+{
+ "started_at": "2026-10-08T09:40:31.578435+00:00",
+ "reps": [
+  {
+   "median_s": 0.7598,
+   "p90_s": 0.7749
+  },
+  {
+   "median_s": 0.7507,
+   "p90_s": 0.7666
+  },
+  {
+   "median_s": 0.7556,
+   "p90_s": 0.7696
+  }
+ ],
+ "finished_at": "2026-10-08T09:42:29.633409+00:00",
+ "median_of_medians_s": 0.7556
+}
