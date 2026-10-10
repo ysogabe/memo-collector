@@ -144,5 +144,7 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 3 guard+triage（14 画面 4/4・誤検知 0、PEM・重なり・余白のマスク漏れ 4 件をセキュリティレビュー指摘で修正、56 テスト、本物の d1 で結合テスト）
 - [x] Wave 3 embedding（コサイン最小 0.9988、融合 256 R@3 0.933 / MRR 0.950、release で融合 0.59 秒・テキスト 6ms、ピーク 375MB。HF の縮小は torchvision の uint8 bicubic とビット一致させた）
 - [x] Wave 4 mcp（27 テスト、stdio 往復の結合テストあり。画像は clear/masked のみ・データルート外を読まない。cc-mcp の埋め込みは `makeEmbedderProvider()` が nil → embedding マージ後に CoreMLEmbedder(.cpuAndGPU) を差す）
+- [ ] Wave 5 wiring-m2（dispatch 済み: トリアージ・埋め込み検索・ガードのレビュー・3 モデルの準備・cc-mcp の埋め込み）
+- [ ] Wave 5 cleanup（dispatch 済み: §6 持ち越しのうち Packages 側）
 - [ ] Wave 4 e2e
 - [ ] PR
