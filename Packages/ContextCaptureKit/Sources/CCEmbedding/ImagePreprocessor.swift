@@ -128,27 +128,50 @@ enum ImagePreprocessor {
         return r
     }
 
-    @inline(__always) static func clip8(_ v: Double) -> UInt8 { UInt8(max(0, min(255, v.rounded()))) }
+    /// 重みの固定小数点化（torchvision の uint8 経路 `_compute_indices_int16_weights_aa` と同じ）。
+    /// 軸ごとに、最大の重みが int16 に収まる最大の精度（≤ 22bit）を選び、0.5 を足して 0 方向へ切り捨てる。
+    static func fixedPoint(_ w: [Double]) -> (weights: [Int32], precision: Int) {
+        let maxWeight = w.max() ?? 0
+        var precision = 0
+        while precision < 22 {
+            let next = Int(0.5 + maxWeight * Double(1 << (precision + 1)))
+            if next >= (1 << 15) { break }
+            precision += 1
+        }
+        let s = Double(1 << precision)
+        let q = w.map { $0 < 0 ? Int32(Int16((-0.5 + $0 * s).rounded(.towardZero))) : Int32(Int16((0.5 + $0 * s).rounded(.towardZero))) }
+        return (q, precision)
+    }
 
-    /// RGBX（4 バイト/画素）を分離型 bicubic で縮小する。横 → 縦の順で、各パスの出力を uint8 に丸める（PIL と同じ）。
+    @inline(__always) static func clip8(_ ss: Int, _ precision: Int) -> UInt8 {
+        let v = ss >> precision
+        return v < 0 ? 0 : (v > 255 ? 255 : UInt8(v))
+    }
+
+    /// RGBX（4 バイト/画素）を分離型 bicubic で縮小する。横 → 縦の順で、各パスの出力を uint8 に丸める。
+    /// 積和は HF（Gemma4ImageProcessor → torchvision `resize(uint8, BICUBIC, antialias=True)`）と同じ int16 固定小数点。
+    /// PIL（22bit 固定小数点）とは実画像で 1 段ずれる画素がある（s01 で 298 値）ので torchvision に合わせている。
+    @_optimize(speed)
     static func resizeBicubic(rgbx src: [UInt8], width sw: Int, height sh: Int, toWidth tw: Int, toHeight th: Int) -> [UInt8] {
         let wx = axisWeights(inSize: sw, outSize: tw), wy = axisWeights(inSize: sh, outSize: th)
+        let (kx, px) = fixedPoint(wx.weights), (ky, py) = fixedPoint(wy.weights)
+        let halfX = 1 << (px - 1), halfY = 1 << (py - 1)
         var mid = [UInt8](repeating: 0, count: tw * sh * 4)
         var dst = [UInt8](repeating: 0, count: tw * th * 4)
         src.withUnsafeBufferPointer { s in
             mid.withUnsafeMutableBufferPointer { m in
-                wx.weights.withUnsafeBufferPointer { wts in
+                kx.withUnsafeBufferPointer { wts in
                     for y in 0..<sh {
                         let row = y * sw
                         for x in 0..<tw {
                             let lo = wx.start[x], n = wx.count[x], off = wx.offset[x]
-                            var r = 0.0, g = 0.0, b = 0.0
+                            var r = halfX, g = halfX, b = halfX
                             for k in 0..<n {
-                                let wk = wts[off + k], p = (row + lo + k) * 4
-                                r += wk * Double(s[p]); g += wk * Double(s[p + 1]); b += wk * Double(s[p + 2])
+                                let wk = Int(wts[off + k]), p = (row + lo + k) * 4
+                                r += wk * Int(s[p]); g += wk * Int(s[p + 1]); b += wk * Int(s[p + 2])
                             }
                             let q = (y * tw + x) * 4
-                            m[q] = clip8(r); m[q + 1] = clip8(g); m[q + 2] = clip8(b)
+                            m[q] = clip8(r, px); m[q + 1] = clip8(g, px); m[q + 2] = clip8(b, px)
                         }
                     }
                 }
@@ -156,17 +179,17 @@ enum ImagePreprocessor {
         }
         mid.withUnsafeBufferPointer { m in
             dst.withUnsafeMutableBufferPointer { d in
-                wy.weights.withUnsafeBufferPointer { wts in
+                ky.withUnsafeBufferPointer { wts in
                     for y in 0..<th {
                         let lo = wy.start[y], n = wy.count[y], off = wy.offset[y]
                         for x in 0..<tw {
-                            var r = 0.0, g = 0.0, b = 0.0
+                            var r = halfY, g = halfY, b = halfY
                             for k in 0..<n {
-                                let wk = wts[off + k], p = ((lo + k) * tw + x) * 4
-                                r += wk * Double(m[p]); g += wk * Double(m[p + 1]); b += wk * Double(m[p + 2])
+                                let wk = Int(wts[off + k]), p = ((lo + k) * tw + x) * 4
+                                r += wk * Int(m[p]); g += wk * Int(m[p + 1]); b += wk * Int(m[p + 2])
                             }
                             let q = (y * tw + x) * 4
-                            d[q] = clip8(r); d[q + 1] = clip8(g); d[q + 2] = clip8(b)
+                            d[q] = clip8(r, py); d[q + 1] = clip8(g, py); d[q + 2] = clip8(b, py)
                         }
                     }
                 }
@@ -186,6 +209,7 @@ enum ImagePreprocessor {
     }
 
     /// 縮小済みの RGBX（辺は 48 の倍数）をパッチに並べる。
+    @_optimize(speed)
     static func patchify(rgbx px: [UInt8], width tw: Int, height th: Int, budget: ImageTokenBudget,
                          positionTable: Data) throws -> Prepared {
         let P = patchSize, K = poolingKernel, D = patchValues
