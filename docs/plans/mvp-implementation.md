@@ -92,14 +92,21 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 | 4 | mcp | CCMCP + cc-mcp（6 ツール、needs_review 画像は返さない、削除不可） | MCP の結合テスト、Claude Code から list_inbox |
 | 4 | e2e | 3 モデル同時常駐の実測、M2/M3 の受け入れ確認 | PRD §10 の非機能要件の実測表 |
 
-## 6. 進捗（main が Wave ごとに更新）
+## 6. 持ち越し事項
+
+- CCCore: 日時はミリ秒精度で保存されるため、`capturedAt` 等を生成時にミリ秒へ丸める（store 担当の提案。往復後の `==` を保証するため）
+- Package.swift: CCStoreTests に GRDB を明示依存、CCCore の Fixtures 共有（任意）
+
+## 7. 進捗（main が Wave ごとに更新）
 
 - [x] 推論ランタイム調査（(b) Go、2026-10-10）
 - [x] PRD を (b) に更新
 - [x] Issue #1・作業ブランチ feat/1-mvp-app
 - [x] Wave 0 scaffold（check.sh green、`swift test` で MLX が Metal 実行できることを確認）
 - [ ] 追加調査: FluidUse / embeddinggemma-2-coreml（dispatch 済み。結果を Wave 1 capture・Wave 3 embedding の設計に反映）
-- [ ] Wave 1 capture / store / stt / intent
+- [x] Wave 1 store（21 テスト成功、検索 1 万件 中央値 19.6ms。アプリは SQLiteRecordStore を 1 プロセス 1 インスタンスで持つこと。保持期間の削除はアプリ側が定期実行）
+- [ ] Wave 1 stt / intent（dispatch 済み。worktree: ../memo-collector-worktrees/{store,stt,intent}、ブランチ wave1/*）
+- [ ] Wave 1 capture（FluidUse 調査の結論待ち）
 - [ ] Wave 2 ui / wiring → M1 動作確認
 - [ ] Wave 3 embedding / guard+triage
 - [ ] Wave 4 mcp / e2e
