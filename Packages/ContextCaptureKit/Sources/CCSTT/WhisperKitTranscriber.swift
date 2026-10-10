@@ -141,8 +141,10 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
     /// 読み込み、`Configuration.warmUpAfterLoad` なら 1 回推論して温める（温めの失敗は無視する）。
     /// 温めは読み込みと同じ Task の中で済ませてから WhisperKit を公開する。その間に届いた `transcribe` は
     /// 読み込みの完了（= 温めの完了）を待ってから普通に処理する（同じ WhisperKit を 2 つの推論が同時に触らない）。
+    /// 温めるのは `prepare()` から読み込んだときだけ。`transcribe` が初めての読み込みを始めたとき（prepare が走っていない・失敗した）は
+    /// 温めない（ユーザーの文字起こしの前に温めの推論を挟まない）。
     public func prepare() async throws {
-        _ = try await loadedKit()
+        _ = try await loadedKit(warmUp: configuration.warmUpAfterLoad)
     }
 
     public func transcribe(samples: [Float], vocabulary: [String]) async throws -> Transcript {
@@ -217,14 +219,14 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
 
     // MARK: - 内部
 
-    private func loadedKit() async throws -> WhisperKit {
+    private func loadedKit(warmUp: Bool = false) async throws -> WhisperKit {
         if let whisperKit { return whisperKit }
         if let loading { return try await loading.value.kit }
         let layout = self.layout
         let configuration = self.configuration
         let task = Task { () throws -> KitBox in
             let box = KitBox(try await Self.load(layout: layout, configuration: configuration))
-            if configuration.warmUpAfterLoad, !Task.isCancelled {
+            if warmUp, !Task.isCancelled {
                 let t0 = Date()
                 box.warmUpError = await Self.warmUp(box.kit)
                 box.warmUpDuration = Date().timeIntervalSince(t0)
