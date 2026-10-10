@@ -212,6 +212,24 @@ final class WhisperKitIntegrationTests: XCTestCase {
         }
     }
 
+    /// 間をあけた単発利用（Push-to-Talk 相当）の所要時間（`CC_STT_EXPERIMENT=sporadic`。20 秒おきに 9 回）。
+    func testSporadicLatencyExperiment() async throws {
+        guard ProcessInfo.processInfo.environment["CC_STT_EXPERIMENT"] == "sporadic" else {
+            throw XCTSkip("CC_STT_EXPERIMENT=sporadic のときだけ走る調査用テスト")
+        }
+        let layout = try requireModel()
+        let t = WhisperKitTranscriber(layout: layout)
+        try await t.prepare()
+        let audio = try STTTestSupport.loadWav(STTTestSupport.audioURL(id: 2))
+        for i in 0..<9 {
+            if i > 0 { try await Task.sleep(nanoseconds: 20_000_000_000) }
+            let t0 = Date()
+            let r = try await t.debugTranscribe(samples: audio, promptTokens: nil)
+            print(String(format: "[ccstt] sporadic %@ #%d wall=%.2f enc=%.2f", Self.iso.string(from: t0), i,
+                         Date().timeIntervalSince(t0), r.first?.timings.encoding ?? -1))
+        }
+    }
+
     /// 前文脈トークンが実際にプレフィルへ入っているかをログで確かめる（`CC_STT_EXPERIMENT=prefill`）。
     func testPrefillLogExperiment() async throws {
         guard ProcessInfo.processInfo.environment["CC_STT_EXPERIMENT"] == "prefill" else {
