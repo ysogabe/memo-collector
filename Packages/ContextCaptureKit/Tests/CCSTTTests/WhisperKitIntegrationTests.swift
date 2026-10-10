@@ -153,21 +153,25 @@ final class WhisperKitIntegrationTests: XCTestCase {
         let layout = try requireModel()
         typealias Strategy = WhisperKitTranscriber.VocabularyStrategy
         let vocab = STTTestSupport.pocVocabulary
-        let cases: [(String, Strategy, [String], Float, Float)] = [
-            ("x-plain", [], [], 0, 0),
-            ("x-prompt", [.prompt], vocab, 0, 0),
-            // 前文脈が効いているかの確認: 出力を英語寄りに引っ張るはずの強い前文脈
-            ("x-prompt-english", [.prompt], ["This is an English transcript. Please write everything in English words."], 0, 0),
-            ("x-bias-1-3", [.logitBias], vocab, 1, 3),
-            ("x-bias-2-5", [.logitBias], vocab, 2, 5),
-            ("x-correction", [.correction], vocab, 0, 0),
-            ("x-prompt-correction", [.prompt, .correction], vocab, 0, 0),
-            ("x-bias-correction", [.logitBias, .correction], vocab, 1, 3),
+        let english = ["This is an English transcript. Please write everything in English words."]
+        // (ラベル, 方式, 語彙, 語頭バイアス, 続きバイアス, firstTokenLogProbThreshold)
+        let cases: [(String, Strategy, [String], Float, Float, Float?)] = [
+            ("x-plain", [], [], 0, 0, -1.5),
+            ("x-prompt", [.prompt], vocab, 0, 0, -1.5),
+            ("x-prompt-nofirst", [.prompt], vocab, 0, 0, nil),
+            // 前文脈が効いているかの対照: 出力を英語寄りに引っ張るはずの強い前文脈
+            ("x-prompt-english", [.prompt], english, 0, 0, nil),
+            ("x-bias-1-3", [.logitBias], vocab, 1, 3, -1.5),
+            ("x-bias-2-5", [.logitBias], vocab, 2, 5, -1.5),
+            ("x-correction", [.correction], vocab, 0, 0, -1.5),
+            ("x-prompt-nofirst-correction", [.prompt, .correction], vocab, 0, 0, nil),
+            ("x-bias-1-3-correction", [.logitBias, .correction], vocab, 1, 3, -1.5),
         ]
         var baseline: [String] = []
-        for (label, strategy, vocabulary, b0, b1) in cases {
+        // 1 つの WhisperKit を使い回すと設定を変えられないので、方式ごとに作り直す（2 回目以降のロードは数秒）
+        for (label, strategy, vocabulary, b0, b1, firstTh) in cases {
             let t = WhisperKitTranscriber(layout: layout, configuration: .init(
-                vocabularyStrategy: strategy, biasStart: b0, biasContinuation: b1))
+                vocabularyStrategy: strategy, biasStart: b0, biasContinuation: b1, firstTokenLogProbThreshold: firstTh))
             try await t.prepare()
             let s = try await run(t, vocabulary: vocabulary, rounds: 1, label: label)
             let hyps = s.rows.map(\.hyp)

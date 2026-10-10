@@ -8,9 +8,20 @@ import WhisperKit
 ///   初回は ANE 特殊化で約 1 分、2 回目以降（OS のキャッシュが効く）は数秒。
 /// - `transcribe` は 16kHz モノラルを受け取り、日本語固定・temperature 0 で認識する。
 ///   無音・0.3 秒未満は WhisperKit に渡さず `STTError.noSpeech` を投げる。
-/// - 語彙は既定で「後処理の綴り寄せ」（`VocabularyCorrector`）だけを使う。プロンプト（promptTokens）と
-///   logit バイアスは `VocabularyStrategy` で選べるが、fixtures では効果が無い・悪化したため既定では切ってある
-///   （経緯は `docs` 側の報告と Tests/CCSTTTests/WhisperKitIntegrationTests.swift を参照）。
+/// - 語彙は既定で「後処理の綴り寄せ」（`VocabularyCorrector`）だけを使う。fixtures 30 件（PoC と同じ語彙 7 語）で
+///   平均 CER 7.72% → 6.75%（改善 4 件・悪化 0 件）。
+///
+/// 語彙プロンプト（promptTokens）について（2026-10-10 調査）:
+/// - スパイクで「出力が 1 文字も変わらなかった」原因は WhisperKit ではなくスパイク側にある。
+///   `WhisperKitConfig` に `modelFolder` を渡さないと `load` の既定が false になり、初期化直後は
+///   `wk.tokenizer == nil`。そのため `if let tok = wk.tokenizer { opts.promptTokens = ... }` が黙って飛ばされ、
+///   プロンプトは一度も渡っていなかった（モデルは最初の transcribe で遅延ロードされる）。
+/// - 正しく渡すと効く（英語の前文脈で 21/30 件の出力が英語化する）が、語彙プロンプトは CER を悪化させた
+///   （11.2%。うち 1 件は最初のトークンの確信度が `firstTokenLogProbThreshold` を下回って空文字になる。
+///   閾値を外しても 8.4%、後処理と併用しても 7.5%）。句読点の付け方が変わる副作用が大きい。
+/// - logit バイアス（語頭 +1 / 続き +3）は 7.31%、後処理と併用で 6.75%（後処理のみと同じ）。+2 / +5 では
+///   語彙に無い "Capture" を作るなどして 8.13% に悪化。効果が後処理と重なるため既定では使わない。
+/// どちらも `VocabularyStrategy` で選べる（調査用テスト: WhisperKitIntegrationTests.testVocabularyStrategiesExperiment）。
 public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
     /// 語彙の使い方。
     public struct VocabularyStrategy: OptionSet, Sendable, Hashable {
@@ -31,6 +42,9 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         /// `.logitBias` の語頭・語の続きへの加算量。
         public var biasStart: Float
         public var biasContinuation: Float
+        /// 最初のトークンの対数確率がこれ未満なら、その窓を打ち切る（WhisperKit の既定 -1.5。nil で無効）。
+        /// 前文脈（`.prompt`）を付けると最初のトークンの確信度が下がり、これに引っかかって空文字になることがある。
+        public var firstTokenLogProbThreshold: Float?
         /// WhisperKit のログを出すか（調査用）。
         public var verboseLogging: Bool
 
@@ -40,6 +54,7 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             vocabularyStrategy: VocabularyStrategy = [.correction],
             biasStart: Float = 1.0,
             biasContinuation: Float = 3.0,
+            firstTokenLogProbThreshold: Float? = -1.5,
             verboseLogging: Bool = false
         ) {
             self.variant = variant
@@ -47,6 +62,7 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             self.vocabularyStrategy = vocabularyStrategy
             self.biasStart = biasStart
             self.biasContinuation = biasContinuation
+            self.firstTokenLogProbThreshold = firstTokenLogProbThreshold
             self.verboseLogging = verboseLogging
         }
     }
@@ -114,6 +130,7 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         let strategy = configuration.vocabularyStrategy
 
         var options = Self.baseDecodingOptions()
+        options.firstTokenLogProbThreshold = configuration.firstTokenLogProbThreshold
         if strategy.contains(.prompt), !terms.isEmpty, let tokenizer = kit.tokenizer {
             options.promptTokens = Self.promptTokens(for: terms, tokenizer: tokenizer)
         }
