@@ -103,6 +103,23 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 
 ## 6. 持ち越し事項
 
+> 2026-10-10: Wave 5 cleanup / wiring-m2 で多くを消化。残りは「6.1 残件」に集約し、以下の旧リストは経緯として残す。
+
+### 6.1 残件（Wave 6 polish で扱う）
+
+- app の重複を CCCore 版へ寄せる: `InboxFilter.matches`、`ccRoundedToMilliseconds`。詳細ビューの保存を `RecordModifying.modify` に（今は get + update でトランザクションでない）
+- `SearchIndexState` の JSON 定義がアプリと cc-mcp で二重 → CCCore へ
+- cc-mcp の初回検索が遅い（初回 84 秒、2 回目以降も起動後最初は 16.5 秒）→ 状態が ready なら起動時に裏で温める。作り直し後に設定が同じでも読み直す件も
+- 作り直しの途中で一部の索引が失敗しても ready にしてしまう → 失敗があれば ready にしない（再試行対象に残す）
+- `TriageStepOutcome` に「未準備」を足し、未準備を失敗扱いにしない
+- `D1ModelPreparer` にサイズだけの verify、`HubApi.snapshot` の進捗、`EmbeddingModelPreparer.prepare()` が `.unmanifested` を取り直す件
+- CCMCP の検索を `search(vector:limit:statuses:)` に切り替え
+- 起動直後に Whisper 読み込み中（約 11 秒）「モデルが未準備」と出る
+- 開発用に記録を入れる正式な経路（cc-models か fixture）
+- RSS は MLX / Core ML のメモリを反映しない → e2e のメモリはデバッグメニューの MLX アクティブ値と `footprint` で測る
+
+### 6.0 旧リスト（経緯）
+
 - CCCore: 日時はミリ秒精度で保存されるため、`capturedAt` 等を生成時にミリ秒へ丸める（store 担当の提案。往復後の `==` を保証するため）
 - Package.swift: CCStoreTests に GRDB を明示依存、CCCore の Fixtures 共有、CCIntentTests の Fixtures を resources/exclude に（警告解消）
 - cc-models: `prepare` グループは main が持ち、各担当は葉コマンドだけ足す（stt マージ時に整理）
@@ -144,7 +161,9 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] Wave 3 guard+triage（14 画面 4/4・誤検知 0、PEM・重なり・余白のマスク漏れ 4 件をセキュリティレビュー指摘で修正、56 テスト、本物の d1 で結合テスト）
 - [x] Wave 3 embedding（コサイン最小 0.9988、融合 256 R@3 0.933 / MRR 0.950、release で融合 0.59 秒・テキスト 6ms、ピーク 375MB。HF の縮小は torchvision の uint8 bicubic とビット一致させた）
 - [x] Wave 4 mcp（27 テスト、stdio 往復の結合テストあり。画像は clear/masked のみ・データルート外を読まない。cc-mcp の埋め込みは `makeEmbedderProvider()` が nil → embedding マージ後に CoreMLEmbedder(.cpuAndGPU) を差す）
-- [ ] Wave 5 wiring-m2（dispatch 済み: トリアージ・埋め込み検索・ガードのレビュー・3 モデルの準備・cc-mcp の埋め込み）
-- [ ] Wave 5 cleanup（dispatch 済み: §6 持ち越しのうち Packages 側）
-- [ ] Wave 4 e2e
+- [x] Wave 5 wiring-m2（アプリのテスト 46 件。非 fake 起動で resumePending・needs_review 判定・埋め込み初回準備 158 秒・d1 の 10 分解放・cc-mcp の vector 検索をログで確認。実機確認手順 docs/manual-tests/m2-m3.md）
+- [x] Wave 5 cleanup（§6 の Packages 側 10 項目。自前コードの警告 0）
+- [ ] Wave 6 polish（6.1 残件）
+- [ ] Wave 4 e2e（他の処理を止めた状態で main が計測: 解放→トースト p90、3 モデル同時常駐のメモリ、アイドル CPU）
+- [ ] セキュリティレビュー（security-review skill）
 - [ ] PR
