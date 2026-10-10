@@ -15,7 +15,7 @@ struct CCModelsCommand: AsyncParsableCommand {
     struct Prepare: AsyncParsableCommand {
         static let configuration = CommandConfiguration(
             abstract: "モデルを取得・変換する",
-            subcommands: [PrepareD1.self, PrepareWhisperCommand.self]
+            subcommands: [PrepareD1.self, PrepareWhisperCommand.self, PrepareEmbeddingCommand.self]
         )
     }
 
