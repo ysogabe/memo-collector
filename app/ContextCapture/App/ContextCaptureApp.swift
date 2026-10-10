@@ -1,17 +1,44 @@
+import AppKit
 import CCCore
 import SwiftUI
 
 /// アプリのエントリポイント。Dock に出さず（Info.plist の LSUIElement）、メニューバーにだけ常駐する（F-01）。
-/// Wave 2 で AppDelegate / AppCoordinator をここに配線する。
+/// 依存の組み立ては `AppEnvironment`、状態は `AppModel`（AppDelegate が 1 つだけ持つ）。
 @main
 struct ContextCaptureApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
+
     var body: some Scene {
         MenuBarExtra {
-            MenuBarContent()
+            MenuBarContent(model: delegate.model)
         } label: {
-            Image(systemName: "camera.viewfinder")
-                .accessibilityLabel("Context Capture")
+            MenuBarLabel(model: delegate.model)
         }
         .menuBarExtraStyle(.menu)
+    }
+}
+
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    /// `--render-snapshots <dir>` のときは時計を固定したフェイクで組み立てる（PNG の中身を毎回同じにするため）。
+    let model: AppModel = {
+        if SnapshotRenderer.requestedDirectory() != nil {
+            return AppModel(env: SnapshotRenderer.makeEnvironment())
+        }
+        return AppModel(env: AppEnvironment.resolve())
+    }()
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        if let dir = SnapshotRenderer.requestedDirectory() {
+            Task { @MainActor in
+                let code = await SnapshotRenderer(model: model).renderAll(to: dir)
+                exit(code)
+            }
+            return
+        }
+        model.start()
+        if !model.settings.onboardingCompleted {
+            model.windows.showOnboarding()
+        }
     }
 }
