@@ -179,5 +179,6 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] main による e2e 再計測（docs/e2e/report.md §9: 解放→保存 p90 1.39〜1.54 秒、続けて録ると 2.69 秒、初回 STT 1.38 秒、ピーク 4.09GB、d1 誤差不変）
 - [x] セキュリティレビュー（信頼度 7 以上 0 件。7 未満の 2 件は #3）（security-review skill）
 - [x] PR #4 作成（Refs #1。フォロー Issue #2 意図の調整、#3 供給網・表示の残件）
-- [ ] PR #4 自己レビュー（A: code-review、C: テスト・QA）と対応
+- [x] PR #4 自己レビュー（A: code-review 9 件、C: テスト・QA 17 件 → 統合して修正必須 11 / フォロー Issue #5 / praise）
+- [ ] Wave 8 review-fix（修正必須 11 件。ユーザー承認済み。dispatch 済み）
 - [ ] W7 修正後の単独起動での実機確認（m1.md W7-5〜7）
