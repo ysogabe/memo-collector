@@ -297,4 +297,109 @@ final class WhisperKitIntegrationTests: XCTestCase {
                          tm.decodingWindowing, tm.totalDecodingLoops, tm.totalDecodingFallbacks))
         }
     }
+    // MARK: - 所要時間の内訳（Wave 9）
+
+    /// 1 件の文字起こしと内訳を 1 行で出す（⚠️ 本文は出さない。CER だけ）。
+    @discardableResult
+    func measure(_ t: WhisperKitTranscriber, id: Int, samples: [Float], ref: String?, label: String) async throws -> (wall: Double, cer: Double, diag: TranscriptDiagnostics?) {
+        let t0 = Date()
+        var hyp = ""
+        var diag: TranscriptDiagnostics?
+        do {
+            let r = try await t.transcribe(samples: samples, vocabulary: STTTestSupport.pocVocabulary)
+            hyp = r.text
+            diag = r.diagnostics
+        } catch STTError.noSpeech {}
+        let wall = Date().timeIntervalSince(t0)
+        let cer = ref.map { STTTestSupport.cer(ref: $0, hyp: hyp) } ?? -1
+        print(String(format: "[ccstt] breakdown %@ %@ c%02d audio=%.1fs wall=%.3fs cer=%.3f chars=%d | %@",
+                     label, Self.iso.string(from: t0), id, Double(samples.count) / 16_000, wall, cer, hyp.count,
+                     diag?.logSummary ?? "-"))
+        return (wall, cer, diag)
+    }
+
+    /// 文字起こしの内訳（フォールバック回数・エンコード・デコード）を条件ごとに測る（`CC_STT_EXPERIMENT=breakdown`）。
+    /// 1) fixtures 30 件を続けて、2) 長い fixtures をアイドル 30 / 60 秒の後に、3) 雑音を足した fixtures（実マイクの代わり）、
+    /// 4) `CC_STT_FALLBACKS`（例 "5,2,1,0"）の各値で fixtures 30 件の CER とフォールバック回数。
+    func testLatencyBreakdownExperiment() async throws {
+        guard ProcessInfo.processInfo.environment["CC_STT_EXPERIMENT"] == "breakdown" else {
+            throw XCTSkip("CC_STT_EXPERIMENT=breakdown のときだけ走る調査用テスト")
+        }
+        let layout = try requireModel()
+        let captures = try STTTestSupport.loadCaptures()
+        let audios = try captures.map { try STTTestSupport.loadWav(STTTestSupport.audioURL(id: $0.id)) }
+        let env = ProcessInfo.processInfo.environment
+        let phases = Set((env["CC_STT_PHASES"] ?? "seq,idle,noise,fallback").split(separator: ",").map(String.init))
+
+        let t = WhisperKitTranscriber(layout: layout)
+        try await t.prepare()
+        print(String(format: "[ccstt] breakdown prepare=%.1fs warm=%.2fs", await t.lastLoadDuration ?? -1, await t.lastWarmUpDuration ?? -1))
+
+        if phases.contains("seq") {
+            var cers: [Double] = [], fb = 0
+            for (i, c) in captures.enumerated() {
+                let r = try await measure(t, id: c.id, samples: audios[i], ref: c.text, label: "seq")
+                cers.append(r.cer); fb += r.diag?.fallbacks ?? 0
+            }
+            print(String(format: "[ccstt] breakdown seq meanCER=%.4f fallbacks=%d", cers.reduce(0, +) / Double(cers.count), fb))
+        }
+
+        let longest = captures.indices.sorted { audios[$0].count > audios[$1].count }
+        if phases.contains("idle") {
+            let idle = Double(env["CC_STT_IDLE_SECONDS"] ?? "30") ?? 30
+            for (n, i) in longest.prefix(4).enumerated() {
+                let wait = n == 3 ? idle * 2 : idle
+                try await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
+                try await measure(t, id: captures[i].id, samples: audios[i], ref: captures[i].text, label: String(format: "idle%.0f", wait))
+                // 直後にもう 1 回（アイドル明けだけが遅いのかを見る）
+                try await measure(t, id: captures[i].id, samples: audios[i], ref: captures[i].text, label: "again")
+            }
+        }
+
+        if phases.contains("noise") {
+            // 実マイクの代わり: 音量を下げて白色雑音を足す（再現可能な擬似乱数）
+            var rng = SplitMix64(seed: 42)
+            for (gain, noise) in [(Float(0.3), Float(0.01)), (Float(0.2), Float(0.02))] {
+                var cers: [Double] = [], fb = 0
+                for (i, c) in captures.enumerated() {
+                    let noisy = audios[i].map { $0 * gain + noise * Float.random(in: -1...1, using: &rng) }
+                    let r = try await measure(t, id: c.id, samples: noisy, ref: c.text, label: String(format: "noise-g%.1f-n%.2f", gain, noise))
+                    cers.append(r.cer); fb += r.diag?.fallbacks ?? 0
+                }
+                print(String(format: "[ccstt] breakdown noise g%.1f n%.2f meanCER=%.4f fallbacks=%d", gain, noise,
+                             cers.reduce(0, +) / Double(cers.count), fb))
+            }
+        }
+        await t.unload()
+
+        if phases.contains("fallback") {
+            let counts = (env["CC_STT_FALLBACKS"] ?? "5,2,1,0").split(separator: ",").compactMap { Int($0) }
+            for count in counts {
+                let tt = WhisperKitTranscriber(layout: layout, configuration: .init(temperatureFallbackCount: count))
+                try await tt.prepare()
+                var cers: [Double] = [], walls: [Double] = [], fb = 0
+                for (i, c) in captures.enumerated() {
+                    let r = try await measure(tt, id: c.id, samples: audios[i], ref: c.text, label: "fb\(count)")
+                    cers.append(r.cer); walls.append(r.wall); fb += r.diag?.fallbacks ?? 0
+                }
+                print(String(format: "[ccstt] breakdown fallbackCount=%d meanCER=%.4f p50=%.3f p90=%.3f max=%.3f fallbacks=%d", count,
+                             cers.reduce(0, +) / Double(cers.count), STTTestSupport.percentile(walls, 0.5),
+                             STTTestSupport.percentile(walls, 0.9), walls.max() ?? -1, fb))
+                await tt.unload()
+            }
+        }
+    }
+}
+
+/// 再現可能な擬似乱数（雑音を足す実験用）。
+struct SplitMix64: RandomNumberGenerator {
+    var state: UInt64
+    init(seed: UInt64) { state = seed }
+    mutating func next() -> UInt64 {
+        state &+= 0x9E37_79B9_7F4A_7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
+        z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
+        return z ^ (z >> 31)
+    }
 }

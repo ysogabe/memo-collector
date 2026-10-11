@@ -55,6 +55,9 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         /// 読み込みの直後に短い合成音で 1 回推論して温めるか（`warmUpSamples`）。
         /// 温めないと、読み込み後の最初の文字起こしが 5.2〜8.4 秒かかる（2 回目以降は 1.6 秒前後。docs/e2e/report.md §6・§7 問題 3）。
         public var warmUpAfterLoad: Bool
+        /// 品質（圧縮率・平均対数確率）が足りないときに温度を上げて解き直す最大回数（WhisperKit の既定 5、増分 0.2）。
+        /// 解き直すたびにデコーダのループを最初からやり直すので、そのぶん遅くなる。
+        public var temperatureFallbackCount: Int
 
         public init(
             variant: String = WhisperModelLayout.defaultVariant,
@@ -66,7 +69,8 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             audioEncoderCompute: MLComputeUnits = .cpuAndNeuralEngine,
             textDecoderCompute: MLComputeUnits = .cpuAndNeuralEngine,
             verboseLogging: Bool = false,
-            warmUpAfterLoad: Bool = true
+            warmUpAfterLoad: Bool = true,
+            temperatureFallbackCount: Int = 5
         ) {
             self.variant = variant
             self.speechGate = speechGate
@@ -78,6 +82,7 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
             self.textDecoderCompute = textDecoderCompute
             self.verboseLogging = verboseLogging
             self.warmUpAfterLoad = warmUpAfterLoad
+            self.temperatureFallbackCount = temperatureFallbackCount
         }
     }
 
@@ -169,12 +174,14 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         // 同じ WhisperKit で 2 つの推論が並行して走り、インスタンスに 1 つしかない `textDecoder.logitsFilters` も
         // 途中で上書きされる。actor だけでは直列化されないので、推論区間を `inferenceGate` で 1 本ずつにする。
         // 読み込みは門の外で先に待つ（読み込み中の `unload()` が門で待たされず、すぐ読み込みを打ち切れるように）。
+        let waitStart = Date()
         if inferenceOverride == nil { _ = try await loadedKit() }
         await acquireInferenceGate()
         defer { releaseInferenceGate() }
         try Task.checkCancellation()
 
         var text: String
+        var diagnostics: TranscriptDiagnostics?
         if let inferenceOverride {
             do {
                 text = try await inferenceOverride(samples)
@@ -184,8 +191,10 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         } else {
             // 門を待つ間に unload されていれば読み込み直す（ふつうは読み込み済みなのですぐ返る）
             let kit = try await loadedKit()
+            let waitSeconds = Date().timeIntervalSince(waitStart)
             var options = Self.baseDecodingOptions()
             options.firstTokenLogProbThreshold = configuration.firstTokenLogProbThreshold
+            options.temperatureFallbackCount = max(0, configuration.temperatureFallbackCount)
             if strategy.contains(.prompt), !terms.isEmpty, let tokenizer = kit.tokenizer {
                 options.promptTokens = Self.promptTokens(for: terms, tokenizer: tokenizer)
             }
@@ -203,6 +212,10 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
                 throw STTError.engineFailure(String(describing: error))
             }
             text = results.map(\.text).joined()
+            diagnostics = Self.diagnostics(
+                for: results, audioSeconds: Double(samples.count) / 16_000, waitSeconds: waitSeconds,
+                temperatureIncrement: Double(options.temperatureIncrementOnFallback)
+            )
         }
         text = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if strategy.contains(.correction), !terms.isEmpty {
@@ -211,7 +224,7 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         if text.isEmpty || Self.hallucinations.contains(text) {
             throw STTError.noSpeech(reason: .emptyResult)
         }
-        return Transcript(text: text, engine: engine)
+        return Transcript(text: text, engine: engine, diagnostics: diagnostics)
     }
 
     // MARK: - ModelUnloadable
@@ -372,6 +385,39 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         } catch {
             return "\(type(of: error))"
         }
+    }
+
+    /// WhisperKit の結果から所要時間の内訳を作る（数値だけ。本文・トークンは持ち出さない）。結果が空なら nil。
+    /// 窓が複数あれば時間・回数は合計、温度・圧縮率は最大、平均対数確率は最小をとる。
+    static func diagnostics(
+        for results: [TranscriptionResult], audioSeconds: Double, waitSeconds: Double, temperatureIncrement: Double
+    ) -> TranscriptDiagnostics? {
+        guard !results.isEmpty else { return nil }
+        let timings = results.map(\.timings)
+        func sum(_ key: KeyPath<TranscriptionTimings, Double>) -> Double { timings.map { $0[keyPath: key] }.reduce(0, +) }
+        let segments = results.flatMap(\.segments)
+        let temperature = Double(segments.map(\.temperature).max() ?? 0)
+        let fallbacks = temperatureIncrement > 0 ? Int((temperature / temperatureIncrement).rounded()) : 0
+        let firstToken: Double? = timings.first.flatMap { t in
+            let d = t.firstTokenTime - t.pipelineStart
+            return d.isFinite && d >= 0 && d < 3600 ? d : nil
+        }
+        return TranscriptDiagnostics(
+            audioSeconds: audioSeconds,
+            waitSeconds: waitSeconds,
+            pipelineSeconds: sum(\.fullPipeline),
+            logmelSeconds: sum(\.logmels),
+            encodingSeconds: sum(\.encoding),
+            decodingSeconds: max(0, sum(\.decodingLoop) - sum(\.encoding) - sum(\.logmels)),
+            fallbackSeconds: sum(\.decodingFallback),
+            fallbacks: fallbacks,
+            temperature: temperature,
+            decodingLoops: Int(sum(\.totalDecodingLoops)),
+            windows: Int(sum(\.totalDecodingWindows)),
+            firstTokenSeconds: firstToken,
+            avgLogProb: segments.map(\.avgLogprob).min().map(Double.init),
+            compressionRatio: segments.map(\.compressionRatio).max().map(Double.init)
+        )
     }
 
     /// 日本語固定・temperature 0・タイムスタンプなし。

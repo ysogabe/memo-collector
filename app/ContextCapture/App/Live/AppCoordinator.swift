@@ -421,7 +421,8 @@ final class AppCoordinator: CaptureControlling {
             releaseToSaved \(releaseToSaved, format: .fixed(precision: 0), privacy: .public)ms \
             stt \(sttElapsedMs, format: .fixed(precision: 0), privacy: .public)ms \
             audio \(audioSeconds, format: .fixed(precision: 1), privacy: .public)s \
-            screenshot \(screenshotPath != nil ? "yes" : "no", privacy: .public)
+            screenshot \(screenshotPath != nil ? "yes" : "no", privacy: .public) \
+            sttBreakdown [\(transcript?.diagnostics?.logSummary ?? "-", privacy: .public)]
             """)
         let notice: CaptureNotice? = context.screenshotSkipReason == ScreenshotSkipReason.permissionDenied ? .screenRecordingDenied : nil
         emit(.saved(record, notice: notice))
