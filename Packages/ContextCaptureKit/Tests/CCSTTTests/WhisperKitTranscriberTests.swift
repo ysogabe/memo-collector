@@ -1,4 +1,5 @@
 import CCCore
+import WhisperKit
 import XCTest
 @testable import CCSTT
 
@@ -210,5 +211,56 @@ final class WhisperKitTranscriberTests: XCTestCase {
         XCTAssertEqual(order, ["in:x", "out:x"])
         let text = try await running.value.text
         XCTAssertEqual(text, "ok")
+    }
+    // MARK: - 所要時間の内訳（Wave 9）
+
+    /// WhisperKit の結果から内訳を作る: フォールバック回数は温度から求め（`totalDecodingFallbacks` の off-by-one を使わない）、
+    /// デコーダはループ全体からメル・エンコーダを引く。要約に本文は出ない。
+    func testDiagnosticsFromWhisperKitResult() throws {
+        var timings = TranscriptionTimings()
+        timings.pipelineStart = 1000
+        timings.firstTokenTime = 1001.2
+        timings.fullPipeline = 6.6
+        timings.logmels = 0.01
+        timings.encoding = 1.2
+        timings.decodingLoop = 6.5
+        timings.decodingFallback = 4.0
+        timings.totalDecodingFallbacks = 4  // WhisperKit は 5 回目のフォールバックで 4 を入れる
+        timings.totalDecodingLoops = 400
+        timings.totalDecodingWindows = 6
+        let segment = TranscriptionSegment(text: "秘密の本文", temperature: 1.0, avgLogprob: -1.2, compressionRatio: 2.6)
+        let result = TranscriptionResult(text: "秘密の本文", segments: [segment], language: "ja", timings: timings)
+        let d = try XCTUnwrap(WhisperKitTranscriber.diagnostics(
+            for: [result], audioSeconds: 5.8, waitSeconds: 0.002, temperatureIncrement: 0.2))
+        XCTAssertEqual(d.fallbacks, 5)
+        XCTAssertEqual(d.temperature, 1.0, accuracy: 1e-6)
+        XCTAssertEqual(d.decodingSeconds, 6.5 - 1.2 - 0.01, accuracy: 1e-9)
+        XCTAssertEqual(d.encodingSeconds, 1.2, accuracy: 1e-9)
+        XCTAssertEqual(d.fallbackSeconds, 4.0, accuracy: 1e-9)
+        XCTAssertEqual(d.decodingLoops, 400)
+        XCTAssertEqual(d.windows, 6)
+        XCTAssertEqual(try XCTUnwrap(d.firstTokenSeconds), 1.2, accuracy: 1e-6)
+        XCTAssertEqual(try XCTUnwrap(d.avgLogProb), -1.2, accuracy: 1e-6)
+        XCTAssertEqual(try XCTUnwrap(d.compressionRatio), 2.6, accuracy: 1e-6)
+        let summary = d.logSummary
+        XCTAssertTrue(summary.contains("fallback 5 (4000ms)"), summary)
+        XCTAssertTrue(summary.contains("enc 1200ms"), summary)
+        XCTAssertTrue(summary.contains("dec 5290ms"), summary)
+        XCTAssertTrue(summary.contains("wait 2ms"), summary)
+        XCTAssertFalse(summary.contains("秘密"), "本文はログに出さない")
+
+        // 温度 0（フォールバック無し）・結果が空
+        let plain = TranscriptionResult(text: "x", segments: [TranscriptionSegment(temperature: 0)], language: "ja", timings: TranscriptionTimings())
+        let d0 = try XCTUnwrap(WhisperKitTranscriber.diagnostics(for: [plain], audioSeconds: 1, waitSeconds: 0, temperatureIncrement: 0.2))
+        XCTAssertEqual(d0.fallbacks, 0)
+        XCTAssertNil(WhisperKitTranscriber.diagnostics(for: [], audioSeconds: 1, waitSeconds: 0, temperatureIncrement: 0.2))
+    }
+
+    /// 推論を差し替えたとき（WhisperKit を通らない）は内訳が無い。
+    func testOverriddenInferenceHasNoDiagnostics() async throws {
+        let t = makeTranscriber { _ in "テスト" }
+        let r = try await t.transcribe(samples: speech(tag: 0.2), vocabulary: [])
+        XCTAssertNil(r.diagnostics)
+        XCTAssertEqual(r, Transcript(text: "テスト", engine: t.engine))
     }
 }
