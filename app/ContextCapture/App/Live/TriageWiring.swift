@@ -4,7 +4,8 @@ import Foundation
 
 /// 保存〜トリアージ〜画面更新の配線（F-09 / F-10 / F-11）。`LiveServices` が 1 つ持つ。
 ///
-/// - 保存直後（`AppCoordinator.onRecordSaved`）→ `enqueue(id:)`
+/// - 保存直後（`AppCoordinator.onRecordSaved`。文字起こしに失敗して注釈が空の記録も）→ `enqueue(id:)`
+/// - 文字起こしの再試行で注釈が入った（`AppCoordinator.onTranscriptRetried`）→ `annotationEdited(id:)`（意図と索引のやり直し）
 /// - 注釈の編集（詳細ビュー）→ `annotationEdited(id:)`（= `reprocess(id:)`。手で変えた意図は上書きされない）
 /// - `TriageQueue.events()` を購読し、ガードか意図を書いた記録が終わったら `onRecordsChanged`（= `AppModel.recordsDidChange()`）。
 ///   索引だけの更新は画面に出ないので知らせない（索引の作り直しで Inbox を何百回も読み直さないため）

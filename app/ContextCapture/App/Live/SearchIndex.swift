@@ -27,10 +27,16 @@ final class SearchIndexMaintainer {
     var onReadinessChange: @MainActor (SearchReadiness) -> Void = { _ in }
 
     private(set) var readiness: SearchReadiness = .unavailable {
-        didSet { if readiness != oldValue { onReadinessChange(readiness) } }
+        didSet {
+            if case .degraded = readiness {} else { degradedFailedIDs = [] }
+            if readiness != oldValue { onReadinessChange(readiness) }
+        }
     }
     /// 今の埋め込みの画像トークン数（未作成なら nil）。
     private(set) var activeImageTokens: Int?
+    /// `degraded` のとき、索引できなかった記録（状態ファイルの `failed_ids`）。それ以外は空。
+    /// これらの記録のベクトルは古いシグネチャのまま・無いままなので、アプリの検索はベクトル検索の結果から外す。
+    private(set) var degradedFailedIDs: Set<String> = []
     private var generation = 0
     private var task: Task<Void, Never>?
 
@@ -173,6 +179,7 @@ final class SearchIndexMaintainer {
             write(next)
             CCLog.models.error("search index degraded: \(failed.count) of \(ids.count) records could not be indexed")
             readiness = .degraded(failed: failed.count)
+            degradedFailedIDs = Set(failed)
         }
     }
 
@@ -193,12 +200,18 @@ final class SearchIndexMaintainer {
 }
 
 /// 埋め込み検索（F-11）。埋め込みが使えないときは文字の一致（`SubstringSearchService`）で探し、そのことを添える。
+///
+/// `degraded`（一部の記録の索引を作れなかった）のときは、見た目での検索を使うが、索引できなかった記録（`failed_ids`）は
+/// ベクトル検索の結果から外す（古いシグネチャのベクトルが残っていて、今のクエリのベクトルとは比べられないため）。
+/// それらの記録は文字の一致で見つかったものだけを後ろに足す（出ないことがある旨の注意書きと整合する）。
 struct EmbeddingSearchService: SearchServing {
     let embedder: SwitchableEmbedder
     let store: any RecordStore
     let fallback: SubstringSearchService
     /// 索引の状態（`SearchIndexMaintainer.readiness`）。
     let readiness: @Sendable () async -> SearchReadiness
+    /// `degraded` のときに索引できなかった記録（`SearchIndexMaintainer.degradedFailedIDs`）。
+    let degradedFailedIDs: @Sendable () async -> Set<String>
 
     static let preparingNotice = "検索の準備中のため、文字の一致で探しています"
     static let unavailableNotice = "検索モデルが未準備のため、文字の一致で探しています"
@@ -207,11 +220,13 @@ struct EmbeddingSearchService: SearchServing {
         "\(failed) 件の記録は索引を作れなかったため、検索に出ないことがあります"
     }
 
-    init(embedder: SwitchableEmbedder, store: any RecordStore, readiness: @escaping @Sendable () async -> SearchReadiness) {
+    init(embedder: SwitchableEmbedder, store: any RecordStore, readiness: @escaping @Sendable () async -> SearchReadiness,
+         degradedFailedIDs: @escaping @Sendable () async -> Set<String> = { [] }) {
         self.embedder = embedder
         self.store = store
         self.fallback = SubstringSearchService(store: store)
         self.readiness = readiness
+        self.degradedFailedIDs = degradedFailedIDs
     }
 
     func search(_ query: String, limit: Int) async throws -> [SearchHit] {
@@ -226,9 +241,20 @@ struct EmbeddingSearchService: SearchServing {
             // degraded: 大半はこの埋め込みで索引済みなので見た目での検索を使い、出ないことがある旨を添える。
             do {
                 let vector = try await embedder.embedQuery(query)
-                let hits = try await store.search(vector: vector, limit: limit)
-                if case let .degraded(n) = current { return SearchResponse(hits: hits, notice: Self.degradedNotice(failed: n)) }
-                return SearchResponse(hits: hits, notice: nil)
+                guard case let .degraded(n) = current else {
+                    return SearchResponse(hits: try await store.search(vector: vector, limit: limit), notice: nil)
+                }
+                let excluded = await degradedFailedIDs()
+                // 外す分を見込んで多めに取り、外してから limit に切る。
+                let vectorHits = try await store.search(vector: vector, limit: limit + excluded.count)
+                    .filter { !excluded.contains($0.record.id) }
+                var hits = Array(vectorHits.prefix(limit))
+                if hits.count < limit, !excluded.isEmpty {
+                    // 索引できなかった記録は文字の一致で見つかったものだけ補う（ベクトルの結果の後ろ）。
+                    let textHits = (try? await fallback.search(query, limit: fallback.scanLimit)) ?? []
+                    hits += textHits.filter { excluded.contains($0.record.id) }.prefix(limit - hits.count)
+                }
+                return SearchResponse(hits: hits, notice: Self.degradedNotice(failed: n))
             } catch {
                 CCLog.models.error("vector search failed, falling back: \(String(describing: type(of: error)), privacy: .public)")
                 notice = Self.failedNotice

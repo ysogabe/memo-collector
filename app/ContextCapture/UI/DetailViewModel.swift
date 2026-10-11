@@ -57,7 +57,7 @@ final class DetailViewModel {
     func saveAnnotation() async {
         guard isAnnotationChanged else { return }
         let text = draftText
-        if await commit(flash: "注釈を保存しました", { RecordEdits.setAnnotation(text, on: &$0) }) {
+        if await commit(flash: "注釈を保存しました", savedDraft: text, { RecordEdits.setAnnotation(text, on: &$0) }) {
             // 意図と索引をやり直す（手で変えた意図は上書きされない）。
             let triage = triage, id = record.id
             Task { await triage.annotationEdited(id: id) }
@@ -121,8 +121,15 @@ final class DetailViewModel {
     /// ストアが `RecordModifying`（本物の `SQLiteRecordStore`・フェイク）なら `modify` で **1 トランザクション**にする
     /// （読み直しと保存の間に cc-mcp やトリアージが書いた変更を失わない）。そうでなければ get + update。
     /// 記録が消えていたら保存せずエラーを出す。
+    ///
+    /// 編集中の注釈（`draftText`）は、注釈の保存（`savedDraft` に保存した下書きを渡す）のときだけ保存値に揃える。
+    /// 意図の変更・完了などの保存では下書きに触らない（未保存の入力を消さない）。注釈の保存中に続けて打った入力も消さない。
     @discardableResult
-    private func commit(flash: String?, _ change: @escaping @Sendable (inout ContextRecord) -> Void) async -> Bool {
+    private func commit(
+        flash: String?,
+        savedDraft: String? = nil,
+        _ change: @escaping @Sendable (inout ContextRecord) -> Void
+    ) async -> Bool {
         do {
             let r: ContextRecord
             if let modifying = store as? any RecordModifying {
@@ -134,7 +141,7 @@ final class DetailViewModel {
                 r = latest
             }
             record = r
-            draftText = r.annotation.text
+            if let savedDraft, draftText == savedDraft { draftText = r.annotation.text }
             errorMessage = nil
             onChange()
             if let flash { showFlash(flash) }
