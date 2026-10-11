@@ -329,6 +329,10 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
 
     /// 撮影から `retentionDays` 日（24 時間 × 日数）より古いレコードのスクショ（マスク版も）を消し、パスを nil にする。
     /// `retentionDays` が nil なら無期限保持で何もしない。処理したレコード数を返す。
+    ///
+    /// ガードの判定（`guardInfo`）も「画像なし」にする（`.clear`・検出箇所なし）。判定の対象の画像が無くなったので、
+    /// `needs_review` のまま Inbox の要確認に残したり、マスク待ちのままにしたりしない（MCP は「スクショがありません」を返す）。
+    /// 受け渡しの履歴（`handoffs`）など他のフィールドは残す。
     @discardableResult
     public func purgeExpiredScreenshots(retentionDays: Int?, now: Date = Date()) async throws -> Int {
         guard let retentionDays else { return 0 }
@@ -336,7 +340,11 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
             where: "screenshot_path IS NOT NULL OR masked_screenshot_path IS NOT NULL",
             cutoff: now.addingTimeInterval(-TimeInterval(retentionDays) * 24 * 60 * 60)
         ) { record in
-            defer { record.screenshotPath = nil; record.maskedScreenshotPath = nil }
+            defer {
+                record.screenshotPath = nil
+                record.maskedScreenshotPath = nil
+                record.guardInfo = GuardInfo(status: .clear, findings: [])
+            }
             return [record.screenshotPath, record.maskedScreenshotPath].compactMap { $0 }
         }
     }

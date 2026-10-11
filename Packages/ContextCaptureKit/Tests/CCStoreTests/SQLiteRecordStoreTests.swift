@@ -346,6 +346,43 @@ final class SQLiteRecordStoreTests: XCTestCase {
         }
     }
 
+    /// 保持期間でスクショを消したら、ガードの判定も「画像なし」（clear・検出なし）にする。Inbox の要確認から外れる。
+    /// 受け渡しの履歴は残す。
+    func testPurgeExpiredScreenshotsClearsGuardInfo() async throws {
+        let now = ms(baseTime + 40 * 86400)
+        var review = makeRecord(at: 0, guardStatus: .needsReview)
+        review.guardInfo.findings = [SecretFinding(kind: "api_key", bbox: CGRect(x: 0.1, y: 0.1, width: 0.2, height: 0.05))]
+        review.screenshotPath = try await store.writeAttachment(Data([1]), id: review.id, kind: .screenshot, ext: "heic", capturedAt: review.capturedAt)
+        review.handoffs = [Handoff(to: "claude-code", at: ms(baseTime + 10), via: "mcp")]
+        var masked = makeRecord(at: 1, guardStatus: .masked)
+        masked.screenshotPath = try await store.writeAttachment(Data([1]), id: masked.id, kind: .screenshot, ext: "heic", capturedAt: masked.capturedAt)
+        masked.maskedScreenshotPath = try await store.writeAttachment(Data([2]), id: masked.id, kind: .maskedScreenshot, ext: "heic", capturedAt: masked.capturedAt)
+        let freshReview = makeRecord(at: 39 * 86400, guardStatus: .needsReview)
+        for r in [review, masked, freshReview] { try await store.insert(r) }
+
+        let reviewFilter = InboxFilter(statuses: [], guardStatuses: [.needsReview])
+        let before = try await store.count(reviewFilter)
+        XCTAssertEqual(before, 2)
+
+        let purged = try await store.purgeExpiredScreenshots(retentionDays: 30, now: now)
+        XCTAssertEqual(purged, 2)
+        let r = try await store.get(id: review.id)
+        XCTAssertEqual(r?.guardInfo, GuardInfo(status: .clear, findings: []))
+        XCTAssertEqual(r?.handoffs, review.handoffs, "受け渡しの履歴は残す")
+        let m = try await store.get(id: masked.id)
+        XCTAssertEqual(m?.guardInfo, GuardInfo(status: .clear, findings: []))
+        XCTAssertNil(m?.maskedScreenshotPath)
+        let f = try await store.get(id: freshReview.id)
+        XCTAssertEqual(f?.guardInfo.status, .needsReview, "期限内の記録はそのまま")
+
+        let after = try await store.count(reviewFilter)
+        XCTAssertEqual(after, 1, "消した記録は要確認の件数から外れる")
+        let rows = try await store.pool.read { db in
+            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM records WHERE guard_status = 'needs_review'")!
+        }
+        XCTAssertEqual(rows, 1, "列も追従している")
+    }
+
     // MARK: - 追記・状態更新
 
     func testMutations() async throws {
