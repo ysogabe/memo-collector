@@ -121,14 +121,16 @@ final class Wave6PreparerTests: XCTestCase {
     }
 
     /// 開発用の置き場（manifest 無し）が読めるなら unmanifested（読み取り専用。書き込まない）。
+    /// `CC_MODELS_DIR` を指定したのに d1 が無ければ失敗（`TestModelLocator` と同じ規則）。
     func testDevModelsD1IsUnmanifestedOrReady() throws {
-        guard let dir = ProcessInfo.processInfo.environment["CC_MODELS_DIR"], !dir.isEmpty else {
+        guard let dir = TestModelLocator.explicitModelsDir else {
             throw XCTSkip("CC_MODELS_DIR が無い")
         }
-        let p = D1ModelPreparer(destination: URL(fileURLWithPath: dir).appendingPathComponent(ModelSlot.d1.directoryName))
+        let p = D1ModelPreparer(destination: dir.appendingPathComponent(ModelSlot.d1.directoryName))
         switch try p.verify(level: .size) {
         case .ready, .unmanifested: break
-        case .missing: throw XCTSkip("d1 が無い")
+        case .missing:
+            throw TestModelLocator.ExplicitModelMissing(description: "CC_MODELS_DIR=\(dir.path) に d1 が無い（\(p.destination.path)）")
         case let .mismatched(bad): XCTFail("\(bad)")
         }
     }

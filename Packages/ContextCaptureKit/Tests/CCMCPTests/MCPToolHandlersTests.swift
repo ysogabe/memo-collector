@@ -394,6 +394,116 @@ final class MCPToolHandlersTests: XCTestCase {
         XCTAssertLessThanOrEqual(props?[kCGImagePropertyPixelWidth] as? Int ?? .max, 800)
     }
 
+    // MARK: - HEIC（本番の保存形式）
+
+    /// 本番と同じく元画像とマスク版を HEIC で保存した記録。
+    @discardableResult
+    func insertWithHEIC(_ record: ContextRecord, width: Int = 400, height: Int = 300) async throws -> ContextRecord {
+        var r = record
+        let original = try HEICFixtures.encode(HEICFixtures.image(width: width, height: height))
+        r.screenshotPath = try await temp.store.writeAttachment(original, id: r.id, kind: .screenshot, ext: "heic", capturedAt: r.capturedAt)
+        let masked = try HEICFixtures.encode(HEICFixtures.image(width: width, height: height, blackFraction: 0.5))
+        r.maskedScreenshotPath = try await temp.store.writeAttachment(masked, id: r.id, kind: .maskedScreenshot, ext: "heic", capturedAt: r.capturedAt)
+        try await temp.store.insert(r)
+        return r
+    }
+
+    func decodeImage(_ base64: String) throws -> CGImage {
+        let data = try XCTUnwrap(Data(base64Encoded: base64))
+        let src = try XCTUnwrap(CGImageSourceCreateWithData(data as CFData, nil))
+        XCTAssertEqual(CGImageSourceGetType(src) as String?, UTType.jpeg.identifier, "中身も JPEG")
+        return try XCTUnwrap(CGImageSourceCreateImageAtIndex(src, 0, nil))
+    }
+
+    /// clear の HEIC は JPEG に変換して返す（MCP クライアントが HEIC を読めるとは限らない）。
+    func testHEICClearIsReturnedAsJPEG() async throws {
+        let r = try await insertWithHEIC(Fixtures.record("HEIC の clear", guardStatus: .clear))
+        let result = try await call("get_capture", ["id": .string(r.id), "include_image": true])
+        XCTAssertEqual(result.isError, false)
+        let image = try XCTUnwrap(result.images.first, "HEIC でも画像を返す")
+        XCTAssertEqual(image.mimeType, "image/jpeg")
+        let decoded = try decodeImage(image.data)
+        XCTAssertEqual(decoded.width, 400)
+        XCTAssertEqual(decoded.height, 300)
+        XCTAssertEqual(try result.json()["image_included"] as? Bool, true)
+        let loaded = try handlers.imageLoader.load(relativePath: r.screenshotPath!, paths: temp.paths)
+        XCTAssertEqual(loaded.mimeType, "image/jpeg")
+        XCTAssertTrue(loaded.resized, "HEIC はそのまま渡さず変換する")
+        let stored = try await temp.store.get(id: r.id)
+        XCTAssertEqual(stored?.handoffs.map(\.to), ["claude-code"])
+    }
+
+    /// masked の HEIC はマスク版を JPEG にして返す。黒塗りの領域は JPEG にも残る（画素で確かめる）。
+    func testHEICMaskedKeepsBlackedOutRegionInJPEG() async throws {
+        let r = try await insertWithHEIC(Fixtures.record("HEIC の masked", guardStatus: .masked))
+        let result = try await call("get_capture", ["id": .string(r.id), "include_image": true], client: "hermes")
+        let image = try XCTUnwrap(result.images.first)
+        XCTAssertEqual(image.mimeType, "image/jpeg")
+        let decoded = try decodeImage(image.data)
+        let w = decoded.width, h = decoded.height
+        for y in [h / 10, h / 2, h * 9 / 10] {
+            // 左半分（黒塗り）は黒のまま、右半分（元の明るい灰色）は明るいまま
+            XCTAssertLessThan(HEICFixtures.brightness(of: decoded, x: w / 4, y: y), 20, "黒塗りが残っている (y=\(y))")
+            XCTAssertLessThan(HEICFixtures.brightness(of: decoded, x: w / 20, y: y), 20)
+            XCTAssertLessThan(HEICFixtures.brightness(of: decoded, x: w / 2 - 4, y: y), 30)
+            XCTAssertGreaterThan(HEICFixtures.brightness(of: decoded, x: w * 3 / 4, y: y), 200, "マスクしていない側は元の色")
+        }
+        let loaded = try handlers.imageLoader.load(relativePath: r.maskedScreenshotPath!, paths: temp.paths)
+        XCTAssertTrue(loaded.resized)
+        // 元画像（黒塗りなし）ではないこと
+        let original = try handlers.imageLoader.load(relativePath: r.screenshotPath!, paths: temp.paths)
+        XCTAssertNotEqual(original.data, Data(base64Encoded: image.data))
+    }
+
+    /// 長辺が `maxSourcePixelSize` を超える HEIC は `maxPixelSize` まで縮小した JPEG になる（PNG でも同じ）。
+    func testHEICAndPNGAboveMaxSourcePixelSizeAreDownscaled() async throws {
+        handlers = MCPToolHandlers(store: temp.store, imageLoader: MCPImageLoader(maxPixelSize: 512, maxSourcePixelSize: 1000))
+        let heic = try await insertWithHEIC(Fixtures.record("大きい HEIC", guardStatus: .masked), width: 1600, height: 900)
+        var result = try await call("get_capture", ["id": .string(heic.id), "include_image": true])
+        var image = try XCTUnwrap(result.images.first)
+        XCTAssertEqual(image.mimeType, "image/jpeg")
+        var decoded = try decodeImage(image.data)
+        XCTAssertEqual(max(decoded.width, decoded.height), 512, "長辺を maxPixelSize に")
+        XCTAssertEqual(Double(decoded.width) / Double(decoded.height), 1600.0 / 900.0, accuracy: 0.02, "縦横比は保つ")
+        XCTAssertLessThan(HEICFixtures.brightness(of: decoded, x: decoded.width / 4, y: decoded.height / 2), 20, "縮小しても黒塗りは残る")
+
+        // 小さいファイル（maxBytes 以下）の PNG でも、長辺が maxSourcePixelSize を超えれば縮小する
+        var png = Fixtures.record("大きい PNG", guardStatus: .clear)
+        png.screenshotPath = try await temp.store.writeAttachment(Fixtures.imageData(width: 1200, height: 400, type: .png),
+                                                                  id: png.id, kind: .screenshot, ext: "png", capturedAt: png.capturedAt)
+        try await temp.store.insert(png)
+        result = try await call("get_capture", ["id": .string(png.id), "include_image": true])
+        image = try XCTUnwrap(result.images.first)
+        XCTAssertEqual(image.mimeType, "image/jpeg")
+        decoded = try decodeImage(image.data)
+        XCTAssertEqual(decoded.width, 512)
+
+        // 超えない PNG はそのまま
+        var small = Fixtures.record("小さい PNG", guardStatus: .clear)
+        small.screenshotPath = try await temp.store.writeAttachment(Fixtures.imageData(width: 900, height: 300, type: .png),
+                                                                    id: small.id, kind: .screenshot, ext: "png", capturedAt: small.capturedAt)
+        try await temp.store.insert(small)
+        result = try await call("get_capture", ["id": .string(small.id), "include_image": true])
+        XCTAssertEqual(result.images.first?.mimeType, "image/png")
+    }
+
+    /// 保持期間でスクショを消した記録は「スクショがありません」（needs_review の確認待ちのままにしない）。
+    func testPurgedScreenshotIsReportedAsNoScreenshot() async throws {
+        let r = try await insertWithHEIC(Fixtures.record("消える要確認", guardStatus: .needsReview))
+        if case .deny(let reason) = MCPToolHandlers.imageDecision(r) {
+            XCTAssertTrue(reason.contains("確認待ち"), reason)
+        } else { XCTFail("needs_review は渡さない") }
+        let purged = try await temp.store.purgeExpiredScreenshots(retentionDays: 1, now: r.capturedAt.addingTimeInterval(3 * 86400))
+        XCTAssertEqual(purged, 1)
+        let fetched = try await temp.store.get(id: r.id)
+        let after = try XCTUnwrap(fetched)
+        XCTAssertEqual(MCPToolHandlers.imageDecision(after), .deny(reason: "この記録にはスクショがありません"))
+        let result = try await call("get_capture", ["id": .string(r.id), "include_image": true])
+        XCTAssertTrue(result.images.isEmpty)
+        XCTAssertEqual(try result.json()["image_omitted_reason"] as? String, "この記録にはスクショがありません")
+        XCTAssertEqual(try result.json()["guard_status"] as? String, "clear")
+    }
+
     func testGetCaptureNotFoundAndValidation() async throws {
         let missing = ULID.generate().string
         let result = try await call("get_capture", ["id": .string(missing)])

@@ -89,7 +89,8 @@ final class LiveServices {
             }
         }
         searchIndex = maintainer
-        search = EmbeddingSearchService(embedder: embedder, store: store, readiness: { await maintainer.readiness })
+        search = EmbeddingSearchService(embedder: embedder, store: store, readiness: { await maintainer.readiness },
+                                        degradedFailedIDs: { await maintainer.degradedFailedIDs })
         guardReviewer = LiveGuardReviewer(store: store, modify: { id, transform in try await store.modify(id: id, transform) })
 
         whisper = WhisperModelSlot(preparer: WhisperModelPreparer(paths: paths), transcriber: transcriber)
@@ -133,6 +134,11 @@ final class LiveServices {
         coordinator.onRecordSaved = { id in
             CCLog.capture.debug("saved \(id, privacy: .public)")
             triage.recordSaved(id: id)
+        }
+        // 文字起こしの再試行で注釈が入った → 意図と索引をやり直す（ガードは保存時に回してある）。
+        coordinator.onTranscriptRetried = { id in
+            CCLog.capture.debug("transcript retried \(id, privacy: .public)")
+            triage.annotationEdited(id: id)
         }
         // 録音〜保存の間はトリアージの次のステップを始めない（Whisper とガード・索引が ANE を取り合うと STT が約 2 倍。
         // docs/e2e/report.md §7）。AppCoordinator は取り消し・失敗でも必ず false を送る。

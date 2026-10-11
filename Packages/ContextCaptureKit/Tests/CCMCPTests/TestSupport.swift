@@ -98,6 +98,47 @@ enum Fixtures {
     }
 }
 
+/// アプリの `ScreenshotEncoder`（app/ContextCapture/App/Live/ScreenshotEncoder.swift）と同じ設定の HEIC。
+/// 本番のスクショ・マスク版は macOS 27 では HEIC（WebP は書けない）で保存される。
+enum HEICFixtures {
+    /// `ScreenshotEncoder.quality` と同じ。
+    static let quality: Double = 0.85
+
+    /// 明るい灰色の背景に、左から `blackFraction` の幅を黒で塗った画像（マスク版の黒塗りの代わり）。
+    static func image(width: Int, height: Int, blackFraction: Double = 0) -> CGImage {
+        let ctx = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                            space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        ctx.setFillColor(CGColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1))
+        ctx.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        if blackFraction > 0 {
+            ctx.setFillColor(CGColor(red: 0, green: 0, blue: 0, alpha: 1))
+            ctx.fill(CGRect(x: 0, y: 0, width: Double(width) * blackFraction, height: Double(height)))
+        }
+        return ctx.makeImage()!
+    }
+
+    static func encode(_ image: CGImage) throws -> Data {
+        let out = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(out as CFMutableData, UTType.heic.identifier as CFString, 1, nil) else {
+            throw XCTSkip("この OS の ImageIO は HEIC を書けない")
+        }
+        CGImageDestinationAddImage(dest, image, [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary)
+        guard CGImageDestinationFinalize(dest) else { throw XCTSkip("HEIC のエンコードに失敗") }
+        return out as Data
+    }
+
+    /// 画像を RGBA8 に描き、列 `x`・行 `y`（上から）の画素の明るさ（RGB の平均、0〜255）を返す。
+    static func brightness(of image: CGImage, x: Int, y: Int) -> Double {
+        let w = image.width, h = image.height
+        let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                            space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+        let buf = ctx.data!.assumingMemoryBound(to: UInt8.self)
+        let i = y * w * 4 + x * 4
+        return (Double(buf[i]) + Double(buf[i + 1]) + Double(buf[i + 2])) / 3
+    }
+}
+
 extension CallTool.Result {
     var texts: [String] {
         content.compactMap { if case let .text(text, _, _) = $0 { return text } else { return nil } }

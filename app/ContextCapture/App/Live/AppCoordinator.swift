@@ -76,8 +76,11 @@ final class AppCoordinator: CaptureControlling {
 
     private let deps: CaptureDependencies
     let latency: CaptureLatencyMonitor
-    /// 保存した直後（文字起こしの再試行で注釈が入ったときも）に呼ぶ。**M2 で `TriageQueue.enqueue(id:)` をここに差す**。
+    /// 記録を保存した直後に呼ぶ（`TriageQueue.enqueue(id:)` を差す）。文字起こしに失敗して注釈が空のまま保存した記録も
+    /// 呼ぶ（ガードと索引を走らせる。意図は注釈が空ならトリアージ側でスキップされる）。
     var onRecordSaved: @MainActor (String) -> Void = { _ in }
+    /// 文字起こしの再試行で注釈が入った直後に呼ぶ（`TriageQueue.reprocess(id:)` = 意図と索引のやり直しを差す）。
+    var onTranscriptRetried: @MainActor (String) -> Void = { _ in }
     /// 取り消しで記録を消した直後に呼ぶ。M2 でトリアージの取り消し（キューから外す）をここに差す。
     var onRecordRemoved: @MainActor (String) -> Void = { _ in }
     /// キャプチャが始まった（true）/ すべて終わった（false）。0↔1 の切り替わりのときだけ呼ぶ。
@@ -136,7 +139,9 @@ final class AppCoordinator: CaptureControlling {
             return
         }
         let samples: [Float]
-        do { samples = try deps.readAudio(url) } catch {
+        // デコードとリサンプル（同期のファイル I/O）は MainActor の外で（`encodeScreenshot` と同じ）。
+        let readAudio = deps.readAudio
+        do { samples = try await Task.detached(priority: .userInitiated) { try readAudio(url) }.value } catch {
             CCLog.capture.error("retry failed: audio unreadable \(recordID, privacy: .public) \(Self.describe(error), privacy: .public)")
             emit(.failed(.transcriptionFailed(recordID: recordID)))
             return
@@ -155,11 +160,11 @@ final class AppCoordinator: CaptureControlling {
             return
         }
         let sttMs = max(0, (deps.uptime() - sttStart) * 1000)
-        // 再試行の間にユーザーが詳細で手直ししていたら、その記録を読み直して注釈だけを差し替える。
-        var updated = (try? await deps.store.get(id: recordID)) ?? record
-        updated.annotation = Annotation(text: transcript.text, sttEngine: transcript.engine)
+        // 再試行の間にユーザーが詳細で手直ししたり、トリアージ・cc-mcp がガードやメモを書いたりしていても消さないよう、
+        // 最新の記録に注釈（と STT エンジン）だけを当てる。
+        let updated: ContextRecord
         do {
-            try await deps.store.update(updated)
+            updated = try await Self.applyRetriedTranscript(transcript, id: recordID, store: deps.store)
         } catch {
             CCLog.capture.error("retry failed: update \(recordID, privacy: .public) \(Self.describe(error), privacy: .public)")
             emit(.failed(.saveFailed(detail: Self.describe(error))))
@@ -167,7 +172,29 @@ final class AppCoordinator: CaptureControlling {
         }
         CCLog.capture.notice("retry saved \(recordID, privacy: .public) stt \(sttMs, format: .fixed(precision: 0), privacy: .public)ms")
         emit(.saved(updated, notice: nil))
-        onRecordSaved(recordID)
+        // ガードは保存時（STT 失敗の記録も）に回してあるので、注釈から作る意図と索引だけをやり直す。
+        onTranscriptRetried(recordID)
+    }
+
+    /// 文字起こしの再試行の結果を、最新の記録の注釈（と STT エンジン）**だけ**に当てて保存する。
+    /// ストアが `RecordModifying`（本物の `SQLiteRecordStore`・フェイク）なら `modify` で 1 トランザクションにする
+    /// （詳細ビューの `DetailViewModel.commit` と同じ方式）。そうでなければ get + update。記録が消えていたら throw。
+    nonisolated static func applyRetriedTranscript(_ transcript: Transcript, id: String, store: any RecordStore) async throws -> ContextRecord {
+        let text = transcript.text, engine = transcript.engine
+        let change: @Sendable (inout ContextRecord) -> Void = { r in
+            r.annotation = Annotation(text: text, sttEngine: engine)
+        }
+        if let modifying = store as? any RecordModifying {
+            return try await modifying.modify(id: id) { change(&$0) }
+        }
+        guard var latest = try await store.get(id: id) else { throw RetryError.recordMissing }
+        change(&latest)
+        try await store.update(latest)
+        return latest
+    }
+
+    private enum RetryError: Error {
+        case recordMissing
     }
 
     // MARK: - ホットキー
@@ -342,7 +369,11 @@ final class AppCoordinator: CaptureControlling {
         }
 
         var audioPath: String?
-        let audioData = audio.fileURL.flatMap { try? Data(contentsOf: $0) } ?? AudioFileIO.wavData(samples: audio.samples16kMono)
+        // 一時ファイルの読み込み（無ければ WAV の組み立て）は MainActor の外で（`encodeScreenshot` と同じ）。
+        let fileURL = audio.fileURL, samples = audio.samples16kMono
+        let audioData = await Task.detached(priority: .userInitiated) {
+            fileURL.flatMap { try? Data(contentsOf: $0) } ?? AudioFileIO.wavData(samples: samples)
+        }.value
         do {
             let p = try await deps.store.writeAttachment(audioData, id: id, kind: .audio, ext: "wav", capturedAt: capturedAt)
             audioPath = p
@@ -377,6 +408,9 @@ final class AppCoordinator: CaptureControlling {
                 stt \(sttElapsedMs, format: .fixed(precision: 0), privacy: .public)ms
                 """)
             emit(.failed(.transcriptionFailed(recordID: id)))
+            // 注釈が無くてもガード（スクショの秘密検出）と索引（タイトル・画像）は回す。意図は注釈が空なのでスキップされる。
+            // 再試行で注釈が入ったら `onTranscriptRetried` で意図と索引をやり直す。
+            onRecordSaved(id)
             return
         }
         let releaseToSaved = max(0, (deps.uptime() - releaseUptime) * 1000)

@@ -5,13 +5,13 @@ import XCTest
 @testable import CCIntent
 
 /// MLX 8bit の d1 と PyTorch MPS bf16 参照（spikes/runtime/data/d1_reference_mps_bf16.json）の数値比較。
-/// モデル（CC_MODELS_DIR/d1-3b-text-q8）が無ければ skip。トークン列は **Swift の D1Tokenizer で作ったもの**を使う。
+/// モデル（CC_MODELS_DIR/d1-3b-text-q8）が無ければ skip（`CC_MODELS_DIR` を指定したのに無ければ失敗）。トークン列は **Swift の D1Tokenizer で作ったもの**を使う。
 /// 結果の要約は標準出力の `D1NUMERICS ` 行に JSON で出し、環境変数 `CC_D1_RESULTS_OUT` があればそのパスにも書く。
 final class D1NumericsTests: XCTestCase {
     static let labels = Intent.allCases.map(\.rawValue)
 
     func testReferenceParityAccuracyLatencyAndUnload() async throws {
-        guard let dir = D1TestSupport.modelDirectory() else {
+        guard let dir = try D1TestSupport.modelDirectory() else {
             throw XCTSkip("d1 モデルが無い（CC_MODELS_DIR/\(ModelSlot.d1.directoryName)）")
         }
         let ref = try D1TestSupport.reference()
@@ -123,7 +123,7 @@ final class D1NumericsTests: XCTestCase {
 final class D1DiagnosticsTests: XCTestCase {
     func testLastPositionHeadVsFullLogits() async throws {
         guard ProcessInfo.processInfo.environment["CC_D1_DIAG"] == "1" else { throw XCTSkip("CC_D1_DIAG=1 のときだけ") }
-        guard let dir = D1TestSupport.modelDirectory() else { throw XCTSkip("d1 モデルが無い") }
+        guard let dir = try D1TestSupport.modelDirectory() else { throw XCTSkip("d1 モデルが無い") }
         let ref = try D1TestSupport.reference()
         let clf = D1IntentClassifier(modelDirectory: dir)
         try await clf.load()

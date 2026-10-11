@@ -15,6 +15,7 @@ final class AppCoordinatorTests: XCTestCase {
     private var events: AsyncStream<CaptureEvent>.Iterator!
     private var saved: [String] = []
     private var removed: [String] = []
+    private var retried: [String] = []
 
     override func setUp() async throws {
         capturer = FakeCapturer.standard()
@@ -39,9 +40,11 @@ final class AppCoordinatorTests: XCTestCase {
         ))
         coordinator.onRecordSaved = { [unowned self] in saved.append($0) }
         coordinator.onRecordRemoved = { [unowned self] in removed.append($0) }
+        coordinator.onTranscriptRetried = { [unowned self] in retried.append($0) }
         events = coordinator.events().makeAsyncIterator()
         saved = []
         removed = []
+        retried = []
     }
 
     // MARK: - 補助
@@ -310,7 +313,9 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertNil(record.annotation.sttEngine)
         XCTAssertNotNil(record.audioPath)
         XCTAssertNotNil(record.screenshotPath)
-        XCTAssertTrue(saved.isEmpty, "注釈が無いうちはトリアージに回さない")
+        // 注釈が無くてもトリアージに回す（ガードと索引。意図は注釈が空なのでトリアージ側でスキップされる）。
+        XCTAssertEqual(saved, [id], "STT に失敗した記録もガードと索引に回す")
+        XCTAssertTrue(retried.isEmpty)
         XCTAssertNil(coordinator.latency.samples[.releaseToSaved])
 
         // [再試行]: 保存した WAV を読み直して文字起こしする。
@@ -326,7 +331,66 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(received.get(), 16_000)
         let reread = try await store.get(id: id)
         XCTAssertEqual(reread?.annotation.text, "やり直した文字起こし")
-        XCTAssertEqual(saved, [id])
+        XCTAssertEqual(reread?.annotation.sttEngine, "whisperkit-large-v3-turbo")
+        XCTAssertEqual(saved, [id], "再試行では enqueue し直さない（ガードは保存時に回してある）")
+        XCTAssertEqual(retried, [id], "再試行が成功したら意図と索引をやり直す")
+    }
+
+    /// 再試行の保存は `modify`（1 トランザクション）で注釈だけを当てる。読み直しと保存の間に別の書き手（トリアージのガード・
+    /// cc-mcp のメモ）が書いても消えない。
+    func testRetryKeepsConcurrentGuardAndNotesWrites() async throws {
+        let modifyStore = ModifyOnlyStore()
+        defer { try? FileManager.default.removeItem(at: modifyStore.inner.root) }
+        let clock = clock!
+        coordinator = AppCoordinator(dependencies: CaptureDependencies(
+            capturer: capturer, recorder: recorder, transcriber: stt, store: modifyStore,
+            readAudio: { _ in Array(repeating: 0.1, count: 16_000) },
+            uptime: { clock.get() }
+        ))
+        coordinator.onTranscriptRetried = { [unowned self] in retried.append($0) }
+        events = coordinator.events().makeAsyncIterator()
+
+        let audioPath = try await modifyStore.writeAttachment(Data([0]), id: "x", kind: .audio, ext: "wav", capturedAt: Date())
+        let r = ContextRecord(capturedAt: Date(), app: .unknown, audioPath: audioPath,
+                              annotation: Annotation(text: "", sttEngine: nil), guardInfo: GuardInfo(status: .pending))
+        try await modifyStore.insert(r)
+        // 保存（modify）の直前に、別の書き手がガードの結果とメモを書く。
+        modifyStore.beforeModify.set { rec in
+            rec.guardInfo = GuardInfo(status: .needsReview, findings: [])
+            if rec.notes.isEmpty { rec.notes.append(Note(author: "claude-code", text: "メモ", at: Date(timeIntervalSince1970: 1_791_000_000))) }
+        }
+        stt.handler.set { _, _ in Transcript(text: "再試行の注釈", engine: "whisperkit-x") }
+        await coordinator.retryTranscription(recordID: r.id)
+        guard case let .saved(updated, _)? = await next() else { return XCTFail("retry not saved") }
+        XCTAssertEqual(modifyStore.modifyCalls.get(), 1, "get + update ではなく modify で保存する")
+        let reread = try await modifyStore.get(id: r.id)
+        XCTAssertEqual(reread?.annotation.text, "再試行の注釈")
+        XCTAssertEqual(reread?.annotation.sttEngine, "whisperkit-x")
+        XCTAssertEqual(reread?.guardInfo.status, .needsReview, "別の書き手のガードを巻き戻さない")
+        XCTAssertEqual(reread?.notes.count, 1, "別の書き手のメモを消さない")
+        XCTAssertEqual(updated.notes.count, 1, "保存イベントの記録も最新")
+        XCTAssertEqual(retried, [r.id])
+    }
+
+    /// `RecordModifying` でないストアでは get + update（詳細ビューと同じ）。消えた記録は作り直さない。
+    func testRetryOnNonModifyingStoreUsesGetAndUpdate() async throws {
+        let plain = PlainStore()
+        defer { try? FileManager.default.removeItem(at: plain.inner.root) }
+        let r = ContextRecord(capturedAt: Date(), app: .unknown, audioPath: "a.wav",
+                              annotation: Annotation(text: "", sttEngine: nil))
+        try await plain.insert(r)
+        var t = Transcript(text: "注釈", engine: "e")
+        let updated = try await AppCoordinator.applyRetriedTranscript(t, id: r.id, store: plain)
+        XCTAssertEqual(updated.annotation.text, "注釈")
+        XCTAssertEqual(plain.updateCalls.get(), 1)
+        try await plain.delete(id: r.id)
+        t.text = "x"
+        do {
+            _ = try await AppCoordinator.applyRetriedTranscript(t, id: r.id, store: plain)
+            XCTFail("消えた記録は throw")
+        } catch {}
+        let missing = try await plain.get(id: r.id)
+        XCTAssertNil(missing)
     }
 
     func testRetryWithoutAudioReportsFailureAgain() async throws {
@@ -423,4 +487,25 @@ final class AppCoordinatorTests: XCTestCase {
         XCTAssertEqual(store.attachmentFileCount(), 0)
         XCTAssertEqual(removed, [r.id])
     }
+}
+
+/// `RecordModifying` に準拠しないストア（get + update の経路を確かめる）。
+final class PlainStore: RecordStore, @unchecked Sendable {
+    let inner = TestStore()
+    let updateCalls = Box(0)
+    func insert(_ record: ContextRecord) async throws { try await inner.insert(record) }
+    func update(_ record: ContextRecord) async throws {
+        updateCalls.update { $0 += 1 }
+        try await inner.update(record)
+    }
+    func get(id: String) async throws -> ContextRecord? { try await inner.get(id: id) }
+    func list(_ filter: InboxFilter) async throws -> [ContextRecord] { try await inner.list(filter) }
+    func count(_ filter: InboxFilter) async throws -> Int { try await inner.count(filter) }
+    func delete(id: String) async throws { try await inner.delete(id: id) }
+    func setEmbedding(id: String, vector: [Float]) async throws { try await inner.setEmbedding(id: id, vector: vector) }
+    func search(vector: [Float], limit: Int) async throws -> [SearchHit] { try await inner.search(vector: vector, limit: limit) }
+    func writeAttachment(_ data: Data, id: String, kind: AttachmentKind, ext: String, capturedAt: Date) async throws -> String {
+        try await inner.writeAttachment(data, id: id, kind: kind, ext: ext, capturedAt: capturedAt)
+    }
+    func attachmentURL(for relativePath: String) async throws -> URL { try await inner.attachmentURL(for: relativePath) }
 }

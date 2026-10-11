@@ -18,7 +18,7 @@ actor SharedEmbeddingModel {
 
     func get() async throws -> CoreMLEmbedder {
         if let embedder { return embedder }
-        guard let dir = EmbeddingFixtures.modelDirectory() else {
+        guard let dir = try EmbeddingFixtures.modelDirectory() else {
             throw XCTSkip("EmbeddingGemma 2 model not found (CC_MODELS_DIR/embeddinggemma-2 or spikes/fluid/models/swift-dir)")
         }
         let env = ProcessInfo.processInfo.environment["CC_EMBEDDING_COMPUTE_UNITS"].flatMap(EmbeddingComputeUnits.init(rawValue:))

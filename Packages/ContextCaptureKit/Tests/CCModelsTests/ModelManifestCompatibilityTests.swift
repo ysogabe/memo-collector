@@ -115,11 +115,17 @@ final class ModelManifestCompatibilityTests: XCTestCase {
     }
 
     /// `CC_MODELS_DIR`（開発用の置き場）に本物の manifest があれば読む（**読むだけ**。書き込まない）。
+    /// `CC_MODELS_DIR` を指定したのにモデルのディレクトリが 1 つも無ければ失敗（`TestModelLocator` と同じ規則）。
+    /// manifest の無いディレクトリ（開発用の unmanifested な置き場）は数えない。
     func testRealManifestsInModelsDirectory() throws {
-        guard let dir = ProcessInfo.processInfo.environment[CCPaths.modelsDirEnvironmentKey], !dir.isEmpty else {
+        guard let dir = TestModelLocator.explicitModelsDir else {
             throw XCTSkip("CC_MODELS_DIR が無い")
         }
-        let paths = CCPaths(dataRoot: FileManager.default.temporaryDirectory, modelsRoot: URL(fileURLWithPath: dir))
+        let paths = CCPaths(dataRoot: FileManager.default.temporaryDirectory, modelsRoot: dir)
+        let slotDirs = ModelSlot.allCases.filter { FileManager.default.fileExists(atPath: paths.modelDirectory($0).path) }
+        if slotDirs.isEmpty {
+            throw TestModelLocator.ExplicitModelMissing(description: "CC_MODELS_DIR=\(dir.path) にモデルのディレクトリが 1 つも無い")
+        }
         var read = 0
         for slot in ModelSlot.allCases where FileManager.default.fileExists(atPath: paths.manifestURL(slot).path) {
             let m = try ModelManifest.load(slot, paths: paths)

@@ -119,6 +119,58 @@ final class SearchIndexDegradedTests: XCTestCase {
         XCTAssertEqual(response.notice, EmbeddingSearchService.degradedNotice(failed: 3))
     }
 
+    /// degraded のとき、索引できなかった記録（failed_ids）の古いベクトルはベクトル検索の結果に混ぜない。
+    /// 文字の一致で見つかるものだけを後ろに足す。
+    func testDegradedSearchExcludesFailedRecordsStaleVectors() async throws {
+        let store = TestStore()
+        defer { try? FileManager.default.removeItem(at: store.root) }
+        let good = makeWave6Record("ビデオ会議", at: 0)
+        let staleMatch = makeWave6Record("会議の議事録", at: -1)   // 索引に失敗。文字では一致する
+        let staleOther = makeWave6Record("買い物リスト", at: -2)  // 索引に失敗。文字でも一致しない
+        for r in [good, staleMatch, staleOther] { try await store.insert(r) }
+        try await store.setEmbedding(id: good.id, vector: [0.5, 0, 0, 0])
+        // 古いシグネチャのベクトル（クエリとの内積が大きく、外さないと上位に来る）
+        try await store.setEmbedding(id: staleMatch.id, vector: [1, 0, 0, 0])
+        try await store.setEmbedding(id: staleOther.id, vector: [0.9, 0, 0, 0])
+        let embedder = SwitchableEmbedder(dimension: 4)
+        await embedder.install(FakePreparableEmbedder(signature: "s"))
+        let failed: Set<String> = [staleMatch.id, staleOther.id]
+        let service = EmbeddingSearchService(embedder: embedder, store: store, readiness: { .degraded(failed: 2) },
+                                             degradedFailedIDs: { failed })
+        let response = try await service.searchWithNotice("会議", limit: 5)
+        XCTAssertEqual(response.hits.map(\.record.id), [good.id, staleMatch.id],
+                       "古いベクトルでは出さず、文字の一致したものだけ後ろに足す")
+        XCTAssertFalse(response.hits.contains { $0.record.id == staleOther.id })
+        XCTAssertEqual(response.notice, EmbeddingSearchService.degradedNotice(failed: 2))
+
+        // limit が埋まっていれば補わない
+        let one = try await service.searchWithNotice("会議", limit: 1)
+        XCTAssertEqual(one.hits.map(\.record.id), [good.id])
+
+        // ready のときは外さない（failed_ids は degraded のときだけ意味を持つ）
+        let ready = EmbeddingSearchService(embedder: embedder, store: store, readiness: { .ready }, degradedFailedIDs: { [] })
+        let all = try await ready.searchWithNotice("会議", limit: 5)
+        XCTAssertEqual(all.hits.first?.record.id, staleMatch.id)
+    }
+
+    /// 作り直しが degraded で終わったら、maintainer は failed_ids を持つ。ready になったら空にする。
+    func testMaintainerExposesDegradedFailedIDs() async throws {
+        let store = TestStore()
+        defer { try? FileManager.default.removeItem(at: store.root) }
+        let a = makeWave6Record("a", at: 0), b = makeWave6Record("b", at: -1)
+        for r in [a, b] { try await store.insert(r) }
+        let queue = FakeTriageQueue()
+        queue.failing.set([b.id: 2])
+        let m = make(store: store, queue: queue)
+        await m.activate(imageTokens: 280).value
+        XCTAssertEqual(m.readiness, .degraded(failed: 1))
+        XCTAssertEqual(m.degradedFailedIDs, [b.id])
+        // 次の起動でやり直しが成功 → ready、除外も消える
+        await m.activate(imageTokens: 280).value
+        XCTAssertEqual(m.readiness, .ready)
+        XCTAssertEqual(m.degradedFailedIDs, [])
+    }
+
     /// 本物の TriageQueue: 埋め込みが準備中（EmbeddingNotReady）の索引ステップは失敗ではなく後回し、
     /// reindexAll は索引できなかったものとして返す（作り直しを ready にしない）。
     func testEmbeddingNotReadyIsDeferredInRealQueue() async throws {
@@ -215,6 +267,37 @@ final class DetailSaveTests: XCTestCase {
         saved = try await store.get(id: r.id)
         XCTAssertEqual(saved?.triage?.intent, .research)
         XCTAssertEqual(saved?.triage?.isManual, true)
+    }
+
+    /// 注釈を編集中に意図を変えても、未保存の下書きは消えない（保存されるのは意図だけ）。
+    func testIntentChangeKeepsUnsavedDraft() async throws {
+        let store = ModifyOnlyStore()
+        defer { try? FileManager.default.removeItem(at: store.inner.root) }
+        let r = makeWave6Record("元の注釈")
+        try await store.insert(r)
+        let vm = DetailViewModel(record: r, store: store, guardReview: NoGuardReview())
+        vm.draftText = "編集中の注釈"
+        await vm.setIntent(.research)
+        XCTAssertNil(vm.errorMessage)
+        XCTAssertEqual(vm.draftText, "編集中の注釈", "意図の保存で下書きを保存値に戻さない")
+        XCTAssertTrue(vm.isAnnotationChanged)
+        var saved = try await store.get(id: r.id)
+        XCTAssertEqual(saved?.annotation.text, "元の注釈", "下書きは保存されない")
+        XCTAssertEqual(saved?.triage?.intent, .research)
+
+        // 完了でも同じ
+        await vm.markDone()
+        XCTAssertEqual(vm.draftText, "編集中の注釈")
+        saved = try await store.get(id: r.id)
+        XCTAssertEqual(saved?.status, .done)
+        XCTAssertEqual(saved?.annotation.text, "元の注釈")
+
+        // 注釈の保存のときは保存値に揃う（変更なしになる）
+        await vm.saveAnnotation()
+        XCTAssertEqual(vm.draftText, "編集中の注釈")
+        XCTAssertFalse(vm.isAnnotationChanged)
+        saved = try await store.get(id: r.id)
+        XCTAssertEqual(saved?.annotation.text, "編集中の注釈")
     }
 
     func testMissingRecordIsNotRecreated() async throws {
