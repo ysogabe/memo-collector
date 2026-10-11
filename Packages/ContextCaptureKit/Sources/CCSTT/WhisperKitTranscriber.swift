@@ -87,7 +87,8 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
     public nonisolated let configuration: Configuration
 
     /// WhisperKit は Sendable でないので箱に入れて actor の外（読み込み Task）から受け取る。
-    /// 中身に触るのはこの actor の中だけ（呼び出しは actor が直列化する）。
+    /// 中身に触るのはこの actor の中だけ。⚠️ actor は await で再入するので、推論の直列化は actor ではなく
+    /// `inferenceGate`（`acquireInferenceGate` / `releaseInferenceGate`）が担う。
     final class KitBox: @unchecked Sendable {
         let kit: WhisperKit
         /// 温めにかかった秒数と失敗（読み込み Task の中で書き、完了後に actor が読む）。
@@ -115,9 +116,19 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
     ]
 
     public init(layout: WhisperModelLayout, configuration: Configuration = Configuration()) {
+        self.init(layout: layout, configuration: configuration, inferenceOverride: nil)
+    }
+
+    /// テスト用: 推論を差し替える（`inferenceOverride` は 16kHz のサンプルを受け取り、認識結果の文字列を返す）。
+    init(
+        layout: WhisperModelLayout,
+        configuration: Configuration = Configuration(),
+        inferenceOverride: (@Sendable ([Float]) async throws -> String)?
+    ) {
         self.layout = layout
         self.configuration = configuration
         self.engine = Self.engineName(for: layout.variant)
+        self.inferenceOverride = inferenceOverride
     }
 
     /// 既定の保存先（`CCPaths.resolve()`）のモデルを使う。
@@ -151,29 +162,49 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
         if let reason = configuration.speechGate.rejectionReason(for: samples) {
             throw STTError.noSpeech(reason: reason)
         }
-        let kit = try await loadedKit()
         let terms = vocabulary.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
         let strategy = configuration.vocabularyStrategy
 
-        var options = Self.baseDecodingOptions()
-        options.firstTokenLogProbThreshold = configuration.firstTokenLogProbThreshold
-        if strategy.contains(.prompt), !terms.isEmpty, let tokenizer = kit.tokenizer {
-            options.promptTokens = Self.promptTokens(for: terms, tokenizer: tokenizer)
-        }
-        // logitsFilters は WhisperKit インスタンスに 1 つだけ持てる。actor で直列化しているので呼ぶたびに差し替える。
-        if strategy.contains(.logitBias), !terms.isEmpty, let tokenizer = kit.tokenizer {
-            kit.textDecoder.logitsFilters = [Self.biasFilter(for: terms, tokenizer: tokenizer, configuration: configuration)]
-        } else {
-            kit.textDecoder.logitsFilters = nil
-        }
+        // ⚠️ actor は `await` のたびに再入する。`kit.transcribe` を待つ間に次の `transcribe` が入ってくると、
+        // 同じ WhisperKit で 2 つの推論が並行して走り、インスタンスに 1 つしかない `textDecoder.logitsFilters` も
+        // 途中で上書きされる。actor だけでは直列化されないので、推論区間を `inferenceGate` で 1 本ずつにする。
+        // 読み込みは門の外で先に待つ（読み込み中の `unload()` が門で待たされず、すぐ読み込みを打ち切れるように）。
+        if inferenceOverride == nil { _ = try await loadedKit() }
+        await acquireInferenceGate()
+        defer { releaseInferenceGate() }
+        try Task.checkCancellation()
 
-        let results: [TranscriptionResult]
-        do {
-            results = try await kit.transcribe(audioArray: samples, decodeOptions: options)
-        } catch {
-            throw STTError.engineFailure(String(describing: error))
+        var text: String
+        if let inferenceOverride {
+            do {
+                text = try await inferenceOverride(samples)
+            } catch {
+                throw STTError.engineFailure(String(describing: error))
+            }
+        } else {
+            // 門を待つ間に unload されていれば読み込み直す（ふつうは読み込み済みなのですぐ返る）
+            let kit = try await loadedKit()
+            var options = Self.baseDecodingOptions()
+            options.firstTokenLogProbThreshold = configuration.firstTokenLogProbThreshold
+            if strategy.contains(.prompt), !terms.isEmpty, let tokenizer = kit.tokenizer {
+                options.promptTokens = Self.promptTokens(for: terms, tokenizer: tokenizer)
+            }
+            // logitsFilters は WhisperKit インスタンスに 1 つだけ持てる。推論区間は inferenceGate で 1 本ずつなので、
+            // 呼ぶたびに差し替えても他の推論の途中で書き換わることはない。
+            if strategy.contains(.logitBias), !terms.isEmpty, let tokenizer = kit.tokenizer {
+                kit.textDecoder.logitsFilters = [Self.biasFilter(for: terms, tokenizer: tokenizer, configuration: configuration)]
+            } else {
+                kit.textDecoder.logitsFilters = nil
+            }
+            let results: [TranscriptionResult]
+            do {
+                results = try await kit.transcribe(audioArray: samples, decodeOptions: options)
+            } catch {
+                throw STTError.engineFailure(String(describing: error))
+            }
+            text = results.map(\.text).joined()
         }
-        var text = results.map(\.text).joined().trimmingCharacters(in: .whitespacesAndNewlines)
+        text = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if strategy.contains(.correction), !terms.isEmpty {
             text = VocabularyCorrector(vocabulary: terms).apply(to: text)
         }
@@ -185,14 +216,19 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
 
     // MARK: - ModelUnloadable
 
+    /// 読み込み中なら打ち切る（その読み込みを待っている `transcribe` は `CancellationError`）。
+    /// 推論の途中なら、その推論が終わるのを待ってから解放する（推論中の WhisperKit を解放しない）。
+    /// 解放の前に並んでいた `transcribe` は先に処理され、後から来たものは解放後に読み込み直す。
     public func unload() async {
         generation += 1
         loading?.cancel()
         loading = nil
+        await acquireInferenceGate()
+        defer { releaseInferenceGate() }
         if let kit = whisperKit {
+            whisperKit = nil
             await kit.unloadModels()
         }
-        whisperKit = nil
     }
 
     public var isLoaded: Bool { whisperKit != nil }
@@ -210,11 +246,41 @@ public actor WhisperKitTranscriber: SpeechTranscribing, ModelUnloadable {
 
     /// 前文脈トークンをそのまま渡して WhisperKit の生の結果を返す。
     func debugTranscribe(samples: [Float], promptTokens: [Int]?) async throws -> [TranscriptionResult] {
+        await acquireInferenceGate()
+        defer { releaseInferenceGate() }
         let kit = try await loadedKit()
         var options = Self.baseDecodingOptions()
         options.promptTokens = promptTokens
         kit.textDecoder.logitsFilters = nil
         return try await kit.transcribe(audioArray: samples, decodeOptions: options)
+    }
+
+    // MARK: - 推論の直列化
+
+    /// テスト用: WhisperKit の代わりに呼ぶ推論（モデル無しで直列化を確かめるため）。nil なら WhisperKit を使う。
+    private let inferenceOverride: (@Sendable ([Float]) async throws -> String)?
+    /// 推論区間（と unload）を 1 本ずつにするための門。actor の中だけで触る。
+    private var inferenceBusy = false
+    private var inferenceWaiters: [CheckedContinuation<Void, Never>] = []
+
+    /// 門が空くまで待って入る（先着順）。待っている間にキャンセルされても、順番が来るまで待つ
+    /// （入った直後に呼び出し側が `Task.checkCancellation()` で抜け、`releaseInferenceGate()` で次へ渡す）。
+    private func acquireInferenceGate() async {
+        if !inferenceBusy {
+            inferenceBusy = true
+            return
+        }
+        await withCheckedContinuation { inferenceWaiters.append($0) }
+        // release が busy のまま順番を渡してくれる
+    }
+
+    /// 門を出る。待っている人がいれば busy のまま次へ渡す。throw・キャンセルでも必ず呼ばれるよう `defer` で使う。
+    private func releaseInferenceGate() {
+        if inferenceWaiters.isEmpty {
+            inferenceBusy = false
+        } else {
+            inferenceWaiters.removeFirst().resume()
+        }
     }
 
     // MARK: - 内部
