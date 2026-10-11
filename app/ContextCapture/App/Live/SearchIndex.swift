@@ -178,8 +178,9 @@ final class SearchIndexMaintainer {
             next.failedIDs = failed
             write(next)
             CCLog.models.error("search index degraded: \(failed.count) of \(ids.count) records could not be indexed")
-            readiness = .degraded(failed: failed.count)
+            // 先に除外する id を入れてから知らせる（readiness の didSet は degraded では消さない）。
             degradedFailedIDs = Set(failed)
+            readiness = .degraded(failed: failed.count)
         }
     }
 
