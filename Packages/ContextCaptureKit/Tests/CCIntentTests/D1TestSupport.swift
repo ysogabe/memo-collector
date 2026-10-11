@@ -18,18 +18,21 @@ enum D1TestSupport {
     static let hfSnapshot = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(
         ".cache/huggingface/hub/models--LiquidAI--d1-3B/snapshots/051bcc464b01b9f92942b364d9586b0ef5912432")
 
-    /// d1 の tokenizer.json（モデルディレクトリ → HF キャッシュの順）。無ければ nil。
-    static func tokenizerJSON() -> URL? {
-        let candidates = [
-            CCPaths.resolve().modelDirectory(.d1).appendingPathComponent("tokenizer.json"),
-            hfSnapshot.appendingPathComponent("tokenizer.json"),
-        ]
-        return candidates.first { FileManager.default.fileExists(atPath: $0.path) }
+    /// d1 の tokenizer.json。モデルディレクトリ（`modelDirectory()`）→ `CC_MODELS_DIR` 未指定のときだけ HF キャッシュの順。
+    /// `CC_MODELS_DIR` 指定で d1 が無ければ throw（失敗）、未指定でどこにも無ければ nil。
+    static func tokenizerJSON() throws -> URL? {
+        if let dir = try modelDirectory() { return dir.appendingPathComponent("tokenizer.json") }
+        let hf = hfSnapshot.appendingPathComponent("tokenizer.json")
+        return FileManager.default.fileExists(atPath: hf.path) ? hf : nil
     }
 
     static let sharedTokenizer: Result<D1Tokenizer, Error>? = {
-        guard let url = tokenizerJSON() else { return nil }
-        return Result { try D1Tokenizer(tokenizerJSON: url) }
+        do {
+            guard let url = try tokenizerJSON() else { return nil }
+            return Result { try D1Tokenizer(tokenizerJSON: url) }
+        } catch {
+            return .failure(error)
+        }
     }()
 
     static func tokenizer() throws -> D1Tokenizer {
@@ -39,14 +42,15 @@ enum D1TestSupport {
         return try r.get()
     }
 
-    /// モデル（MLX 8bit）のディレクトリ。config.json と safetensors が無ければ nil。
-    static func modelDirectory() -> URL? {
-        let dir = CCPaths.resolve().modelDirectory(.d1)
-        let fm = FileManager.default
-        guard fm.fileExists(atPath: dir.appendingPathComponent("config.json").path),
-              fm.fileExists(atPath: dir.appendingPathComponent("model.safetensors").path)
-        else { return nil }
-        return dir
+    /// モデル（MLX 8bit）のディレクトリ。config.json・safetensors・tokenizer.json が揃っているもの。
+    /// 探索の規則は `TestModelLocator`（全テストターゲット共通）: `CC_MODELS_DIR` 指定時はその下だけ（無ければ throw = 失敗）、
+    /// 未指定なら既定の保存先（無ければ nil）。
+    static func modelDirectory() throws -> URL? {
+        try TestModelLocator.locate(.d1) { dir in
+            ["config.json", "model.safetensors", "tokenizer.json"].allSatisfy {
+                FileManager.default.fileExists(atPath: dir.appendingPathComponent($0).path)
+            }
+        }
     }
 
     struct Reference: Decodable {

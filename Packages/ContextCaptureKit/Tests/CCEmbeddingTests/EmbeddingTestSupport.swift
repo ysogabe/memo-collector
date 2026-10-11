@@ -12,11 +12,11 @@ enum EmbeddingFixtures {
         .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
         .deletingLastPathComponent().deletingLastPathComponent()
     /// git 管理外のもの（スパイクのモデル・`st_inputs.npz`）はメイン作業ツリーにしか無いことがある。
-    static let mainRepoRoot = URL(fileURLWithPath: "/Users/yoshio/works/60-misc/memo-collector")
+    static let mainRepoRoot: URL? = TestModelLocator.mainWorktreeRoot
 
     /// `relative` を worktree → メイン作業ツリーの順に探す。
     static func file(_ relative: String) -> URL? {
-        for root in [repoRoot, mainRepoRoot] {
+        for root in [repoRoot, mainRepoRoot].compactMap({ $0 }) {
             let u = root.appendingPathComponent(relative)
             if FileManager.default.fileExists(atPath: u.path) { return u }
         }
@@ -28,19 +28,17 @@ enum EmbeddingFixtures {
         return u
     }
 
-    /// モデルディレクトリ: `CC_MODELS_DIR/embeddinggemma-2`（`cc-models prepare embedding` の出力）→ スパイクの `swift-dir`。
-    static func modelDirectory() -> URL? {
-        var candidates: [URL] = []
-        if let env = ProcessInfo.processInfo.environment[CCPaths.modelsDirEnvironmentKey], !env.isEmpty {
-            candidates.append(CCPaths.resolve().modelDirectory(.embedding))
-        }
-        if let spike = file("spikes/fluid/models/swift-dir") { candidates.append(spike) }
+    /// モデルディレクトリ。探索の規則は `TestModelLocator`（全テストターゲット共通）: `CC_MODELS_DIR` 指定時は
+    /// `<dir>/embeddinggemma-2`（`cc-models prepare embedding` の出力）だけ（無ければ throw = 失敗）、未指定なら
+    /// 既定の保存先 → スパイクの `spikes/fluid/models/swift-dir`（無ければ nil）。
+    static func modelDirectory() throws -> URL? {
         let need = EmbeddingModelFiles.textRequired + EmbeddingModelFiles.visionRequired
-        return candidates.first { EmbeddingModelFiles.missing(need, in: $0).isEmpty }
+        return try TestModelLocator.locate(.embedding) { EmbeddingModelFiles.missing(need, in: $0).isEmpty }
     }
 
-    static func tokenizerURL() -> URL? {
-        if let dir = modelDirectory() { return dir.appendingPathComponent(EmbeddingModelFiles.tokenizer) }
+    /// tokenizer.json。モデルディレクトリ →（`CC_MODELS_DIR` 未指定のときだけ）スパイクのスナップショットの順。
+    static func tokenizerURL() throws -> URL? {
+        if let dir = try modelDirectory() { return dir.appendingPathComponent(EmbeddingModelFiles.tokenizer) }
         return file("spikes/fluid/models/embeddinggemma-2-coreml/tokenizer.json")
     }
 

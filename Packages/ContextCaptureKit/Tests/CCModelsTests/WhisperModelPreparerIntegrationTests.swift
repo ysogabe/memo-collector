@@ -5,28 +5,15 @@ import XCTest
 
 /// 実モデルを使うテスト。モデルが無ければ XCTSkip。**モデルの置き場には何も書かない**（スパイクの取得物は読み取り専用）。
 final class WhisperModelPreparerIntegrationTests: XCTestCase {
-    /// `CC_MODELS_DIR`（`<dir>/whisperkit/` または `<dir>/stt/whisperkit/`）→ 既定の保存先 → スパイクの取得物の順に探す。
-    static func locateModel() -> WhisperModelPreparer? {
-        var roots = [CCPaths.resolve().modelDirectory(.whisper)]
-        if let env = ProcessInfo.processInfo.environment[CCPaths.modelsDirEnvironmentKey], !env.isEmpty {
-            roots.append(URL(fileURLWithPath: (env as NSString).expandingTildeInPath).appendingPathComponent("stt/whisperkit"))
-        }
-        // .../Packages/ContextCaptureKit/Tests/CCModelsTests/<file> → リポジトリ（worktree）ルート
-        var repo = URL(fileURLWithPath: #filePath)
-        for _ in 0..<5 { repo.deleteLastPathComponent() }
-        roots.append(repo.appendingPathComponent("spikes/runtime/models/stt/whisperkit"))
-        // worktree なら本体の作業ツリー（.git ファイルの gitdir から辿る）
-        if let text = try? String(contentsOf: repo.appendingPathComponent(".git"), encoding: .utf8),
-           text.hasPrefix("gitdir:"),
-           let range = text.range(of: "/.git/worktrees/") {
-            let main = text.dropFirst("gitdir:".count)[..<range.lowerBound].trimmingCharacters(in: .whitespaces)
-            roots.append(URL(fileURLWithPath: main).appendingPathComponent("spikes/runtime/models/stt/whisperkit"))
-        }
-        return roots.map { WhisperModelPreparer(root: $0) }.first { $0.missingRequiredFiles().isEmpty }
+    /// 探索の規則は `TestModelLocator`（全テストターゲット共通）: `CC_MODELS_DIR` 指定時はその下（`<dir>/whisperkit/` または
+    /// `<dir>/stt/whisperkit/`）だけ（無ければ throw = 失敗）、未指定なら既定の保存先 → スパイクの取得物（無ければ nil）。
+    static func locateModel() throws -> WhisperModelPreparer? {
+        try TestModelLocator.locate(.whisper) { WhisperModelPreparer(root: $0).missingRequiredFiles().isEmpty }
+            .map { WhisperModelPreparer(root: $0) }
     }
 
     func testBuildManifestFromRealModelWithoutWriting() throws {
-        guard let p = Self.locateModel() else { throw XCTSkip("WhisperKit のモデルが見つからない") }
+        guard let p = try Self.locateModel() else { throw XCTSkip("WhisperKit のモデルが見つからない") }
         let hadManifest = FileManager.default.fileExists(atPath: p.manifestURL.path)
         let status = try p.verify(level: .size)
         if !hadManifest { XCTAssertEqual(status, .unmanifested) }
@@ -49,7 +36,7 @@ final class WhisperModelPreparerIntegrationTests: XCTestCase {
     }
 
     func testWarmUpLoadsModel() async throws {
-        guard let p = Self.locateModel() else { throw XCTSkip("WhisperKit のモデルが見つからない") }
+        guard let p = try Self.locateModel() else { throw XCTSkip("WhisperKit のモデルが見つからない") }
         let r = try await p.warmUp()
         print(String(format: "[ccmodels] warm-up %.1fs", r.loadSeconds))
         XCTAssertGreaterThan(r.loadSeconds, 0)

@@ -44,7 +44,7 @@ final class WhisperKitIntegrationTests: XCTestCase {
     }
 
     func requireModel() throws -> WhisperModelLayout {
-        guard let layout = STTTestSupport.locateModel() else {
+        guard let layout = try STTTestSupport.locateModel() else {
             throw XCTSkip("WhisperKit のモデルが見つからない（CC_MODELS_DIR か spikes/runtime/models/stt/whisperkit を用意する）")
         }
         return layout

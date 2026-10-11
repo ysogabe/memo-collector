@@ -3,13 +3,15 @@ import CCIntent
 import XCTest
 @testable import CCTriage
 
-/// 本物の d1（`CC_MODELS_DIR` の `d1-3b-text-q8/`）で 3 件流す結合テスト。モデルが無ければ skip。
+/// 本物の d1（`CC_MODELS_DIR` の `d1-3b-text-q8/`）で 3 件流す結合テスト。モデルが無ければ skip（`CC_MODELS_DIR` を指定したのに無ければ失敗）。
 /// 埋め込み・スキャナ・画像はフェイクのまま（埋め込みは Wave 3 embedding 担当が実装）。
 final class D1TriageIntegrationTests: XCTestCase {
     func testRealD1ClassifiesThreeRecordsAndUnloads() async throws {
-        let dir = CCPaths.resolve().modelDirectory(.d1)
-        guard FileManager.default.fileExists(atPath: dir.appendingPathComponent("config.json").path) else {
-            throw XCTSkip("d1 モデルが無い: \(dir.path)")
+        // 探索の規則は `TestModelLocator`（全テストターゲット共通）。CC_MODELS_DIR 指定で無ければ失敗、未指定で無ければ skip。
+        let dir = try TestModelLocator.require(.d1) { dir in
+            ["config.json", "model.safetensors", "tokenizer.json"].allSatisfy {
+                FileManager.default.fileExists(atPath: dir.appendingPathComponent($0).path)
+            }
         }
         let temp = try TempStore()
         let classifier = D1IntentClassifier(modelDirectory: dir)

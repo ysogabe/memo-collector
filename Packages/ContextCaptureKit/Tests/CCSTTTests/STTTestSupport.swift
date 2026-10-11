@@ -17,28 +17,11 @@ enum STTTestSupport {
 
     static var fixturesDir: URL { repoRoot.appendingPathComponent("poc/fixtures", isDirectory: true) }
 
-    /// git worktree なら本体の作業ツリーのルート（`.git` ファイルの gitdir から辿る）。worktree でなければ nil。
-    static var mainWorktreeRoot: URL? {
-        let dotGit = repoRoot.appendingPathComponent(".git")
-        guard let text = try? String(contentsOf: dotGit, encoding: .utf8), text.hasPrefix("gitdir:") else { return nil }
-        let gitdir = text.dropFirst("gitdir:".count).trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let range = gitdir.range(of: "/.git/worktrees/") else { return nil }
-        return URL(fileURLWithPath: String(gitdir[..<range.lowerBound]), isDirectory: true)
-    }
-
-    /// 結合テストに使うモデル。`CC_MODELS_DIR`（または既定の保存先）→ スパイクの変換済みモデルの順に探す。
-    /// どこにも無ければ nil（テストは XCTSkip）。
-    static func locateModel() -> WhisperModelLayout? {
-        var candidates = [WhisperModelLayout(paths: CCPaths.resolve())]
-        // 計画書 §2: 開発中はスパイクの `spikes/runtime/models/` を指してよい（STT は stt/whisperkit/ にある）
-        for root in [repoRoot, mainWorktreeRoot].compactMap({ $0 }) {
-            candidates.append(WhisperModelLayout(root: root.appendingPathComponent("spikes/runtime/models/stt/whisperkit")))
-        }
-        if let env = ProcessInfo.processInfo.environment[CCPaths.modelsDirEnvironmentKey], !env.isEmpty {
-            let base = URL(fileURLWithPath: (env as NSString).expandingTildeInPath, isDirectory: true)
-            candidates.append(WhisperModelLayout(root: base.appendingPathComponent("stt/whisperkit")))
-        }
-        return candidates.first { $0.missingFiles().isEmpty }
+    /// 結合テストに使うモデル。探索の規則は `TestModelLocator`（全テストターゲット共通）:
+    /// `CC_MODELS_DIR` 指定時はその下だけ（無ければ throw = 失敗）、未指定なら既定の保存先 → スパイクの変換済みモデル（無ければ nil）。
+    static func locateModel() throws -> WhisperModelLayout? {
+        try TestModelLocator.locate(.whisper) { WhisperModelLayout(root: $0).missingFiles().isEmpty }
+            .map { WhisperModelLayout(root: $0) }
     }
 
     struct Capture: Decodable {

@@ -154,7 +154,7 @@ final class EmbeddingUnitTests: XCTestCase {
     // MARK: - トークナイザ（tokenizer.json が要る）
 
     private func builder() throws -> EmbeddingSequenceBuilder {
-        guard let url = EmbeddingFixtures.tokenizerURL() else { throw XCTSkip("tokenizer.json not found") }
+        guard let url = try EmbeddingFixtures.tokenizerURL() else { throw XCTSkip("tokenizer.json not found") }
         return EmbeddingSequenceBuilder(tokenizer: try EmbeddingGemma2Tokenizer(tokenizerJsonURL: url))
     }
 
