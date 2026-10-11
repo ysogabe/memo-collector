@@ -18,6 +18,13 @@ import Foundation
 /// - `pause()` / `resume()`: キャプチャ（録音開始〜保存完了）の間、**次のステップを始めない**（進行中のステップは中断しない）。
 ///   文字起こし（Whisper、ANE）とガード（Vision OCR）・索引（埋め込み、ANE）が重なると STT が約 2 倍になるため
 ///   （docs/e2e/report.md §7）。止めたまま再開されなくても `Configuration.maxPauseDuration` で自動的に再開する。
+/// - 同じ記録を重ねて処理しない: 待ち行列に同じ id があればステップを合わせて 1 件にする。処理中の id に対しては
+///   - `enqueue` / `resumePending`（「済んでいなければやる」）は、処理中のジョブが持つステップを積まない。そのステップが
+///     失敗・未準備（`.failed` / `.skipped(.notReady)`）で終わったときだけ、処理の後に 1 回積み直す
+///     （モデルの準備完了で呼ばれた `resumePending` を、ちょうど処理中だった未準備のステップが取りこぼさないように）。
+///   - `reprocess` / `reindexAndWait`（「今の結果は古いのでやり直す」）は、処理の後に 1 回走る（何度呼んでも待ち行列で 1 件にまとまる）。
+///   ⚠️ 残る窓: `resumePending` がストアを読んだ直後に同じ記録の処理が始まり、積む前に終わり切ると重ねて積む
+///   （ストアの読み取りは数 ms、1 件の処理は秒単位なので実害は小さい）。
 /// - ⚠️ OCR 結果・検出文字列・注釈本文はログにもイベントにも出さない。
 public actor TriageQueue {
     public struct Configuration: Sendable {
@@ -53,6 +60,12 @@ public actor TriageQueue {
     public nonisolated let configuration: Configuration
 
     private var queue: [Job] = []
+    /// 処理中のジョブ（`drain` が待ち行列から取り出して `process` している間だけ）。
+    private var inFlight: Job?
+    /// 処理中のジョブのステップのうち、`enqueue` / `resumePending` が重ねて頼んだもの（処理中は積まずにここへ預ける）。
+    private var absorbedSteps: Set<TriageStep> = []
+    /// 処理中のジョブの各ステップの結果（預かったステップを積み直すかの判定用）。
+    private var inFlightOutcomes: [TriageStep: TriageStepOutcome] = [:]
     private var worker: Task<Void, Never>?
     private var idleWaiters: [CheckedContinuation<Void, Never>] = []
     private var subscribers: [UUID: AsyncStream<TriageEvent>.Continuation] = [:]
@@ -98,18 +111,21 @@ public actor TriageQueue {
     // MARK: - 公開 API
 
     /// 新しく保存したレコードを全ステップで処理する（保存直後に呼ぶ）。
+    /// 処理中の同じ記録には重ねない（処理中のステップが失敗・未準備で終わったときだけ、処理の後に積み直す）。
     public func enqueue(id: String) {
-        schedule(Job(id: id, steps: Set(TriageStep.allCases)))
+        scheduleIfNeeded(Job(id: id, steps: Set(TriageStep.allCases)))
     }
 
     /// 指定ステップだけ再実行する。注釈を編集したときは既定の `[.intent, .index]`。
     /// 手で変えた意図（`TriageMarkers.manualModel`）は再実行しても上書きしない。
+    /// 同じ記録が処理中なら、その処理の後に 1 回走る（待ち行列の同じ記録とはステップを合わせて 1 件にする）。
     public func reprocess(id: String, steps: Set<TriageStep> = [.intent, .index]) {
         guard !steps.isEmpty else { return }
         schedule(Job(id: id, steps: steps))
     }
 
-    /// 起動時の再開。未完了のステップがあるレコードを**古い順**に投入し、投入した件数を返す。
+    /// 起動時の再開。未完了のステップがあるレコードを**古い順**に投入し、投入した件数を返す
+    /// （処理中の記録のうち、処理中のステップで足りるものは積まず、数えない）。
     /// - guard が pending → guard
     /// - triage が nil で注釈（前処理後）が空でない → intent
     /// - 埋め込みが無い → index
@@ -130,8 +146,7 @@ public actor TriageQueue {
             }
             if unindexed.contains(record.id) { steps.insert(.index) }
             guard !steps.isEmpty else { continue }
-            schedule(Job(id: record.id, steps: steps))
-            n += 1
+            if scheduleIfNeeded(Job(id: record.id, steps: steps)) { n += 1 }
         }
         return n
     }
@@ -228,6 +243,36 @@ public actor TriageQueue {
 
     // MARK: - キュー
 
+    /// 「済んでいなければやる」依頼（`enqueue` / `resumePending`）。処理中の同じ記録が持つステップは積まずに預け、
+    /// 処理の後に結果を見て積み直すか決める（`finishInFlight`）。何か積んだ（または待ち行列へ合わせた）なら true。
+    @discardableResult
+    private func scheduleIfNeeded(_ job: Job) -> Bool {
+        var job = job
+        if let current = inFlight, current.id == job.id {
+            let covered = job.steps.intersection(current.steps)
+            absorbedSteps.formUnion(covered)
+            job.steps.subtract(covered)
+        }
+        guard !job.steps.isEmpty else { return false }
+        schedule(job)
+        return true
+    }
+
+    /// 処理中のジョブを終える。預かったステップのうち、失敗・未準備で終わったものだけ積み直す。
+    private func finishInFlight() {
+        guard let current = inFlight else { return }
+        let retry = absorbedSteps.filter { step in
+            switch inFlightOutcomes[step] {
+            case .failed?, .skipped(.notReady)?: return true
+            default: return false
+            }
+        }
+        inFlight = nil
+        absorbedSteps = []
+        inFlightOutcomes = [:]
+        if !retry.isEmpty { schedule(Job(id: current.id, steps: retry)) }
+    }
+
     private func schedule(_ job: Job) {
         // まだ始まっていない同じ id のジョブがあればステップを合わせる（同じレコードを二重に処理しない）。
         if let i = queue.firstIndex(where: { $0.id == job.id }) {
@@ -252,7 +297,9 @@ public actor TriageQueue {
         while !queue.isEmpty {
             await waitWhilePaused()
             let job = queue.removeFirst()
+            inFlight = job
             await process(job)
+            finishInFlight()
         }
         worker = nil
         broadcast(.idle)
@@ -435,6 +482,7 @@ public actor TriageQueue {
 
     /// ステップの終わりを知らせ、`reindexAndWait` の見張りに索引の結果を残す。
     private func finishStep(id: String, step: TriageStep, outcome: TriageStepOutcome) {
+        if inFlight?.id == id { inFlightOutcomes[step] = outcome }
         if step == .index {
             for key in indexWatches.keys where indexWatches[key]!.ids.contains(id) {
                 indexWatches[key]!.outcomes[id] = outcome

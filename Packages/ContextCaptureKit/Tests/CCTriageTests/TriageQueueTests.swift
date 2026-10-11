@@ -318,6 +318,117 @@ final class TriageQueueTests: XCTestCase {
         XCTAssertEqual(embedder.calls.count, 2)
     }
 
+    // MARK: - 処理中の記録への重ねた依頼（Wave 9）
+
+    /// 保存直後の enqueue と、モデル準備完了の resumePending が同じ記録で重なっても、各ステップは 1 回だけ走る。
+    func testEnqueueAndResumePendingOverlapRunEachStepOnce() async throws {
+        let r = makeRecord()
+        try await temp.store.insert(r)
+        await classifier.holdNextCall()
+        let q = makeQueue()
+        await q.enqueue(id: r.id)
+        await classifier.waitUntilHeld()  // guard は済み、intent の途中（ストア上は triage nil・埋め込み無し）
+        let n = try await q.resumePending()
+        XCTAssertEqual(n, 0, "処理中のステップで足りるので積まない")
+        let pending = await q.pendingCount
+        XCTAssertEqual(pending, 0)
+        await q.enqueue(id: r.id)  // 重ねた enqueue も積まない
+        let pending2 = await q.pendingCount
+        XCTAssertEqual(pending2, 0)
+        await classifier.release()
+        await q.waitUntilIdle()
+        XCTAssertEqual(scanner.calls, 1)
+        let texts = await classifier.texts
+        XCTAssertEqual(texts.count, 1)
+        XCTAssertEqual(embedder.calls.count, 1)
+        let again = try await q.resumePending()
+        XCTAssertEqual(again, 0)
+    }
+
+    /// まだ始まっていない記録への enqueue と resumePending は待ち行列で 1 件にまとまる。
+    func testEnqueueAndResumePendingBeforeStartAreMerged() async throws {
+        let blocker = makeRecord(offset: 0, screenshot: nil)
+        let r = makeRecord(offset: 1)
+        try await temp.store.insert(blocker)
+        try await temp.store.insert(r)
+        await classifier.holdNextCall()
+        let q = makeQueue()
+        await q.enqueue(id: blocker.id)
+        await classifier.waitUntilHeld()
+        await q.enqueue(id: r.id)
+        let n = try await q.resumePending()
+        XCTAssertEqual(n, 1, "r は待ち行列の同じ記録に合わせる（blocker は処理中なので積まない）")
+        let pending = await q.pendingCount
+        XCTAssertEqual(pending, 1)
+        await classifier.release()
+        await q.waitUntilIdle()
+        XCTAssertEqual(scanner.calls, 1, "スクショがあるのは r だけ")
+        let texts = await classifier.texts
+        XCTAssertEqual(texts.count, 2)
+        XCTAssertEqual(embedder.calls.count, 2)
+    }
+
+    /// 処理中の記録への reprocess は、その処理の後に 1 回だけ走る（何度呼んでも 1 回）。
+    func testReprocessDuringProcessingRunsOnceAfterward() async throws {
+        let r = makeRecord()
+        try await temp.store.insert(r)
+        await classifier.holdNextCall()
+        let q = makeQueue()
+        await q.enqueue(id: r.id)
+        await classifier.waitUntilHeld()
+        await q.reprocess(id: r.id)
+        await q.reprocess(id: r.id, steps: [.index])
+        _ = try await q.resumePending()
+        let pending = await q.pendingCount
+        XCTAssertEqual(pending, 1)
+        await classifier.release()
+        await q.waitUntilIdle()
+        XCTAssertEqual(scanner.calls, 1, "guard は reprocess に含まれない")
+        let texts = await classifier.texts
+        XCTAssertEqual(texts.count, 2, "最初の処理 + reprocess 1 回")
+        XCTAssertEqual(embedder.calls.count, 2, "最初の処理 + reprocess 1 回（intent と index の依頼を 1 件にまとめる）")
+    }
+
+    /// 処理中のステップが未準備で終わったら、その間に預かった resumePending の分を処理の後に 1 回だけ積み直す
+    /// （埋め込みの準備完了で呼ばれた resumePending を、ちょうど処理中で未準備に終わった index が取りこぼさない）。
+    func testAbsorbedStepIsRetriedWhenInFlightStepWasNotReady() async throws {
+        let r = makeRecord(screenshot: nil)
+        try await temp.store.insert(r)
+        let embedder = FirstCallNotReadyEmbedder()
+        await classifier.holdNextCall()
+        let q = TriageQueue(store: temp.store, classifier: classifier, scanner: scanner, embedder: embedder, screenshots: loader)
+        let events = EventCollector(await q.events())
+        await q.enqueue(id: r.id)
+        await classifier.waitUntilHeld()
+        let n = try await q.resumePending()
+        XCTAssertEqual(n, 0, "処理中のステップで足りるので積まない（預かる）")
+        await classifier.release()
+        await q.waitUntilIdle()
+        XCTAssertEqual(embedder.callCount, 2, "未準備で終わった index だけ 1 回やり直す")
+        let texts = await classifier.texts
+        XCTAssertEqual(texts.count, 1, "成功した intent はやり直さない")
+        let embedded = try await embeddedIDs()
+        XCTAssertEqual(embedded, [r.id])
+        _ = await events.wait { $0.filter { if case .stepFinished(_, .index, _) = $0 { return true } else { return false } }.count >= 2 }
+        let indexOutcomes = events.events.compactMap { e -> TriageStepOutcome? in
+            if case let .stepFinished(id, .index, o) = e, id == r.id { return o }
+            return nil
+        }
+        XCTAssertEqual(indexOutcomes, [.skipped(.notReady), .succeeded])
+    }
+
+    /// 預かったステップが成功で終わったら積み直さない（未準備でも、預かっていなければ積み直さない）。
+    func testNotReadyStepIsNotRetriedWithoutOverlappingRequest() async throws {
+        let r = makeRecord(screenshot: nil)
+        try await temp.store.insert(r)
+        let embedder = FirstCallNotReadyEmbedder()
+        let q = TriageQueue(store: temp.store, classifier: classifier, scanner: scanner, embedder: embedder, screenshots: loader)
+        await q.enqueue(id: r.id)
+        await q.waitUntilIdle()
+        XCTAssertEqual(embedder.callCount, 1, "重ねた依頼が無ければ、未準備は次の resumePending まで待つ（従来どおり）")
+    }
+
+    // MARK: - d1 の解放
     // MARK: - d1 の解放
 
     func testClassifierIsUnloadedAfterIdleTimeout() async throws {
@@ -532,5 +643,24 @@ final class TriageInFlightChangeTests: XCTestCase {
         XCTAssertEqual(indexOutcome, .skipped(.annotationChanged))
         let embedded = try await store.idsWithEmbedding(dimension: 256)
         XCTAssertFalse(embedded.contains(r.id))
+    }
+}
+
+/// 1 回目だけ「未準備」を投げ、2 回目以降は成功する埋め込み。
+final class FirstCallNotReadyEmbedder: Embedder, @unchecked Sendable {
+    let dimension = 256
+    private let lock = NSLock()
+    private var calls = 0
+    var callCount: Int { lock.withLock { calls } }
+    func embedQuery(_ text: String) async throws -> [Float] { unit() }
+    func embedDocument(text: String, title: String?, image: CGImage?) async throws -> [Float] {
+        let n = lock.withLock { calls += 1; return calls }
+        if n == 1 { throw FakeNotReady() }
+        return unit()
+    }
+    private func unit() -> [Float] {
+        var v = [Float](repeating: 0, count: dimension)
+        v[0] = 1
+        return v
     }
 }
