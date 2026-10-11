@@ -382,3 +382,155 @@ final class TriageQueueTests: XCTestCase {
         XCTAssertEqual(e1.events, e2.events)
     }
 }
+
+// MARK: - 処理中の差し替え（遅いスキャナ・埋め込みの途中で記録が変わる）
+
+/// スキャンの途中で `onScan` を呼ぶ（その間に記録を書き換えて「スキャン中の差し替え」を作る）。
+final class HookedScanner: SecretScanning, @unchecked Sendable {
+    let onScan: @Sendable () async throws -> Void
+    var findings: [SecretFinding] = []
+    init(findings: [SecretFinding] = [], onScan: @escaping @Sendable () async throws -> Void) {
+        self.findings = findings
+        self.onScan = onScan
+    }
+    func scan(image: CGImage) async throws -> [SecretFinding] {
+        try await Task.sleep(for: .milliseconds(30))  // 遅いスキャナ
+        try await onScan()
+        return findings
+    }
+}
+
+/// 埋め込みの途中で `onEmbed` を呼ぶ。
+final class HookedEmbedder: Embedder, @unchecked Sendable {
+    let dimension = 256
+    let onEmbed: @Sendable () async throws -> Void
+    init(onEmbed: @escaping @Sendable () async throws -> Void) { self.onEmbed = onEmbed }
+    func embedQuery(_ text: String) async throws -> [Float] { unit() }
+    func embedDocument(text: String, title: String?, image: CGImage?) async throws -> [Float] {
+        try await Task.sleep(for: .milliseconds(30))
+        try await onEmbed()
+        return unit()
+    }
+    private func unit() -> [Float] {
+        var v = [Float](repeating: 0, count: dimension)
+        v[0] = 1
+        return v
+    }
+}
+
+final class TriageInFlightChangeTests: XCTestCase {
+    var temp: TempStore!
+
+    override func setUp() async throws {
+        temp = try TempStore()
+    }
+
+    private func outcome(_ events: EventCollector, _ id: String, _ step: TriageStep) async -> TriageStepOutcome? {
+        _ = await events.wait { $0.contains(.recordFinished(id: id)) }
+        for case let .stepFinished(eid, s, o) in events.events where eid == id && s == step { return o }
+        return nil
+    }
+
+    /// スキャン中にスクショが差し替わったら、古い画像の判定（clear）は書かず pending のまま次回に回す。
+    func testGuardSkipsWhenScreenshotReplacedDuringScan() async throws {
+        let r = makeRecord(screenshot: "captures/x/old.heic")
+        try await temp.store.insert(r)
+        let store = temp.store
+        let scanner = HookedScanner {
+            try await store.modify(id: r.id) { $0.screenshotPath = "captures/x/new.heic" }
+        }
+        let q = TriageQueue(store: store, classifier: FakeClassifier(), scanner: scanner, embedder: FakeEmbedder(),
+                            screenshots: FakeLoader())
+        let events = EventCollector(await q.events())
+        await q.enqueue(id: r.id)
+        await q.waitUntilIdle()
+        let guardOutcome = await outcome(events, r.id, .guardScan)
+        XCTAssertEqual(guardOutcome, .skipped(.screenshotChanged))
+        let saved = try await store.get(id: r.id)
+        XCTAssertEqual(saved?.guardInfo.status, .pending, "古い画像の clear を書かない")
+        XCTAssertEqual(saved?.screenshotPath, "captures/x/new.heic")
+        // 次回の再開で新しい画像をスキャンし直す
+        let resumed = try await q.resumePending()
+        XCTAssertEqual(resumed, 1)
+    }
+
+    /// スキャン中に保持期間でスクショが消えたら、古い判定（needs_review と検出箇所）を書かない（消した側の「画像なし」が残る）。
+    func testGuardSkipsWhenScreenshotPurgedDuringScan() async throws {
+        let r = makeRecord(offset: -100 * 86400, screenshot: nil)
+        var withShot = r
+        withShot.screenshotPath = try await temp.store.writeAttachment(Data([1]), id: r.id, kind: .screenshot, ext: "heic", capturedAt: r.capturedAt)
+        try await temp.store.insert(withShot)
+        let store = temp.store
+        let finding = SecretFinding(kind: "openai_key", bbox: CGRect(x: 0, y: 0, width: 0.1, height: 0.1))
+        let scanner = HookedScanner(findings: [finding]) {
+            _ = try await store.purgeExpiredScreenshots(retentionDays: 30)
+        }
+        let q = TriageQueue(store: store, classifier: FakeClassifier(), scanner: scanner, embedder: FakeEmbedder(),
+                            screenshots: FakeLoader())
+        let events = EventCollector(await q.events())
+        await q.enqueue(id: r.id)
+        await q.waitUntilIdle()
+        let guardOutcome = await outcome(events, r.id, .guardScan)
+        XCTAssertNotEqual(guardOutcome, .succeeded)
+        let saved = try await store.get(id: r.id)
+        XCTAssertNil(saved?.screenshotPath)
+        XCTAssertEqual(saved?.guardInfo, GuardInfo(status: .clear, findings: []), "消えた画像の判定を書かない")
+    }
+
+    /// スキャン中にパスだけが消えた（guard は pending のまま）ときも `.screenshotChanged` で書かない。
+    func testGuardSkipsWhenScreenshotPathRemovedDuringScan() async throws {
+        let r = makeRecord(screenshot: "captures/x/s.heic")
+        try await temp.store.insert(r)
+        let store = temp.store
+        let scanner = HookedScanner {
+            try await store.modify(id: r.id) { $0.screenshotPath = nil }
+        }
+        let q = TriageQueue(store: store, classifier: FakeClassifier(), scanner: scanner, embedder: FakeEmbedder(),
+                            screenshots: FakeLoader())
+        let events = EventCollector(await q.events())
+        await q.enqueue(id: r.id)
+        await q.waitUntilIdle()
+        let guardOutcome = await outcome(events, r.id, .guardScan)
+        XCTAssertEqual(guardOutcome, .skipped(.screenshotChanged))
+        let saved = try await store.get(id: r.id)
+        XCTAssertEqual(saved?.guardInfo.status, .pending)
+    }
+
+    /// 埋め込み中に注釈が編集されたら、古い注釈のベクトルは書かない（`.annotationChanged`）。
+    func testIndexSkipsWhenAnnotationEditedDuringEmbedding() async throws {
+        let r = makeRecord(text: "古い注釈")
+        try await temp.store.insert(r)
+        let store = temp.store
+        let embedder = HookedEmbedder {
+            try await store.modify(id: r.id) { $0.annotation.text = "新しい注釈" }
+        }
+        let q = TriageQueue(store: store, classifier: FakeClassifier(), scanner: FakeScanner(), embedder: embedder,
+                            screenshots: FakeLoader())
+        let events = EventCollector(await q.events())
+        await q.reprocess(id: r.id, steps: [.index])
+        await q.waitUntilIdle()
+        let indexOutcome = await outcome(events, r.id, .index)
+        XCTAssertEqual(indexOutcome, .skipped(.annotationChanged))
+        let embedded = try await store.idsWithEmbedding(dimension: 256)
+        XCTAssertFalse(embedded.contains(r.id), "古い注釈のベクトルを書かない")
+    }
+
+    /// 埋め込み中にウインドウタイトルが変わったときも書かない。
+    func testIndexSkipsWhenTitleChangedDuringEmbedding() async throws {
+        let r = makeRecord(title: "古いタイトル")
+        try await temp.store.insert(r)
+        let store = temp.store
+        let embedder = HookedEmbedder {
+            try await store.modify(id: r.id) { $0.window = WindowInfo(title: "新しいタイトル", frame: nil) }
+        }
+        let q = TriageQueue(store: store, classifier: FakeClassifier(), scanner: FakeScanner(), embedder: embedder,
+                            screenshots: FakeLoader())
+        let events = EventCollector(await q.events())
+        await q.reprocess(id: r.id, steps: [.index])
+        await q.waitUntilIdle()
+        let indexOutcome = await outcome(events, r.id, .index)
+        XCTAssertEqual(indexOutcome, .skipped(.annotationChanged))
+        let embedded = try await store.idsWithEmbedding(dimension: 256)
+        XCTAssertFalse(embedded.contains(r.id))
+    }
+}
