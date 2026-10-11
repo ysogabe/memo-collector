@@ -180,5 +180,5 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] セキュリティレビュー（信頼度 7 以上 0 件。7 未満の 2 件は #3）（security-review skill）
 - [x] PR #4 作成（Refs #1。フォロー Issue #2 意図の調整、#3 供給網・表示の残件）
 - [x] PR #4 自己レビュー（A: code-review 9 件、C: テスト・QA 17 件 → 統合して修正必須 11 / フォロー Issue #5 / praise）
-- [ ] Wave 8 review-fix（修正必須 11 件。ユーザー承認済み。dispatch 済み）
+- [x] Wave 8 review-fix（修正必須 11 件。check.sh green、アプリのテスト 71 件。`CC_MODELS_DIR` 指定時は受け入れテストが skip せず失敗する）
 - [ ] W7 修正後の単独起動での実機確認（m1.md W7-5〜7）
