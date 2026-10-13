@@ -1,0 +1,18 @@
+{
+  "id": "01JA9Z3K8Q4V7X2M5N6P8R0T1W",
+  "captured_at": "2026-10-08T23:15:32+09:00",
+  "app": { "name": "Google Chrome", "bundle_id": "com.google.Chrome" },
+  "window": { "title": "Support streaming events · Issue #128", "frame": [0, 38, 1440, 862] },
+  "url": "https://github.com/opendots/opendots/issues/128",
+  "extra": {},
+  "screenshot": "captures/2026/10/08/231532.webp",
+  "audio": "captures/2026/10/08/231532.m4a",
+  "annotation": { "text": "このissueの修正、Claude Codeにやらせて", "stt_engine": "whisper-large-v3-turbo", "edited": false },
+  "triage": {
+    "intent": "code", "intent_confidence": 0.84, "mentions_datetime": false,
+    "model": "LiquidAI/d1-3B@051bcc4"
+  },
+  "guard": { "status": "needs_review", "findings": [ { "kind": "github_token", "bbox": [0.1, 0.25, 0.3, 0.05] } ] },
+  "handoff": [ { "to": "claude-code", "at": "2026-10-09T09:00:00+09:00", "via": "mcp" } ],
+  "status": "inbox"
+}

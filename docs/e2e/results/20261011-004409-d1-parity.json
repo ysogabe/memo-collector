@@ -1,0 +1,75 @@
+{
+  "schema": "cc-e2e-d1-parity/1",
+  "swiftpm_release": {
+    "accuracy_dev": "25/30",
+    "accuracy_holdout": "21/22",
+    "datetime_max_abs_dp_vs_chain": 0.009240864985776809,
+    "datetime_top1_agree_chain": "52/52",
+    "intent_max_abs_dp_vs_chain": 0.04258086715888221,
+    "intent_max_abs_dp_vs_tree": 0.04258086715888221,
+    "intent_top1_agree_chain": "51/52",
+    "latency": {
+      "finished_at": "2026-10-10T16:22:56Z",
+      "p50_median_of_reps_s": 0.8597739934921265,
+      "p90_median_of_reps_s": 0.9968069791793823,
+      "reps": [
+        {
+          "p50_s": 0.47364604473114014,
+          "p90_s": 0.4908030033111572
+        },
+        {
+          "p50_s": 1.2623330354690552,
+          "p90_s": 2.2595410346984863
+        },
+        {
+          "p50_s": 0.8597739934921265,
+          "p90_s": 0.9968069791793823
+        }
+      ],
+      "started_at": "2026-10-10T16:20:24Z"
+    },
+    "load_s": 1.8348779678344727,
+    "mlx_active_after_load_mb": 2866.020992,
+    "token_mismatch_rows": 0
+  },
+  "swiftpm_vs_xcode": {
+    "datetime_max_abs_diff": 0.0,
+    "intent_max_abs_diff": 0.0,
+    "intent_top1_same": "52/52"
+  },
+  "tolerance": 0.05,
+  "uptime": " 1:35  up 9 days, 15:56, 5 users, load averages: 4.88 6.56 7.68",
+  "xcode_metallib": "/Users/yoshio/works/60-misc/memo-collector-worktrees/e2e/DerivedData/e2e-kit/Build/Products/Release/CCModelsTests.xctest/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib /Users/yoshio/works/60-misc/memo-collector-worktrees/e2e/DerivedData/e2e-kit/Build/Products/Release/CCEmbeddingTests.xctest/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib /Users/yoshio/works/60-misc/memo-collector-worktrees/e2e/DerivedData/e2e-kit/Build/Products/Release/CCTriageTests.xctest/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib",
+  "xcode_release": {
+    "accuracy_dev": "25/30",
+    "accuracy_holdout": "21/22",
+    "datetime_max_abs_dp_vs_chain": 0.009240864985776809,
+    "datetime_top1_agree_chain": "52/52",
+    "intent_max_abs_dp_vs_chain": 0.04258086715888221,
+    "intent_max_abs_dp_vs_tree": 0.04258086715888221,
+    "intent_top1_agree_chain": "51/52",
+    "latency": {
+      "finished_at": "2026-10-10T16:35:45Z",
+      "p50_median_of_reps_s": 1.0464659929275513,
+      "p90_median_of_reps_s": 1.264420986175537,
+      "reps": [
+        {
+          "p50_s": 0.5328129529953003,
+          "p90_s": 1.0648449659347534
+        },
+        {
+          "p50_s": 1.2152179479599,
+          "p90_s": 2.382899045944214
+        },
+        {
+          "p50_s": 1.0464659929275513,
+          "p90_s": 1.264420986175537
+        }
+      ],
+      "started_at": "2026-10-10T16:32:52Z"
+    },
+    "load_s": 2.1437100172042847,
+    "mlx_active_after_load_mb": 2866.020992,
+    "token_mismatch_rows": 0
+  }
+}

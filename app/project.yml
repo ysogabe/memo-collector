@@ -1,0 +1,129 @@
+# XcodeGen の定義。`xcodegen generate` で ContextCapture.xcodeproj を作る（xcodeproj は生成物・git 管理外）。
+name: ContextCapture
+options:
+  bundleIdPrefix: dev.ysogabe
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    # Apple Silicon 専用（PRD §3。MLX / ANE 前提）。Release の既定（ONLY_ACTIVE_ARCH=NO）は universal を作り、
+    # CCEmbedding の Float16（x86_64 macOS では使えない）でビルドが落ちる（docs/e2e/report.md §7 問題 1）。Debug / Release とも arm64 だけ。
+    ARCHS: arm64
+    # Apple Development 証明書で署名する（キーチェーンの `Apple Development: sogabeyoshio.dev@gmail.com (3H5DM2CR45)`）。
+    # Team ID は証明書の OU の `PJH36NNFL6`（名前の括弧内 `3H5DM2CR45` は証明書の識別子で Team ID ではない。指定すると「No certificate for team」になる）。
+    # ad-hoc（"-"）署名はビルドのたびに cdhash が変わり、TCC（マイク・画面収録・アクセシビリティ）の許可が外れる。
+    # Team 署名なら designated requirement（identifier + Team ID + 証明書）が安定するので、ビルドし直しても許可が残る。
+    # macOS アプリで制限付き entitlement を使っていないため、プロビジョニングプロファイルは不要（Manual のまま）。
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "Apple Development"
+    DEVELOPMENT_TEAM: PJH36NNFL6
+packages:
+  ContextCaptureKit:
+    path: ../Packages/ContextCaptureKit
+targets:
+  ContextCapture:
+    type: application
+    platform: macOS
+    sources:
+      - path: ContextCapture
+        excludes:
+          - "Resources/Info.plist"
+    dependencies:
+      # アプリがリンクする ContextCaptureKit の product（Package.swift 側の product 名と合わせる）。
+      # MCP はアプリではなく別プロセスの cc-mcp が持つので、アプリは CCMCP をリンクしない。
+      - package: ContextCaptureKit
+        product: CCCore
+      - package: ContextCaptureKit
+        product: CCCapture      # ホットキー・前面コンテキスト・録音（M1）
+      - package: ContextCaptureKit
+        product: CCSTT          # WhisperKit（M1）
+      - package: ContextCaptureKit
+        product: CCStore        # SQLite + 添付（M1）
+      - package: ContextCaptureKit
+        product: CCModels       # モデルの取得・検証・変換（Whisper / 埋め込み / d1。MLX をリンクするので metallib が同梱される）
+      - package: ContextCaptureKit
+        product: CCTriage       # 保存後の非同期処理（ガード → 意図 → 索引）（M2）
+      - package: ContextCaptureKit
+        product: CCIntent       # d1-3B on MLX Swift（意図・日時言及）（M2）
+      - package: ContextCaptureKit
+        product: CCGuard        # Vision OCR + パターン、マスク画像（M2 / M3）
+      - package: ContextCaptureKit
+        product: CCEmbedding    # EmbeddingGemma 2 Core ML（検索の索引とクエリ）（M2）
+    settings:
+      base:
+        PRODUCT_NAME: ContextCapture
+        PRODUCT_BUNDLE_IDENTIFIER: dev.ysogabe.ContextCapture
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_FILE: ContextCapture/Resources/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: ContextCapture/ContextCapture.entitlements
+        # Team 署名では Xcode が ENABLE_HARDENED_RUNTIME から `--options runtime` を自分で付ける（codesign の flags=0x10000(runtime) で確認）。
+        # ad-hoc 署名のときに必要だった OTHER_CODE_SIGN_FLAGS: "--options=runtime" は外した。
+        ENABLE_HARDENED_RUNTIME: YES
+        # ENABLE_DEBUG_DYLIB は既定（Debug で ContextCapture.debug.dylib を作る）に戻した。ad-hoc 署名では Hardened Runtime の
+        # ライブラリ検証が dylib を「別 Team」とみなして拒否したが、Team 署名ならアプリ本体と同じ Team ID で署名されるので通る。
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  # AppCoordinator（状態機械・保存の流れ）と M2 / M3 の配線の単体テスト。アプリをホストにせず（起動時に本物のホットキー等を触らないため）、
+  # 必要なソースだけをこのバンドルに直接コンパイルする。モデル・権限に触る部品はフェイク。
+  #   cd app && xcodebuild -project ContextCapture.xcodeproj -scheme ContextCapture -derivedDataPath ../DerivedData test
+  ContextCaptureTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: ContextCaptureTests
+      - path: ContextCapture/App/UIProtocols.swift
+      - path: ContextCapture/App/AppSettings.swift
+      - path: ContextCapture/App/Live/AppCoordinator.swift
+      - path: ContextCapture/App/Live/CaptureLatency.swift
+      - path: ContextCapture/App/Live/ScreenshotEncoder.swift
+      - path: ContextCapture/App/Live/AudioFileIO.swift
+      - path: ContextCapture/App/Live/SubstringSearchService.swift
+      # M2 / M3 の配線（トリアージ・ガードの確認・検索・索引・モデル準備）。本物のモデルはフェイクに差し替えて確かめる。
+      - path: ContextCapture/App/Live/SwitchableEmbedder.swift
+      - path: ContextCapture/App/Live/SearchIndex.swift
+      - path: ContextCapture/App/Live/TriageWiring.swift
+      - path: ContextCapture/App/Live/TriageAssembly.swift
+      - path: ContextCapture/App/Live/LiveGuardReviewer.swift
+      - path: ContextCapture/App/Live/ModelPreparationPipeline.swift
+      # 詳細ビューの保存（RecordModifying.modify）。Clipboard と DateText のために InboxViewModel / Theme も入れる。
+      - path: ContextCapture/UI/DetailViewModel.swift
+      - path: ContextCapture/UI/InboxViewModel.swift
+      - path: ContextCapture/UI/Theme.swift
+    dependencies:
+      - package: ContextCaptureKit
+        product: CCCore
+      - package: ContextCaptureKit
+        product: CCCapture
+      - package: ContextCaptureKit
+        product: CCSTT
+      - package: ContextCaptureKit
+        product: CCTriage       # TriageQueue（本物のキューをフェイクの分類器・埋め込みで回す）
+      - package: ContextCaptureKit
+        product: CCEmbedding    # TriageAssembly（CoreMLEmbedder の適合。テストでは読み込まない）
+      - package: ContextCaptureKit
+        product: CCGuard        # SecretMasker
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.ysogabe.ContextCaptureTests
+        GENERATE_INFOPLIST_FILE: YES
+        ENABLE_HARDENED_RUNTIME: NO
+schemes:
+  ContextCapture:
+    build:
+      targets:
+        ContextCapture: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - ContextCaptureTests
+    archive:
+      config: Release

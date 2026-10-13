@@ -1,0 +1,19 @@
+ok 48.08155393600464 7.650194883346558 0.185150146484375 [60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60] ["finished_at": "2026-10-10T08:16:42Z", "image": ["median_s_each_rep": [0.14928460121154785, 0.15574193000793457, 0.16026806831359863], "median_s": 0.15574193000793457, "preprocess_median_s": 0.05564165115356445, "vision_median_s": 0.08323109149932861], "started_at": "2026-10-10T08:16:21Z", "fused": ["preprocess_median_s": 0.05441451072692871, "vision_median_s": 0.08116090297698975, "median_s_each_rep": [0.15300559997558594, 0.15659594535827637, 0.14961469173431396], "median_s": 0.15300559997558594]] 213.32088 226.542768
+       85.88 real        20.93 user         1.20 sys
+           423002112  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              101399  page reclaims
+                1254  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 629  voluntary context switches
+               26530  involuntary context switches
+        161263777538  instructions retired
+         40514344850  cycles elapsed
+           226542768  peak memory footprint

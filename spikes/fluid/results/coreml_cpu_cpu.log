@@ -1,0 +1,210 @@
+{
+ "started_at": "2026-10-10T07:24:20.164739+00:00",
+ "text_cu": "CPU_ONLY",
+ "vision_cu": "CPU_ONLY",
+ "rss_start_mb": 93.5,
+ "load_text_s": 25.74,
+ "load_vision_s": 2.09,
+ "rss_after_load_mb": 346.0,
+ "first_text_predict_s": 0.03,
+ "first_image_predict_s": 1.194,
+ "token_lengths": {
+  "text_docs": [
+   86,
+   85,
+   37,
+   34,
+   38,
+   40,
+   46,
+   44,
+   52,
+   52,
+   39,
+   40,
+   38,
+   68,
+   34,
+   39,
+   78,
+   85,
+   54,
+   40,
+   37,
+   31,
+   70,
+   72,
+   80,
+   33,
+   36,
+   47,
+   40,
+   37
+  ],
+  "text_queries": [
+   16,
+   15,
+   13,
+   12,
+   14,
+   17,
+   16,
+   16,
+   14,
+   15
+  ],
+  "image_queries": [
+   14,
+   16,
+   14,
+   13,
+   13,
+   19,
+   17,
+   15,
+   12,
+   14
+  ]
+ },
+ "cos_vs_torch": {
+  "text_docs": {
+   "min": 0.99966,
+   "mean": 0.99988
+  },
+  "text_queries": {
+   "min": 0.99991,
+   "mean": 0.99994
+  },
+  "image_queries": {
+   "min": 0.99988,
+   "mean": 0.99993
+  },
+  "images": {
+   "min": 0.9967,
+   "mean": 0.99914
+  },
+  "fused": {
+   "min": 0.99923,
+   "mean": 0.99963
+  }
+ },
+ "retrieval": {
+  "768": {
+   "coreml text→capture(text+meta)": {
+    "recall@3": 0.933,
+    "mrr": 0.9
+   },
+   "coreml text→capture(fused)": {
+    "recall@3": 0.883,
+    "mrr": 0.95
+   },
+   "coreml image_query→screenshot": {
+    "recall@3": 0.8,
+    "mrr": 0.729
+   },
+   "torch_ref text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.9
+   },
+   "torch_ref text→capture(fused)": {
+    "recall@3": 0.883,
+    "mrr": 0.9
+   },
+   "torch_ref image_query→screenshot": {
+    "recall@3": 0.8,
+    "mrr": 0.731
+   }
+  },
+  "256": {
+   "coreml text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.85
+   },
+   "coreml text→capture(fused)": {
+    "recall@3": 0.933,
+    "mrr": 0.95
+   },
+   "coreml image_query→screenshot": {
+    "recall@3": 0.65,
+    "mrr": 0.712
+   },
+   "torch_ref text→capture(text+meta)": {
+    "recall@3": 0.883,
+    "mrr": 0.85
+   },
+   "torch_ref text→capture(fused)": {
+    "recall@3": 0.933,
+    "mrr": 0.95
+   },
+   "torch_ref image_query→screenshot": {
+    "recall@3": 0.65,
+    "mrr": 0.712
+   }
+  }
+ },
+ "bench": {
+  "started_at": "2026-10-10T07:25:57.470582+00:00",
+  "text_doc": {
+   "median_s_each_rep": [
+    0.0284,
+    0.0289,
+    0.0272
+   ],
+   "median_s": 0.0284
+  },
+  "query": {
+   "median_s_each_rep": [
+    0.0163,
+    0.0163,
+    0.0166
+   ],
+   "median_s": 0.0163
+  },
+  "vision_only": {
+   "median_s_each_rep": [
+    1.2488,
+    1.0962,
+    1.0374
+   ],
+   "median_s": 1.0962
+  },
+  "image_embed": {
+   "median_s_each_rep": [
+    1.1658,
+    1.1289,
+    1.1202
+   ],
+   "median_s": 1.1289
+  },
+  "fused_embed": {
+   "median_s_each_rep": [
+    1.1164,
+    1.1282,
+    1.2167
+   ],
+   "median_s": 1.1282
+  },
+  "finished_at": "2026-10-10T07:29:21.483176+00:00"
+ },
+ "rss_end_mb": 2279.1,
+ "peak_rss_mb": 2313.2,
+ "phys_footprint_mb": 2272.6
+}
+      302.48 real       516.60 user        14.74 sys
+          2318188544  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              244515  page reclaims
+              155917  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               10214  voluntary context switches
+             1867804  involuntary context switches
+       3360301178836  instructions retired
+       1356753311490  cycles elapsed
+           610748984  peak memory footprint
