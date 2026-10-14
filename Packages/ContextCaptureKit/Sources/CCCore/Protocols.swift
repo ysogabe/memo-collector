@@ -74,7 +74,7 @@ public protocol RecordStore: Sendable {
     func count(_ filter: InboxFilter) async throws -> Int
     /// レコードと添付ファイル・埋め込みを消す。無ければ何もしない。
     func delete(id: String) async throws
-    /// 検索用ベクトル（L2 正規化済み）を保存・置換する。
+    /// 世代のない互換ストア向けの保存。世代管理を開始した SQLite ストアでは VersionedEmbeddingStoring.commitEmbedding を使う。
     func setEmbedding(id: String, vector: [Float]) async throws
     /// ベクトルに近い順に最大 limit 件。埋め込みの無いレコードは対象外。
     func search(vector: [Float], limit: Int) async throws -> [SearchHit]

@@ -94,6 +94,7 @@ final class SearchIndexMaintainer {
     private func isCurrent(_ gen: Int) -> Bool { gen == generation && !Task.isCancelled }
 
     private func run(imageTokens: Int, generation gen: Int) async {
+        guard isCurrent(gen) else { return }
         guard let e = makeEmbedder(imageTokens) else {
             activeImageTokens = nil
             await embedder.uninstall()
@@ -104,8 +105,16 @@ final class SearchIndexMaintainer {
         }
         activeImageTokens = imageTokens
         readiness = .preparing
+        let generationStore = store as? any IndexGenerationManaging
+        let desired: IndexGeneration?
+        if let generationStore, let pipeline = e.pipeline {
+            do { desired = try await generationStore.beginGeneration(pipeline) }
+            catch { readiness = .failed; return }
+        } else { desired = nil }
+        guard isCurrent(gen) else { return }
         // 準備の間もガードと意図は進めてよい（索引ステップは EmbeddingNotReady ですぐ .skipped(.notReady) になり、後で拾われる）。
         await resume()
+        guard isCurrent(gen) else { return }
         let t0 = Date()
         let state = await embedder.install(e)
         guard isCurrent(gen) else { return }
@@ -115,6 +124,10 @@ final class SearchIndexMaintainer {
         }
         CCLog.models.notice("embedder ready in \(Date().timeIntervalSince(t0), format: .fixed(precision: 1), privacy: .public)s (\(e.indexSignature, privacy: .public))")
 
+        if let generationStore, let desired {
+            await rebuildGeneration(desired, store: generationStore, generation: gen)
+            return
+        }
         let saved = SearchIndexState.read(from: stateURL)
         if let saved, saved.indexSignature == e.indexSignature {
             if saved.status == .ready {
@@ -184,6 +197,54 @@ final class SearchIndexMaintainer {
         }
     }
 
+    private func rebuildGeneration(_ desired: IndexGeneration, store: any IndexGenerationManaging, generation gen: Int) async {
+        do {
+            if let active = try await store.activeGeneration(), active.id == desired.id, active.state == "ready" {
+                write(SearchIndexState(indexSignature: active.pipeline.compatibilityKey, imageTokens: active.pipeline.imageTokens,
+                                       dimension: active.pipeline.dimension, status: .ready, updatedAt: Date()))
+                readiness = .ready
+                await resume()
+                return
+            }
+            readiness = .rebuilding
+            // JSON exports the active generation. During a rebuild MCP can keep that encoder and index.
+            if try await store.activeGeneration() == nil {
+                write(SearchIndexState(indexSignature: desired.pipeline.compatibilityKey, imageTokens: desired.pipeline.imageTokens,
+                                       dimension: desired.pipeline.dimension, status: .rebuilding, updatedAt: Date()))
+            }
+            var failed: [String] = []
+            while isCurrent(gen) {
+                let ids = try await store.missingGenerationIDs(desired.id, limit: 100)
+                if ids.isEmpty {
+                    if try await store.activateGeneration(desired.id) {
+                        guard isCurrent(gen) else { return }
+                        write(SearchIndexState(indexSignature: desired.pipeline.compatibilityKey, imageTokens: desired.pipeline.imageTokens,
+                                               dimension: desired.pipeline.dimension, status: .ready, updatedAt: Date()))
+                        readiness = .ready
+                        return
+                    }
+                    guard try await store.targetGeneration()?.id == desired.id else { readiness = .failed; return }
+                    // Edits/new captures raced with the last page; re-read the pending inputs.
+                    continue
+                }
+                failed = await queue.reindexAll(ids: ids)
+                guard isCurrent(gen) else { return }
+                if !failed.isEmpty { failed = await queue.reindexAll(ids: failed) }
+                guard isCurrent(gen) else { return }
+                if !failed.isEmpty { break }
+            }
+            guard isCurrent(gen) else { return }
+            // Old generation is retained, but the current embedder belongs to the incomplete new one.
+            degradedFailedIDs = Set(failed)
+            readiness = .failed
+            CCLog.models.error("shadow index incomplete: \(failed.count) records; old generation retained")
+        } catch {
+            guard isCurrent(gen) else { return }
+            readiness = .failed
+            CCLog.models.error("generation rebuild failed: \(String(describing: type(of: error)), privacy: .public)")
+        }
+    }
+
     private func write(_ state: SearchIndexState) {
         do { try state.write(to: stateURL) } catch {
             CCLog.models.error("search index state write failed: \(String(describing: error), privacy: .public)")
@@ -241,13 +302,20 @@ struct EmbeddingSearchService: SearchServing {
         case .ready, .degraded:
             // degraded: 大半はこの埋め込みで索引済みなので見た目での検索を使い、出ないことがある旨を添える。
             do {
-                let vector = try await embedder.embedQuery(query)
+                let signed = try await embedder.embedQueryWithSignature(query)
+                let vector = signed.vector
+                func searchHits(_ count: Int) async throws -> [SearchHit] {
+                    if let versioned = store as? any GenerationFilteredSearching {
+                        return try await versioned.search(vector: vector, limit: count, statuses: [], compatibilityKey: signed.compatibilityKey)
+                    }
+                    return try await store.search(vector: vector, limit: count)
+                }
                 guard case let .degraded(n) = current else {
-                    return SearchResponse(hits: try await store.search(vector: vector, limit: limit), notice: nil)
+                    return SearchResponse(hits: try await searchHits(limit), notice: nil)
                 }
                 let excluded = await degradedFailedIDs()
                 // 外す分を見込んで多めに取り、外してから limit に切る。
-                let vectorHits = try await store.search(vector: vector, limit: limit + excluded.count)
+                let vectorHits = try await searchHits(limit + excluded.count)
                     .filter { !excluded.contains($0.record.id) }
                 var hits = Array(vectorHits.prefix(limit))
                 if hits.count < limit, !excluded.isEmpty {

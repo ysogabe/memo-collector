@@ -453,7 +453,7 @@ final class SQLiteRecordStoreTests: XCTestCase {
         let reopened = try root.makeStore()
         try StoreSchema.migrator.migrate(reopened.pool)
         let applied = try await reopened.pool.read { db in try StoreSchema.migrator.appliedMigrations(db) }
-        XCTAssertEqual(applied, ["v1"])
+        XCTAssertEqual(applied, ["v1", "v2_index_generations"])
         let fetched = try await reopened.get(id: r.id)
         XCTAssertEqual(fetched, r)
         let hasNew = try await reopened.pool.read { db in try StoreSchema.migrator.hasCompletedMigrations(db) }

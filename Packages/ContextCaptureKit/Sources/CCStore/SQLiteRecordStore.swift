@@ -40,6 +40,40 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
         config.busyMode = .timeout(busyTimeout)
         config.label = "CCStore"
         pool = try DatabasePool(path: paths.databaseURL.path, configuration: config)
+        let needsBackup = try pool.read { db in
+            guard try db.tableExists("grdb_migrations") else { return false }
+            let migrations = try String.fetchAll(db, sql: "SELECT identifier FROM grdb_migrations")
+            return migrations.contains("v1") && !migrations.contains("v2_index_generations")
+        }
+        if needsBackup {
+            let backup = paths.databaseURL.appendingPathExtension("pre-index-v2-backup")
+            if !FileManager.default.fileExists(atPath: backup.path) {
+                let partial = backup.appendingPathExtension("partial-\(UUID().uuidString)")
+                do {
+                    let destination = try DatabaseQueue(path: partial.path)
+                    try pool.backup(to: destination)
+                    try destination.writeWithoutTransaction { db in
+                        try db.execute(sql: "PRAGMA journal_mode=DELETE")
+                    }
+                    try destination.close()
+                    do { try FileManager.default.moveItem(at: partial, to: backup) }
+                    catch {
+                        // Another process may have completed the same migration backup meanwhile.
+                        guard FileManager.default.fileExists(atPath: backup.path) else { throw error }
+                        try? FileManager.default.removeItem(at: partial)
+                    }
+                } catch {
+                    try? FileManager.default.removeItem(at: partial)
+                    throw error
+                }
+            }
+            var backupConfig = Configuration(); backupConfig.readonly = true
+            let verified = try DatabaseQueue(path: backup.path, configuration: backupConfig)
+            let valid = try verified.read { db in
+                try String.fetchOne(db, sql: "PRAGMA quick_check") == "ok" && db.tableExists("records")
+            }
+            guard valid else { throw CCStoreError.invalidGeneration("migration backup is invalid") }
+        }
         try StoreSchema.migrator.migrate(pool)
     }
 
@@ -144,16 +178,21 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
         guard vector.count == dimension else {
             throw CCStoreError.dimensionMismatch(expected: dimension, actual: vector.count)
         }
+        guard vector.allSatisfy(\.isFinite) else { throw CCStoreError.invalidVector }
         let blob = VectorCodec.encode(vector)
         let dim = dimension
         try await pool.write { db in
             guard try RecordRow.exists(id: id, db: db) else { throw CCStoreError.notFound(id) }
+            guard try String.fetchOne(db, sql: "SELECT target_id FROM index_generation_pointer WHERE id=1") == nil else {
+                throw CCStoreError.invalidGeneration("versioned commit required")
+            }
             try db.execute(
                 sql: """
-                INSERT INTO embeddings (record_id, dim, vector) VALUES (?, ?, ?)
-                ON CONFLICT(record_id) DO UPDATE SET dim = excluded.dim, vector = excluded.vector
+                INSERT INTO embeddings (record_id, dim, vector, input_version)
+                SELECT ?, ?, ?, version FROM record_input_versions WHERE record_id = ?
+                ON CONFLICT(record_id) DO UPDATE SET dim = excluded.dim, vector = excluded.vector, input_version = excluded.input_version
                 """,
-                arguments: [id, dim, blob]
+                arguments: [id, dim, blob, id]
             )
         }
     }
@@ -167,6 +206,14 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
     /// `statuses` の状態のレコードだけを対象に、上位 `limit` 件を返す。空集合なら全状態（`InboxFilter.statuses` と同じ）。
     /// 状態での絞り込みは上位を選ぶ**前**に効くので、archived が多くても `limit` 件まで埋まる。同点は id の新しい順。
     public func search(vector: [Float], limit: Int, statuses: Set<RecordStatus>) async throws -> [SearchHit] {
+        try await searchSnapshot(vector: vector, limit: limit, statuses: statuses, compatibilityKey: nil)
+    }
+
+    public func search(vector: [Float], limit: Int, statuses: Set<RecordStatus>, compatibilityKey: String) async throws -> [SearchHit] {
+        try await searchSnapshot(vector: vector, limit: limit, statuses: statuses, compatibilityKey: compatibilityKey)
+    }
+
+    private func searchSnapshot(vector: [Float], limit: Int, statuses: Set<RecordStatus>, compatibilityKey: String?) async throws -> [SearchHit] {
         guard vector.count == dimension else {
             throw CCStoreError.dimensionMismatch(expected: dimension, actual: vector.count)
         }
@@ -175,6 +222,12 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
         let cache = embeddingCache
         let statusValues = statuses.map(\.rawValue).sorted()
         return try await pool.read { db in
+            if let compatibilityKey {
+                let active = try String.fetchOne(db, sql: "SELECT active_id FROM index_generation_pointer WHERE id=1")
+                guard let generation = try Self.generation(active, db: db), generation.pipeline.compatibilityKey == compatibilityKey else {
+                    throw CCStoreError.invalidGeneration("query/index compatibility mismatch")
+                }
+            }
             // 1. 全ベクトル（連続バッファ）。埋め込みが変わっていなければキャッシュを使う。
             let snapshot = try cache.snapshot(db: db, dimension: dim)
             let ids = snapshot.ids
@@ -249,7 +302,16 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
         let relative = CCPaths.attachmentRelativePath(id: id, kind: kind, ext: ext, capturedAt: capturedAt, timeZone: timeZone)
         let url = try paths.url(forRelativePath: relative)
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try data.write(to: url, options: .atomic)
+        if kind == .screenshot {
+            // Once a record refers to a raw screenshot, its path is an immutable input identity.
+            // Serialize the reference check and atomic write with record insert/update.
+            try await pool.write { db in
+                if try Bool.fetchOne(db, sql: "SELECT EXISTS(SELECT 1 FROM records WHERE screenshot_path=?)", arguments: [relative]) == true {
+                    throw CCStoreError.immutableAttachment
+                }
+                try data.write(to: url, options: .atomic)
+            }
+        } else { try data.write(to: url, options: .atomic) }
         return relative
     }
 
@@ -379,13 +441,13 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
 
 // MARK: - CCCore の追加プロトコルへの準拠
 
-extension SQLiteRecordStore: RecordModifying, EmbeddingPresenceChecking, StatusFilteredSearching {
+extension SQLiteRecordStore: RecordModifying, EmbeddingPresenceChecking, StatusFilteredSearching, GenerationFilteredSearching {
     /// 次元が `dimension` の埋め込みを持つレコードの id。SQL で引く（零ベクトルの全件検索は使わない）。
     public func idsWithEmbedding(dimension: Int) async throws -> Set<String> {
         try await pool.read { db in
             try Set(String.fetchAll(
                 db,
-                sql: "SELECT e.record_id FROM embeddings e JOIN records r ON r.id = e.record_id WHERE e.dim = ?",
+                sql: Self.presenceSQL(db: db),
                 arguments: [dimension]
             ))
         }
@@ -394,15 +456,18 @@ extension SQLiteRecordStore: RecordModifying, EmbeddingPresenceChecking, StatusF
     /// 次元が `dimension` の埋め込みを持たないレコードの id（違う次元の古い埋め込みしか無いものを含む）。SQL で引く。
     public func idsWithoutEmbedding(dimension: Int) async throws -> Set<String> {
         try await pool.read { db in
-            try Set(String.fetchAll(
-                db,
-                sql: """
-                SELECT r.id FROM records r
-                LEFT JOIN embeddings e ON e.record_id = r.id AND e.dim = ?
-                WHERE e.record_id IS NULL
-                """,
-                arguments: [dimension]
-            ))
+            let present = try Set(String.fetchAll(db, sql: Self.presenceSQL(db: db), arguments: [dimension]))
+            let all = try Set(String.fetchAll(db, sql: "SELECT id FROM records"))
+            return all.subtracting(present)
         }
+    }
+
+    static func presenceSQL(db: Database) throws -> String {
+        if let id = try String.fetchOne(db, sql: "SELECT coalesce(target_id,active_id) FROM index_generation_pointer WHERE id=1") {
+            // UUIDs are generated internally, but bind the value with quote() instead of interpolating it unescaped.
+            let quoted = try String.fetchOne(db, sql: "SELECT quote(?)", arguments: [id])!
+            return "SELECT e.record_id FROM generation_embeddings e JOIN record_input_versions i ON i.record_id=e.record_id AND i.version=e.input_version WHERE e.generation_id=\(quoted) AND e.dim=?"
+        }
+        return "SELECT e.record_id FROM embeddings e JOIN record_input_versions i ON i.record_id=e.record_id AND i.version=e.input_version WHERE e.dim=?"
     }
 }

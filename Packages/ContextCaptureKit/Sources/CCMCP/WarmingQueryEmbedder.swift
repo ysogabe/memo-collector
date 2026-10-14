@@ -55,6 +55,7 @@ public actor WarmingQueryEmbedder {
 
     public let stateURL: URL
     public let waitLimit: Duration
+    private let readState: @Sendable () async -> SearchIndexState?
     private let decide: @Sendable (SearchIndexState) -> Decision
     private let log: @Sendable (String) -> Void
 
@@ -71,22 +72,24 @@ public actor WarmingQueryEmbedder {
 
     public init(stateURL: URL, waitLimit: Duration = WarmingQueryEmbedder.defaultWaitLimit,
                 log: @escaping @Sendable (String) -> Void = { MCPLog.write($0) },
+                readState: (@Sendable () async -> SearchIndexState?)? = nil,
                 decide: @escaping @Sendable (SearchIndexState) -> Decision) {
         self.stateURL = stateURL
         self.waitLimit = waitLimit
         self.log = log
         self.decide = decide
+        self.readState = readState ?? { SearchIndexState.read(from: stateURL) }
     }
 
     /// 状態が ready なら裏で読み込みを始める（すぐ戻る）。始めた（または済んでいる）なら true。
     @discardableResult
-    public func prewarm() -> Bool {
-        select() != nil
+    public func prewarm() async -> Bool {
+        await select() != nil
     }
 
     /// 検索の直前に呼ぶ。
     public func resolve() async -> QueryEmbedderResolution {
-        guard let embedder = select() else { return .unavailable }
+        guard let embedder = await select() else { return .unavailable }
         if phase == .warm { return .available(embedder) }
         switch await waitForWarm() {
         case .warm: return .available(embedder)
@@ -104,8 +107,8 @@ public actor WarmingQueryEmbedder {
     // MARK: - 下請け
 
     /// 状態ファイルを読み、使う埋め込みを返す（必要なら作って読み込みを始める）。使えなければ nil。
-    private func select() -> (any Embedder)? {
-        guard let state = SearchIndexState.read(from: stateURL) else {
+    private func select() async -> (any Embedder)? {
+        guard let state = await readState() else {
             warn("索引の状態ファイル（\(SearchIndexState.fileName)）が無いので部分一致で検索する。アプリで検索の準備が終わるのを待ってください")
             return nil
         }

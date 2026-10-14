@@ -106,6 +106,8 @@ targets:
       - package: ContextCaptureKit
         product: CCTriage       # TriageQueue（本物のキューをフェイクの分類器・埋め込みで回す）
       - package: ContextCaptureKit
+        product: CCStore        # 世代索引の実 SQLite 結合テスト
+      - package: ContextCaptureKit
         product: CCEmbedding    # TriageAssembly（CoreMLEmbedder の適合。テストでは読み込まない）
       - package: ContextCaptureKit
         product: CCGuard        # SecretMasker

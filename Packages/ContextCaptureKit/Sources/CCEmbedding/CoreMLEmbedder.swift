@@ -39,7 +39,14 @@ public actor CoreMLEmbedder: Embedder, ModelUnloadable {
 
         /// 索引の互換性を表す文字列。保存しておき、変わったら索引を作り直す（計算ユニットは含めない: 差はコサイン 0.999 台）。
         public var indexSignature: String {
-            "embeddinggemma-2-coreml@\(Self.modelRevision.prefix(7))/d\(dimension)/img\(imageTokens.rawValue)"
+            pipeline.compatibilityKey
+        }
+
+        public var pipeline: EmbeddingPipeline {
+            EmbeddingPipeline(modelID: "FluidInference/embeddinggemma-2-coreml", revision: Self.modelRevision,
+                              runtime: "coreml-vectors1", quantization: "fp16+bf16-token-table", dimension: dimension,
+                              imageTokens: imageTokens.rawValue,
+                              preprocessingVersion: "prompts1/tokenizer1/bicubic1/interleaved1/mean-mrl1")
         }
 
         /// 前提にしているモデルの revision（CCModels の `EmbeddingModelPreparer.revision` と同じ）。
@@ -269,5 +276,14 @@ extension CoreMLEmbedder: ModelPreparable {
     /// 計測値が要るときやテキスト塔だけ温めたいときは `prepare(includeVision:)` を明示して呼ぶ。
     public func prepare() async throws {
         _ = try await prepare(includeVision: true)
+    }
+}
+
+extension CoreMLEmbedder: SignatureReportingEmbedder {
+    public func embedQueryWithSignature(_ text: String) async throws -> SignedEmbedding {
+        SignedEmbedding(vector: try await embedQuery(text), compatibilityKey: configuration.indexSignature)
+    }
+    public func embedDocumentWithSignature(text: String, title: String?, image: CGImage?) async throws -> SignedEmbedding {
+        SignedEmbedding(vector: try await embedDocument(text: text, title: title, image: image), compatibilityKey: configuration.indexSignature)
     }
 }

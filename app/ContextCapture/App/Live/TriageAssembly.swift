@@ -24,6 +24,7 @@ extension TriageQueue: TriageQueuing {
 }
 
 extension CoreMLEmbedder: PreparableEmbedder {
+    nonisolated var pipeline: EmbeddingPipeline? { configuration.pipeline }
     nonisolated var indexSignature: String { configuration.indexSignature }
 
     func prepareForUse() async throws {

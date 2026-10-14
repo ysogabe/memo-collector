@@ -311,8 +311,14 @@ public actor TriageQueue {
 
     private func process(_ job: Job) async {
         let record: ContextRecord
+        let input: EmbeddingInput?
         do {
-            guard let r = try await store.get(id: job.id) else {
+            let fetched: ContextRecord?
+            if let versioned = store as? any VersionedEmbeddingStoring {
+                input = try await versioned.embeddingInput(id: job.id)
+                fetched = input?.record
+            } else { input = nil; fetched = try await store.get(id: job.id) }
+            guard let r = fetched else {
                 for step in job.steps.sorted() {
                     finishStep(id: job.id, step: step, outcome: .skipped(.recordMissing))
                 }
@@ -349,7 +355,7 @@ public actor TriageQueue {
         }
         if job.steps.contains(.index) {
             await waitWhilePaused()
-            let outcome = await runIndex(record: record, image: image)
+            let outcome = await runIndex(record: record, image: image, input: input)
             finishStep(id: job.id, step: .index, outcome: outcome)
         }
         broadcast(.recordFinished(id: job.id))
@@ -412,18 +418,26 @@ public actor TriageQueue {
         }
     }
 
-    private func runIndex(record: ContextRecord, image: CGImage?) async -> TriageStepOutcome {
+    private func runIndex(record: ContextRecord, image: CGImage?, input: EmbeddingInput?) async -> TriageStepOutcome {
         let text = AnnotationPreprocessor.stripSpecialTokens(record.annotation.text)
             .trimmingCharacters(in: .whitespacesAndNewlines)
         let title = record.window?.title
         let vector: [Float]
+        var signed: SignedEmbedding?
         do {
-            vector = try await embedder.embedDocument(text: text, title: title, image: image)
+            if let reporting = embedder as? any SignatureReportingEmbedder {
+                let result = try await reporting.embedDocumentWithSignature(text: text, title: title, image: image)
+                signed = result; vector = result.vector
+            } else { vector = try await embedder.embedDocument(text: text, title: title, image: image) }
         } catch {
             return Self.outcome(for: error)
         }
         do {
-            // 埋め込み中に注釈・タイトルが変わったら古いベクトルは書かない（編集側の reprocess が新しいものを書く）。
+            if let input, let versioned = store as? any VersionedEmbeddingStoring {
+                let result = signed ?? SignedEmbedding(vector: vector, compatibilityKey: "legacy-unsigned")
+                return try await versioned.commitEmbedding(result, input: input) ? .succeeded : .skipped(.annotationChanged)
+            }
+            // フェイク等、versioned store でない場合の互換経路。
             guard let latest = try await store.get(id: record.id) else { return .skipped(.recordMissing) }
             guard latest.annotation.text == record.annotation.text, latest.window?.title == title else {
                 return .skipped(.annotationChanged)

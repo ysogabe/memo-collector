@@ -4,6 +4,9 @@ import Foundation
 public enum CCStoreError: Error, Equatable, Sendable {
     /// insert で同じ id が既にある。
     case duplicateID(String)
+    case immutableAttachment
+    case invalidVector
+    case invalidGeneration(String)
     /// update / 追記系で id が無い。
     case notFound(String)
     /// 埋め込みの次元がストアの想定（既定 256）と違う。

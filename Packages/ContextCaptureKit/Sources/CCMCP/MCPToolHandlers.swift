@@ -139,9 +139,17 @@ public struct MCPToolHandlers: Sendable {
                 fallbackReason = "embedder_failed"
             case let .available(embedder):
                 do {
-                    let vector = try await embedder.embedQuery(query)
+                    let signed = try await (embedder as? any SignatureReportingEmbedder)?.embedQueryWithSignature(query)
+                    let vector: [Float]
+                    if let signed { vector = signed.vector } else { vector = try await embedder.embedQuery(query) }
                     // 状態の絞り込みは上位 limit 件を選ぶ前に効く（archived が多くても件数が足りなくならない）。
-                    let hits = try await store.search(vector: vector, limit: limit, statuses: statuses)
+                    let hits: [SearchHit]
+                    if let signed {
+                        hits = try await store.search(vector: vector, limit: limit, statuses: statuses, compatibilityKey: signed.compatibilityKey)
+                    } else {
+                        // Legacy fakes/fixtures have no generation descriptor.
+                        hits = try await store.search(vector: vector, limit: limit, statuses: statuses)
+                    }
                     let items = hits.map { CaptureSummary($0.record, score: $0.score) }
                     return try jsonResult(SearchOutput(mode: "vector", fallbackReason: nil, query: query, count: items.count, items: items))
                 } catch {
