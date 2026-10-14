@@ -43,12 +43,15 @@ for i,(group,title,short,app,text,paraphrase,number,api) in enumerate(TOPICS):
             'annotation':{'text':annotation,'stt_engine':'synthetic','edited':False},
             'triage':None,'guard':{'status':'clear','findings':[]},'handoff':[],'notes':[],
             'status':['inbox','done','archived'][j]}})
+    noise=title.replace('検索','検策').replace('転写','転舎').replace('低電力','低電カ').replace('秘密','秘蜜').replace('世代','世帯').replace('通信','通心').replace('ジョブ','ジョプ').replace('画像','画象').replace('順位','順立').replace('メモリ','メモリー').replace('エラー','エラ一').replace('記録','記緑').replace('手渡し','手渡レ').replace('モデル','モデノレ').replace('評価','評値')
     cases=[(title,[0,1],['exact','japanese']), (paraphrase,[0,1],['paraphrase','japanese']),
            (short,[0,1],['short','japanese']), (api,[0],['identifier','mixed']),
            (f'https://github.com/example-fixtures/{group}/issues/{number}',[0,1],['url','exact']),
            (f'{group} #{number}',[0,1],['issue','exact']),
-           (title.replace('検索','検策').replace('転写','転舎')+'の検証',[0,1],['noise','ocr_stt']),
-           (title,[0,1,2],['archived','filter'])]
+           (noise+'の検証',[0,1],['noise','ocr_stt']),
+           (title,[0,1,2],['archived','filter']),
+           (title[:3],[0,1],['japanese_substring','exact']),
+           (''.join(chr(ord(c)+0xFEE0) if '!'<=c<='~' else c for c in api),[0],['width','identifier'])]
     for j,(q,positive,tags) in enumerate(cases):
         queries.append({'id':f'{group}-{j+1:02d}','text':q,'relevant':[{'recordID':ids[k],'grade':2 if k==0 else 1} for k in positive],
                         'tags':tags,'group':group,'split':split,'includeArchived':j==7})
@@ -57,9 +60,9 @@ for split in ['dev','holdout']:
     for i,q in enumerate(negatives):
         queries.append({'id':f'none-{split}-{i}','text':q,'relevant':[],'tags':['no_answer'],
                         'group':f'none-{split}-{i}','split':split,'includeArchived':False})
-dump(ROOT/'records.json',{'schemaVersion':1,'corpusID':'search-ja-v1','records':records})
-dump(ROOT/'queries.json',{'schemaVersion':1,'corpusID':'search-ja-v1','queries':queries})
-manifest={'schemaVersion':1,'corpusID':'search-ja-v1','seed':0,'provenance':'Authored synthetic Japanese text; no personal records, screenshots, audio, or upstream evaluation data copied.',
+dump(ROOT/'records.json',{'schemaVersion':1,'corpusID':'search-ja-v2','records':records})
+dump(ROOT/'queries.json',{'schemaVersion':1,'corpusID':'search-ja-v2','queries':queries})
+manifest={'schemaVersion':1,'corpusID':'search-ja-v2','seed':0,'provenance':'Authored synthetic Japanese text; no personal records, screenshots, audio, or upstream evaluation data copied.',
           'license':'CC0-1.0','generator':'generate.py','records':len(records),'queries':len(queries),
           'files':{name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in ['records.json','queries.json']},
           'splitPolicy':'Topic groups, their records and all paraphrases belong to exactly one dev/holdout split.'}
