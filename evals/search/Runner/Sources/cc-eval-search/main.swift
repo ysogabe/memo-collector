@@ -49,7 +49,8 @@ struct VectorCache: Codable {
     var queryMilliseconds: [String: Double]
     var preparationMilliseconds: Double
 }
-struct FrozenEmbedder: Embedder {
+struct FrozenEmbedder: SignatureReportingEmbedder {
+    let compatibilityKey: String
     let dimension: Int
     let vectors: [String: [Float]]
     func embedQuery(_ text: String) async throws -> [Float] {
@@ -57,6 +58,12 @@ struct FrozenEmbedder: Embedder {
         return vector
     }
     func embedDocument(text: String, title: String?, image: CGImage?) async throws -> [Float] {
+        throw EvaluationError.invalid("frozen query embedder has no document inference")
+    }
+    func embedQueryWithSignature(_ text: String) async throws -> SignedEmbedding {
+        SignedEmbedding(vector: try await embedQuery(text), compatibilityKey: compatibilityKey)
+    }
+    func embedDocumentWithSignature(text: String, title: String?, image: CGImage?) async throws -> SignedEmbedding {
         throw EvaluationError.invalid("frozen query embedder has no document inference")
     }
 }
@@ -154,10 +161,15 @@ func summaries(_ results: [QueryResult]) -> [String: Summary] {
         let paths = CCPaths(dataRoot: root, modelsRoot: modelsRoot)
         let store = try SQLiteRecordStore(paths: paths)
         let start = now()
+        let generation = try await store.beginGeneration(config.pipeline)
         for row in corpus.records {
             try await store.insert(row.record)
-            try await store.setEmbedding(id: row.record.id, vector: cache.documents[row.record.id]!)
+            guard let input = try await store.embeddingInput(id: row.record.id),
+                  try await store.commitEmbedding(SignedEmbedding(vector: cache.documents[row.record.id]!, compatibilityKey: config.indexSignature), input: input) else {
+                throw EvaluationError.invalid("fixture indexing became obsolete")
+            }
         }
+        guard try await store.activateGeneration(generation.id) else { throw EvaluationError.invalid("fixture generation incomplete") }
         let storeMs = elapsed(start)
         let size = try FileManager.default.attributesOfItem(atPath: paths.databaseURL.path)[.size] as? NSNumber
         if o.liveQueries, coreML == nil {
@@ -165,7 +177,7 @@ func summaries(_ results: [QueryResult]) -> [String: Summary] {
         }
         var frozenQueries: [String: [Float]] = [:]
         for q in set.queries { frozenQueries[q.text] = cache.queries[q.id] }
-        let provider: any Embedder = o.liveQueries ? coreML! : FrozenEmbedder(dimension: config.dimension, vectors: frozenQueries)
+        let provider: any Embedder = o.liveQueries ? coreML! : FrozenEmbedder(compatibilityKey: config.indexSignature, dimension: config.dimension, vectors: frozenQueries)
         let vectorHandler = MCPToolHandlers(store: store, embedderProvider: { provider })
         let keywordHandler = MCPToolHandlers(store: store)
         var reports: [String: ModeReport] = [:]

@@ -23,9 +23,17 @@ final class EmbeddingCache: @unchecked Sendable {
         }
         var ids: [String] = []
         var matrix: [Float] = []
-        let rows = try Row.fetchCursor(
-            db, sql: "SELECT record_id, vector FROM embeddings WHERE dim = ?", arguments: [dimension]
-        )
+        let active = try String.fetchOne(db, sql: "SELECT active_id FROM index_generation_pointer WHERE id=1")
+        let sql: String
+        let arguments: StatementArguments
+        if let active {
+            sql = "SELECT e.record_id,e.vector FROM generation_embeddings e JOIN record_input_versions i ON i.record_id=e.record_id AND i.version=e.input_version WHERE e.generation_id=? AND e.dim=?"
+            arguments = [active,dimension]
+        } else {
+            sql = "SELECT e.record_id,e.vector FROM embeddings e JOIN record_input_versions i ON i.record_id=e.record_id AND i.version=e.input_version WHERE e.dim=?"
+            arguments = [dimension]
+        }
+        let rows = try Row.fetchCursor(db, sql: sql, arguments: arguments)
         while let row = try rows.next() {
             let blob: Data = row["vector"]
             guard let v = VectorCodec.decode(blob, count: dimension) else { continue }

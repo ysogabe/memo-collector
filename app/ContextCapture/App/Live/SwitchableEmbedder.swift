@@ -3,13 +3,24 @@ import CoreGraphics
 import Foundation
 
 /// 準備（読み込み + 初回推論）が要る埋め込み。本物は `CoreMLEmbedder`（適合は `TriageAssembly.swift`）。
-protocol PreparableEmbedder: Embedder, ModelUnloadable {
+protocol PreparableEmbedder: SignatureReportingEmbedder, ModelUnloadable {
+    var pipeline: EmbeddingPipeline? { get }
     /// 索引の互換性を表す文字列（`CoreMLEmbedder.Configuration.indexSignature`）。変わったら全件を埋め込み直す。
     var indexSignature: String { get }
     /// 読み込みと最初の推論を済ませる（ANE の初回特殊化で数分かかりうる）。
     func prepareForUse() async throws
     /// デバッグ表示用の読み込み状態（例: "text+vision"）。
     func loadDescription() async -> String
+}
+
+extension PreparableEmbedder {
+    var pipeline: EmbeddingPipeline? { nil }
+    func embedQueryWithSignature(_ text: String) async throws -> SignedEmbedding {
+        SignedEmbedding(vector: try await embedQuery(text), compatibilityKey: indexSignature)
+    }
+    func embedDocumentWithSignature(text: String, title: String?, image: CGImage?) async throws -> SignedEmbedding {
+        SignedEmbedding(vector: try await embedDocument(text: text, title: title, image: image), compatibilityKey: indexSignature)
+    }
 }
 
 /// 埋め込みが準備中・未準備のとき（すぐ throw して、呼び出し側に後回しさせる）。
@@ -23,7 +34,7 @@ struct EmbeddingNotReady: ModelReadinessReporting, Equatable {
 /// - 中身（`PreparableEmbedder`）は差し替えられる（設定の画像トークン数を変えたとき。`CoreMLEmbedder` の設定は不変なので作り直す）
 /// - **準備が終わるまでは `embedQuery` / `embedDocument` がすぐ `EmbeddingNotReady` を投げる**。トリアージの索引ステップは
 ///   `.skipped(.notReady)`（失敗ではない）で残り、準備後の `resumePending()` で拾われる（直列キューが数分の初回特殊化で止まらないように）
-actor SwitchableEmbedder: Embedder {
+actor SwitchableEmbedder: SignatureReportingEmbedder {
     enum State: Sendable, Equatable {
         case unavailable
         case preparing
@@ -89,4 +100,13 @@ actor SwitchableEmbedder: Embedder {
         guard state == .ready, let current else { throw EmbeddingNotReady() }
         return try await current.embedDocument(text: text, title: title, image: image)
     }
+    func embedQueryWithSignature(_ text: String) async throws -> SignedEmbedding {
+        guard state == .ready, let current else { throw EmbeddingNotReady() }
+        return try await current.embedQueryWithSignature(text)
+    }
+    func embedDocumentWithSignature(text: String, title: String?, image: CGImage?) async throws -> SignedEmbedding {
+        guard state == .ready, let current else { throw EmbeddingNotReady() }
+        return try await current.embedDocumentWithSignature(text: text, title: title, image: image)
+    }
+
 }

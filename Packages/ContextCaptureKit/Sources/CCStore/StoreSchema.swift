@@ -59,6 +59,66 @@ enum StoreSchema {
                     BEGIN UPDATE embeddings_version SET version = version + 1 WHERE id = 1; END;
                 """)
         }
+        m.registerMigration("v2_index_generations") { db in
+            try db.execute(sql: """
+                ALTER TABLE embeddings ADD COLUMN input_version INTEGER NOT NULL DEFAULT 0;
+                CREATE TABLE record_input_versions(
+                    record_id TEXT PRIMARY KEY REFERENCES records(id) ON DELETE CASCADE,
+                    version INTEGER NOT NULL DEFAULT 0
+                );
+                INSERT INTO record_input_versions(record_id) SELECT id FROM records;
+                CREATE TABLE index_generations(
+                    id TEXT PRIMARY KEY, compatibility_key TEXT NOT NULL UNIQUE,
+                    pipeline_json TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'building'
+                );
+                CREATE TABLE index_generation_pointer(
+                    id INTEGER PRIMARY KEY CHECK(id=1),
+                    active_id TEXT REFERENCES index_generations(id),
+                    target_id TEXT REFERENCES index_generations(id)
+                );
+                INSERT INTO index_generation_pointer(id) VALUES(1);
+                CREATE TABLE generation_embeddings(
+                    record_id TEXT NOT NULL REFERENCES records(id) ON DELETE CASCADE,
+                    generation_id TEXT NOT NULL REFERENCES index_generations(id) ON DELETE CASCADE,
+                    input_version INTEGER NOT NULL, input_hash TEXT NOT NULL, dim INTEGER NOT NULL, vector BLOB NOT NULL,
+                    PRIMARY KEY(record_id,generation_id)
+                );
+                CREATE TABLE generation_jobs(
+                    record_id TEXT NOT NULL REFERENCES records(id) ON DELETE CASCADE,
+                    generation_id TEXT NOT NULL REFERENCES index_generations(id) ON DELETE CASCADE,
+                    input_version INTEGER NOT NULL, state TEXT NOT NULL DEFAULT 'pending', attempts INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(record_id,generation_id)
+                );
+                CREATE TRIGGER records_input_after_insert AFTER INSERT ON records BEGIN
+                    INSERT INTO record_input_versions(record_id) VALUES(new.id);
+                    INSERT INTO generation_jobs(record_id,generation_id,input_version)
+                        SELECT new.id,g.id,0 FROM index_generations g
+                        WHERE g.state='building' OR g.id=(SELECT active_id FROM index_generation_pointer WHERE id=1);
+                END;
+                CREATE TRIGGER records_input_after_update AFTER UPDATE ON records
+                WHEN json_extract(old.json,'$.annotation.text') IS NOT json_extract(new.json,'$.annotation.text')
+                  OR json_extract(old.json,'$.window.title') IS NOT json_extract(new.json,'$.window.title')
+                  OR old.screenshot_path IS NOT new.screenshot_path
+                BEGIN
+                    UPDATE record_input_versions SET version=version+1 WHERE record_id=new.id;
+                END;
+                CREATE TRIGGER input_version_after_update AFTER UPDATE ON record_input_versions BEGIN
+                    UPDATE embeddings_version SET version=version+1 WHERE id=1;
+                    INSERT INTO generation_jobs(record_id,generation_id,input_version,state)
+                        SELECT new.record_id,g.id,new.version,'pending' FROM index_generations g
+                        WHERE g.state='building' OR g.id=(SELECT active_id FROM index_generation_pointer WHERE id=1)
+                        ON CONFLICT(record_id,generation_id) DO UPDATE SET input_version=excluded.input_version,state='pending';
+                END;
+                CREATE TRIGGER generation_embeddings_after_insert AFTER INSERT ON generation_embeddings
+                    BEGIN UPDATE embeddings_version SET version=version+1 WHERE id=1; END;
+                CREATE TRIGGER generation_embeddings_after_update AFTER UPDATE ON generation_embeddings
+                    BEGIN UPDATE embeddings_version SET version=version+1 WHERE id=1; END;
+                CREATE TRIGGER generation_embeddings_after_delete AFTER DELETE ON generation_embeddings
+                    BEGIN UPDATE embeddings_version SET version=version+1 WHERE id=1; END;
+                CREATE TRIGGER generation_pointer_after_update AFTER UPDATE ON index_generation_pointer
+                    BEGIN UPDATE embeddings_version SET version=version+1 WHERE id=1; END;
+                """)
+        }
         return m
     }
 }

@@ -2,7 +2,7 @@ import Foundation
 
 /// 検索索引の状態ファイル（データルート直下の `search-index.json`）。
 ///
-/// アプリ（`SearchIndexMaintainer`）が書き、cc-mcp（別プロセス）が読む。**形式の定義はここだけ**（両方がこの型を使う）。
+/// アプリ（`SearchIndexMaintainer`）が互換/診断用に書く。世代対応の cc-mcp は DB の active generation を正本にし、この型へ投影する。**JSON形式の定義はここだけ**。
 /// cc-mcp はここの `image_tokens` で同じ設定の埋め込みを作り、`index_signature` が自分のものと一致し
 /// `status == .ready` のときだけベクトル検索を使う。
 ///

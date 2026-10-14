@@ -37,7 +37,7 @@ struct CCMCPCommand: AsyncParsableCommand {
         }
 
         // 状態が ready なら検索モデル（テキスト塔）を裏で読み込み始める（すぐ戻る。stdio の受付は待たせない）。
-        let queryEmbedder = makeQueryEmbedder(paths: paths)
+        let queryEmbedder = makeQueryEmbedder(paths: paths, store: store)
         await queryEmbedder.prewarm()
         let handlers = MCPToolHandlers(store: store, embedderResolver: { await queryEmbedder.resolve() })
         let server = ContextCaptureMCPServer(handlers: handlers)
@@ -58,9 +58,20 @@ struct CCMCPCommand: AsyncParsableCommand {
 /// - 埋め込みモデル（`EmbeddingGemma2Text.mlmodelc` など）が `CC_MODELS_DIR` / 既定のモデル置き場に無い
 /// - アプリが書く索引の状態ファイル（`SearchIndexState`、データルートの `search-index.json`）が無い・ready でない・
 ///   シグネチャ（`CoreMLEmbedder.Configuration.indexSignature`）がこちらの設定と食い違う → 標準エラーに警告
-func makeQueryEmbedder(paths: CCPaths = .resolve()) -> WarmingQueryEmbedder {
+func makeQueryEmbedder(paths: CCPaths = .resolve(), store: SQLiteRecordStore? = nil) -> WarmingQueryEmbedder {
     let modelDirectory = paths.modelDirectory(.embedding)
-    return WarmingQueryEmbedder(stateURL: paths.searchIndexStateURL) { state in
+    return WarmingQueryEmbedder(stateURL: paths.searchIndexStateURL, readState: {
+        if let store {
+            do {
+                if let active = try await store.activeGeneration() {
+                    return SearchIndexState(indexSignature: active.pipeline.compatibilityKey, imageTokens: active.pipeline.imageTokens,
+                                            dimension: active.pipeline.dimension, status: .ready, updatedAt: Date())
+                }
+                if try await store.targetGeneration() != nil { return nil }
+            } catch { return nil }
+        }
+        return SearchIndexState.read(from: paths.searchIndexStateURL)
+    }) { state in
         let required = ["EmbeddingGemma2Text.mlmodelc", "embeddings.bf16", "tokenizer.json"]
         guard required.allSatisfy({ FileManager.default.fileExists(atPath: modelDirectory.appendingPathComponent($0).path) }) else {
             return .reject("埋め込みモデルが無いので部分一致で検索する: \(modelDirectory.path)")

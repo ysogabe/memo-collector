@@ -23,9 +23,13 @@ final class EmbeddingUnitTests: XCTestCase {
         XCTAssertEqual(c.dimension, 768)
         XCTAssertEqual(c.textComputeUnits, .cpuAndNeuralEngine)
         XCTAssertEqual(c.visionComputeUnits, .cpuAndNeuralEngine)
-        XCTAssertEqual(CoreMLEmbedder.Configuration(modelDirectory: URL(fileURLWithPath: "/tmp")).indexSignature,
-                       "embeddinggemma-2-coreml@3f978dd/d256/img280")
-        XCTAssertEqual(c.indexSignature, "embeddinggemma-2-coreml@3f978dd/d768/img70")
+        let baseline = CoreMLEmbedder.Configuration(modelDirectory: URL(fileURLWithPath: "/tmp"))
+        XCTAssertTrue(baseline.indexSignature.hasPrefix("embedding/"))
+        XCTAssertNotEqual(c.indexSignature, baseline.indexSignature)
+        var gpu = baseline; gpu.textComputeUnits = .cpuAndGPU
+        XCTAssertEqual(gpu.indexSignature, baseline.indexSignature)
+        var changed = baseline.pipeline; changed.preprocessingVersion = "new"
+        XCTAssertNotEqual(changed.compatibilityKey, baseline.indexSignature)
     }
 
     func testPrompts() {
