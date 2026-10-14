@@ -1,0 +1,1686 @@
+{
+  "corpusID": "search-ja-v1",
+  "records": [
+    {
+      "group": "search",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "SQLite の日本語検索にキーワード検索を足す方式を比較する。API検索 の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.search",
+          "name": "SwiftUI"
+        },
+        "audio": null,
+        "captured_at": "2026-10-01T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000001",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/search/issues/6",
+        "window": {
+          "frame": null,
+          "title": "日本語検索 · Issue #6"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "search",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "日本語検索の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.search",
+          "name": "SwiftUI"
+        },
+        "audio": null,
+        "captured_at": "2026-10-01T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000002",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/search/issues/6",
+        "window": {
+          "frame": null,
+          "title": "日本語検索 · Issue #6"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "search",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した日本語検索の過去メモ。SQLite の日本語検索にキーワード検索を足す方式を比較する"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.search",
+          "name": "SwiftUI"
+        },
+        "audio": null,
+        "captured_at": "2026-10-01T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000003",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/search/issues/6",
+        "window": {
+          "frame": null,
+          "title": "日本語検索 · Issue #6 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "audio",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "音声認識で固有名詞の文字起こし誤りを修正する辞書を作る。transcribe の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.audio",
+          "name": "WhisperKit"
+        },
+        "audio": null,
+        "captured_at": "2026-10-02T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000004",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/audio/issues/60",
+        "window": {
+          "frame": null,
+          "title": "音声転写 · Issue #60"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "audio",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "音声転写の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.audio",
+          "name": "WhisperKit"
+        },
+        "audio": null,
+        "captured_at": "2026-10-02T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000005",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/audio/issues/60",
+        "window": {
+          "frame": null,
+          "title": "音声転写 · Issue #60"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "audio",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した音声転写の過去メモ。音声認識で固有名詞の文字起こし誤りを修正する辞書を作る"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.audio",
+          "name": "WhisperKit"
+        },
+        "audio": null,
+        "captured_at": "2026-10-02T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000006",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/audio/issues/60",
+        "window": {
+          "frame": null,
+          "title": "音声転写 · Issue #60 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "calendar",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "来週の打ち合わせの日時と会議室をカレンダーへ登録する。createEvent の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.calendar",
+          "name": "Calendar"
+        },
+        "audio": null,
+        "captured_at": "2026-10-03T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000007",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/calendar/issues/18",
+        "window": {
+          "frame": null,
+          "title": "予定登録 · Issue #18"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "calendar",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "予定登録の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.calendar",
+          "name": "Calendar"
+        },
+        "audio": null,
+        "captured_at": "2026-10-03T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000008",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/calendar/issues/18",
+        "window": {
+          "frame": null,
+          "title": "予定登録 · Issue #18"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "calendar",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した予定登録の過去メモ。来週の打ち合わせの日時と会議室をカレンダーへ登録する"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.calendar",
+          "name": "Calendar"
+        },
+        "audio": null,
+        "captured_at": "2026-10-03T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000009",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/calendar/issues/18",
+        "window": {
+          "frame": null,
+          "title": "予定登録 · Issue #18 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "battery",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "バッテリー駆動の低電力モードでは過去の埋め込み処理を後回しにする。ANE の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.battery",
+          "name": "CoreML"
+        },
+        "audio": null,
+        "captured_at": "2026-10-04T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000A",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/battery/issues/25",
+        "window": {
+          "frame": null,
+          "title": "低電力 · Issue #25"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "battery",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "低電力の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.battery",
+          "name": "CoreML"
+        },
+        "audio": null,
+        "captured_at": "2026-10-04T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000B",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/battery/issues/25",
+        "window": {
+          "frame": null,
+          "title": "低電力 · Issue #25"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "battery",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した低電力の過去メモ。バッテリー駆動の低電力モードでは過去の埋め込み処理を後回しにする"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.battery",
+          "name": "CoreML"
+        },
+        "audio": null,
+        "captured_at": "2026-10-04T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000C",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/battery/issues/25",
+        "window": {
+          "frame": null,
+          "title": "低電力 · Issue #25 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "privacy",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "画面に含まれる秘密情報を検出してマスク画像だけを渡す。scanSecrets の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.privacy",
+          "name": "Vision"
+        },
+        "audio": null,
+        "captured_at": "2026-10-05T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000D",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/privacy/issues/31",
+        "window": {
+          "frame": null,
+          "title": "秘密保護 · Issue #31"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "privacy",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "秘密保護の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.privacy",
+          "name": "Vision"
+        },
+        "audio": null,
+        "captured_at": "2026-10-05T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000E",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/privacy/issues/31",
+        "window": {
+          "frame": null,
+          "title": "秘密保護 · Issue #31"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "privacy",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した秘密保護の過去メモ。画面に含まれる秘密情報を検出してマスク画像だけを渡す"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.privacy",
+          "name": "Vision"
+        },
+        "audio": null,
+        "captured_at": "2026-10-05T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000F",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/privacy/issues/31",
+        "window": {
+          "frame": null,
+          "title": "秘密保護 · Issue #31 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "database",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "埋め込み索引の世代を保ち再構築が失敗しても旧世代に戻す。setEmbedding の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.database",
+          "name": "GRDB"
+        },
+        "audio": null,
+        "captured_at": "2026-10-06T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000G",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/database/issues/41",
+        "window": {
+          "frame": null,
+          "title": "世代切替 · Issue #41"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "database",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "世代切替の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.database",
+          "name": "GRDB"
+        },
+        "audio": null,
+        "captured_at": "2026-10-06T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000H",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/database/issues/41",
+        "window": {
+          "frame": null,
+          "title": "世代切替 · Issue #41"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "database",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した世代切替の過去メモ。埋め込み索引の世代を保ち再構築が失敗しても旧世代に戻す"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.database",
+          "name": "GRDB"
+        },
+        "audio": null,
+        "captured_at": "2026-10-06T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000J",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/database/issues/41",
+        "window": {
+          "frame": null,
+          "title": "世代切替 · Issue #41 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "network",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "HTTP の接続が切れたら回数上限付きの指数バックオフで再試行する。URLSession の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.network",
+          "name": "URLSession"
+        },
+        "audio": null,
+        "captured_at": "2026-10-07T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000K",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/network/issues/51",
+        "window": {
+          "frame": null,
+          "title": "通信再試行 · Issue #51"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "network",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "通信再試行の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.network",
+          "name": "URLSession"
+        },
+        "audio": null,
+        "captured_at": "2026-10-07T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000M",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/network/issues/51",
+        "window": {
+          "frame": null,
+          "title": "通信再試行 · Issue #51"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "network",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した通信再試行の過去メモ。HTTP の接続が切れたら回数上限付きの指数バックオフで再試行する"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.network",
+          "name": "URLSession"
+        },
+        "audio": null,
+        "captured_at": "2026-10-07T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000N",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/network/issues/51",
+        "window": {
+          "frame": null,
+          "title": "通信再試行 · Issue #51 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "queue",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "非同期ジョブを保存しアプリの再起動後に未完了の要求を再開する。resumePending の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.queue",
+          "name": "Swift"
+        },
+        "audio": null,
+        "captured_at": "2026-10-08T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000P",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/queue/issues/61",
+        "window": {
+          "frame": null,
+          "title": "ジョブ再開 · Issue #61"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "queue",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "ジョブ再開の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.queue",
+          "name": "Swift"
+        },
+        "audio": null,
+        "captured_at": "2026-10-08T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000Q",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/queue/issues/61",
+        "window": {
+          "frame": null,
+          "title": "ジョブ再開 · Issue #61"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "queue",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了したジョブ再開の過去メモ。非同期ジョブを保存しアプリの再起動後に未完了の要求を再開する"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.queue",
+          "name": "Swift"
+        },
+        "audio": null,
+        "captured_at": "2026-10-08T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000R",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/queue/issues/61",
+        "window": {
+          "frame": null,
+          "title": "ジョブ再開 · Issue #61 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "dev"
+    },
+    {
+      "group": "image",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "画像を bicubic で縮小し前処理の画素値を参照と一致させる。resizeBicubic の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.image",
+          "name": "CoreGraphics"
+        },
+        "audio": null,
+        "captured_at": "2026-10-09T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000S",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/image/issues/72",
+        "window": {
+          "frame": null,
+          "title": "画像縮小 · Issue #72"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "image",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "画像縮小の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.image",
+          "name": "CoreGraphics"
+        },
+        "audio": null,
+        "captured_at": "2026-10-09T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000T",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/image/issues/72",
+        "window": {
+          "frame": null,
+          "title": "画像縮小 · Issue #72"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "image",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した画像縮小の過去メモ。画像を bicubic で縮小し前処理の画素値を参照と一致させる"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.image",
+          "name": "CoreGraphics"
+        },
+        "audio": null,
+        "captured_at": "2026-10-09T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000V",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/image/issues/72",
+        "window": {
+          "frame": null,
+          "title": "画像縮小 · Issue #72 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "ranking",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "意味検索と全文検索の順位を RRF で融合して検索品質を比較する。RRF の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.ranking",
+          "name": "SQLite"
+        },
+        "audio": null,
+        "captured_at": "2026-10-10T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000W",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/ranking/issues/82",
+        "window": {
+          "frame": null,
+          "title": "順位融合 · Issue #82"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "ranking",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "順位融合の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.ranking",
+          "name": "SQLite"
+        },
+        "audio": null,
+        "captured_at": "2026-10-10T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000X",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/ranking/issues/82",
+        "window": {
+          "frame": null,
+          "title": "順位融合 · Issue #82"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "ranking",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した順位融合の過去メモ。意味検索と全文検索の順位を RRF で融合して検索品質を比較する"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.ranking",
+          "name": "SQLite"
+        },
+        "audio": null,
+        "captured_at": "2026-10-10T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000Y",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/ranking/issues/82",
+        "window": {
+          "frame": null,
+          "title": "順位融合 · Issue #82 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "memory",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "使っていない推論モデルを解放しプロセスの物理メモリを計測する。unload の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.memory",
+          "name": "Metal"
+        },
+        "audio": null,
+        "captured_at": "2026-10-11T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000000Z",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/memory/issues/92",
+        "window": {
+          "frame": null,
+          "title": "メモリ解放 · Issue #92"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "memory",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "メモリ解放の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.memory",
+          "name": "Metal"
+        },
+        "audio": null,
+        "captured_at": "2026-10-11T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000010",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/memory/issues/92",
+        "window": {
+          "frame": null,
+          "title": "メモリ解放 · Issue #92"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "memory",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了したメモリ解放の過去メモ。使っていない推論モデルを解放しプロセスの物理メモリを計測する"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.memory",
+          "name": "Metal"
+        },
+        "audio": null,
+        "captured_at": "2026-10-11T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000011",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/memory/issues/92",
+        "window": {
+          "frame": null,
+          "title": "メモリ解放 · Issue #92 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "error",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "ERR_TOKEN_EXPIRED の原因と期限切れセッションの更新を調査する。ERR_TOKEN_EXPIRED の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.error",
+          "name": "Xcode"
+        },
+        "audio": null,
+        "captured_at": "2026-10-12T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000012",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/error/issues/102",
+        "window": {
+          "frame": null,
+          "title": "エラー診断 · Issue #102"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "error",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "エラー診断の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.error",
+          "name": "Xcode"
+        },
+        "audio": null,
+        "captured_at": "2026-10-12T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000013",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/error/issues/102",
+        "window": {
+          "frame": null,
+          "title": "エラー診断 · Issue #102"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "error",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了したエラー診断の過去メモ。ERR_TOKEN_EXPIRED の原因と期限切れセッションの更新を調査する"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.error",
+          "name": "Xcode"
+        },
+        "audio": null,
+        "captured_at": "2026-10-12T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000014",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/error/issues/102",
+        "window": {
+          "frame": null,
+          "title": "エラー診断 · Issue #102 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "record",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "ホットキーで画面と声のメモを素早く保存する。captureFrontmost の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.record",
+          "name": "ContextCapture"
+        },
+        "audio": null,
+        "captured_at": "2026-10-13T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000015",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/record/issues/112",
+        "window": {
+          "frame": null,
+          "title": "即時記録 · Issue #112"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "record",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "即時記録の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.record",
+          "name": "ContextCapture"
+        },
+        "audio": null,
+        "captured_at": "2026-10-13T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000016",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/record/issues/112",
+        "window": {
+          "frame": null,
+          "title": "即時記録 · Issue #112"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "record",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した即時記録の過去メモ。ホットキーで画面と声のメモを素早く保存する"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.record",
+          "name": "ContextCapture"
+        },
+        "audio": null,
+        "captured_at": "2026-10-13T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000017",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/record/issues/112",
+        "window": {
+          "frame": null,
+          "title": "即時記録 · Issue #112 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "guard",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "needs_review の画像は確認が済むまでエージェントに渡さない。needs_review の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.guard",
+          "name": "MCP"
+        },
+        "audio": null,
+        "captured_at": "2026-10-14T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000018",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/guard/issues/122",
+        "window": {
+          "frame": null,
+          "title": "画像手渡し · Issue #122"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "guard",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "画像手渡しの比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.guard",
+          "name": "MCP"
+        },
+        "audio": null,
+        "captured_at": "2026-10-14T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH00000000000000019",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/guard/issues/122",
+        "window": {
+          "frame": null,
+          "title": "画像手渡し · Issue #122"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "guard",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した画像手渡しの過去メモ。needs_review の画像は確認が済むまでエージェントに渡さない"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.guard",
+          "name": "MCP"
+        },
+        "audio": null,
+        "captured_at": "2026-10-14T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000001A",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/guard/issues/122",
+        "window": {
+          "frame": null,
+          "title": "画像手渡し · Issue #122 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "model",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "固定 revision のモデルを取得し sha256 を検証してから使う。sha256 の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.model",
+          "name": "HuggingFace"
+        },
+        "audio": null,
+        "captured_at": "2026-10-15T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000001B",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/model/issues/132",
+        "window": {
+          "frame": null,
+          "title": "モデル取得 · Issue #132"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "model",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "モデル取得の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.model",
+          "name": "HuggingFace"
+        },
+        "audio": null,
+        "captured_at": "2026-10-15T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000001C",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/model/issues/132",
+        "window": {
+          "frame": null,
+          "title": "モデル取得 · Issue #132"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "model",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了したモデル取得の過去メモ。固定 revision のモデルを取得し sha256 を検証してから使う"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.model",
+          "name": "HuggingFace"
+        },
+        "audio": null,
+        "captured_at": "2026-10-15T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000001D",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/model/issues/132",
+        "window": {
+          "frame": null,
+          "title": "モデル取得 · Issue #132 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "tests",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "検索の正解集合を固定して Recall と MRR の回帰を検出する。Recall@3 の実装を読む。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.tests",
+          "name": "XCTest"
+        },
+        "audio": null,
+        "captured_at": "2026-10-16T08:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000001E",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "inbox",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/tests/issues/142",
+        "window": {
+          "frame": null,
+          "title": "回帰評価 · Issue #142"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "tests",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "回帰評価の比較資料。先行方式と新方式を検証する。"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.tests",
+          "name": "XCTest"
+        },
+        "audio": null,
+        "captured_at": "2026-10-16T09:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000001F",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "done",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/tests/issues/142",
+        "window": {
+          "frame": null,
+          "title": "回帰評価 · Issue #142"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    },
+    {
+      "group": "tests",
+      "record": {
+        "annotation": {
+          "edited": false,
+          "stt_engine": "synthetic",
+          "text": "完了した回帰評価の過去メモ。検索の正解集合を固定して Recall と MRR の回帰を検出する"
+        },
+        "app": {
+          "bundle_id": "example.synthetic.tests",
+          "name": "XCTest"
+        },
+        "audio": null,
+        "captured_at": "2026-10-16T10:00:00+09:00",
+        "extra": {},
+        "guard": {
+          "findings": [],
+          "status": "clear"
+        },
+        "handoff": [],
+        "id": "01JSEARCH0000000000000001G",
+        "masked_screenshot": null,
+        "notes": [],
+        "screenshot": null,
+        "status": "archived",
+        "triage": null,
+        "url": "https://github.com/example-fixtures/tests/issues/142",
+        "window": {
+          "frame": null,
+          "title": "回帰評価 · Issue #142 過去資料"
+        }
+      },
+      "screen": null,
+      "split": "holdout"
+    }
+  ],
+  "schemaVersion": 1
+}
