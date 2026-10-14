@@ -1,6 +1,6 @@
 # main マージ後の実モデル検証（#8 / #10）
 
-2026-10-14、PR #12〜#18 を順に main へ merge commit で統合した。main は `3b70228968c0e7892ab5f589feeb030552374eb9`。[検索回帰CI](https://github.com/ysogabe/memo-collector/actions/runs/38559741457) は成功。#6/#7/#9/#11 は完了し、#8/#10 の追加測定を以下に記録する。
+2026-10-14、PR #12〜#18 を順に main へ merge commit で統合した。測定時のmain は `3b70228968c0e7892ab5f589feeb030552374eb9`。[検索回帰CI](https://github.com/ysogabe/memo-collector/actions/runs/38559741457) は成功。#6/#7/#9/#11 は完了し、#8/#10 の追加測定を以下に記録する。
 
 **測定対象は M3 24GiB。M4 32GB はユーザー指定により対象外で、タスクや採用の前提条件にしない。** 本文の M1 は CPU 名ではなく、milestone 1「録って残す」を指す。
 
