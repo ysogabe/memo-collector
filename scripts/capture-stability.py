@@ -13,10 +13,14 @@ PRESETS = {
     'encoder-gpu': {'encoder': 'gpu', 'decoder': 'ane', 'quiet': 0},
     'decoder-gpu': {'encoder': 'ane', 'decoder': 'gpu', 'quiet': 0},
     'quiet-750': {'encoder': 'ane', 'decoder': 'ane', 'quiet': 750},
+    'both-gpu-quiet': {'encoder': 'gpu', 'decoder': 'gpu', 'quiet': 750},
+    'encoder-gpu-quiet': {'encoder': 'gpu', 'decoder': 'ane', 'quiet': 750},
 }
 
 
 def plan(phase, candidate=None):
+    if phase == 'combinations':
+        return [('baseline', 10), ('both-gpu-quiet', 10), ('encoder-gpu-quiet', 10)]
     if phase == 'screen':
         return [('baseline', 10), ('encoder-gpu', 10), ('quiet-750', 10), ('decoder-gpu', 10)]
     if candidate not in PRESETS or candidate == 'baseline':
@@ -54,7 +58,7 @@ def summarize(report, preset, expected_count, expected_order):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--phase', choices=['screen', 'confirm'], required=True)
+    parser.add_argument('--phase', choices=['screen', 'combinations', 'confirm'], required=True)
     parser.add_argument('--candidate', choices=list(PRESETS))
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
@@ -67,7 +71,8 @@ def main():
     if (output / 'summary.json').exists() or any(output.glob('trial-*')):
         parser.error('output already contains measurements; preserve them and choose a fresh directory')
     source = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
-    report = dict(schemaVersion=1, phase=args.phase, sourceCommit=source, trials=[],
+    test_binary = root / 'DerivedData/Build/Products/Release/ContextCaptureTests.xctest/Contents/MacOS/ContextCaptureTests'
+    report = dict(schemaVersion=1, phase=args.phase, sourceCommit=source, compiledTestSHA256=hashlib.sha256(test_binary.read_bytes()).hexdigest(), trials=[],
                   scope='M3 fixture hardware and real models; no real mic/screen/toast; no automatic adoption')
     for i, (preset, count) in enumerate(trials):
         folder = output / f'trial-{i+1:02d}-{preset}'
@@ -79,11 +84,14 @@ def main():
                    CC_CAPTURE_BENCH_OUTPUT=str(folder), CC_CAPTURE_BENCH_LIMIT=str(count),
                    CC_CAPTURE_STT_ENCODER=p['encoder'], CC_CAPTURE_STT_DECODER=p['decoder'],
                    CC_CAPTURE_QUIET_MS=str(p['quiet']), CC_CAPTURE_CONDITION_ORDER=','.join(order))
+        row_environment = dict(loadAverageBefore=subprocess.check_output(['sysctl', '-n', 'vm.loadavg'], text=True).strip())
         with (folder / 'runner.log').open('w') as log:
             subprocess.run([str(root / 'scripts/capture-model-evaluation.sh')], cwd=root, env=env,
                            stdout=log, stderr=subprocess.STDOUT, check=True)
         raw = (folder / 'capture.json').read_bytes()
         row = summarize(json.loads(raw), preset, count, order)
+        row['environment'] = row_environment
+        row['environment']['loadAverageAfter'] = subprocess.check_output(['sysctl', '-n', 'vm.loadavg'], text=True).strip()
         row['rawSHA256'] = hashlib.sha256(raw).hexdigest()
         row['rawRelativePath'] = str(folder.relative_to(output.resolve()) / 'capture.json')
         # Retain failing performance gates; continue the remaining comparative trials.

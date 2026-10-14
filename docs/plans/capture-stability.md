@@ -19,3 +19,5 @@ Release buildとモデルなしテストを先に完了し、計測中は他のb
 採用条件: warm保存P90≤2秒を各candidate passで確認し、30fixtureの平均CER≤9%と既存方式との品質差を評価する。active physical≤10GB、d1解放後≤4GB。CPU/wall・初回prepare・索引待ちの代償も確認する。単一passや未見ではない合成データだけで、実機受け入れの完了は宣言しない。実hotkey/mic/screen/toast、battery/low-powerの製品接続と実機検証は別に残す。
 
 #10をhelperへ切り替える根拠にはしない。改善があれば必要な最小の設定だけを製品へ反映し、通常のアプリテスト・CI後に既存のマージ指示に従って統合する。完了後のworktreeは片付ける。
+
+一次screenではGPUencoder単独の並行P90が10.9秒、quiet750msでも2.11秒で不達。OS背景処理の高CPUも観測したため、GPUのencoder/decoderとquietの組み合わせを追加して比較する。各trialのload averageと同じ測定バイナリのSHA256を残す。
