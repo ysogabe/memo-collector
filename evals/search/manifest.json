@@ -1,13 +1,13 @@
 {
-  "corpusID": "search-ja-v1",
+  "corpusID": "search-ja-v2",
   "files": {
-    "queries.json": "bd148f126a133e06a1c672258fc72157fda1ede058e3a7700bb6c36f7f666c9d",
-    "records.json": "84e46b44b3856a4e41a04a9d50b481f8363c0131afc7ec36b6078b7c5bf6670a"
+    "queries.json": "83b74ef6dd91e5a9208f8c5a9343b04739a3dda92340ba42a277e0a4cd51ee8c",
+    "records.json": "13fc0ee5f4e6f1db2cc40bf29d069e31446ca76325d672b69b6140948dfa7afc"
   },
   "generator": "generate.py",
   "license": "CC0-1.0",
   "provenance": "Authored synthetic Japanese text; no personal records, screenshots, audio, or upstream evaluation data copied.",
-  "queries": 144,
+  "queries": 176,
   "records": 48,
   "schemaVersion": 1,
   "seed": 0,

@@ -1,5 +1,5 @@
 {
-  "corpusID": "search-ja-v1",
+  "corpusID": "search-ja-v2",
   "queries": [
     {
       "group": "search",
@@ -170,6 +170,44 @@
       "text": "日本語検索"
     },
     {
+      "group": "search",
+      "id": "search-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000002"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "日本語"
+    },
+    {
+      "group": "search",
+      "id": "search-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ＡＰＩ検索"
+    },
+    {
       "group": "audio",
       "id": "audio-01",
       "includeArchived": false,
@@ -336,6 +374,44 @@
         "filter"
       ],
       "text": "音声転写"
+    },
+    {
+      "group": "audio",
+      "id": "audio-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000005"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "音声転"
+    },
+    {
+      "group": "audio",
+      "id": "audio-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｔｒａｎｓｃｒｉｂｅ"
     },
     {
       "group": "calendar",
@@ -506,6 +582,44 @@
       "text": "予定登録"
     },
     {
+      "group": "calendar",
+      "id": "calendar-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000008"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "予定登"
+    },
+    {
+      "group": "calendar",
+      "id": "calendar-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｃｒｅａｔｅＥｖｅｎｔ"
+    },
+    {
       "group": "battery",
       "id": "battery-01",
       "includeArchived": false,
@@ -646,7 +760,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "低電力の検証"
+      "text": "低電カの検証"
     },
     {
       "group": "battery",
@@ -672,6 +786,44 @@
         "filter"
       ],
       "text": "低電力"
+    },
+    {
+      "group": "battery",
+      "id": "battery-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000B"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "低電力"
+    },
+    {
+      "group": "battery",
+      "id": "battery-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ＡＮＥ"
     },
     {
       "group": "privacy",
@@ -814,7 +966,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "秘密保護の検証"
+      "text": "秘蜜保護の検証"
     },
     {
       "group": "privacy",
@@ -840,6 +992,44 @@
         "filter"
       ],
       "text": "秘密保護"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000E"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "秘密保"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｓｃａｎＳｅｃｒｅｔｓ"
     },
     {
       "group": "database",
@@ -982,7 +1172,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "世代切替の検証"
+      "text": "世帯切替の検証"
     },
     {
       "group": "database",
@@ -1008,6 +1198,44 @@
         "filter"
       ],
       "text": "世代切替"
+    },
+    {
+      "group": "database",
+      "id": "database-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000H"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "世代切"
+    },
+    {
+      "group": "database",
+      "id": "database-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｓｅｔＥｍｂｅｄｄｉｎｇ"
     },
     {
       "group": "network",
@@ -1150,7 +1378,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "通信再試行の検証"
+      "text": "通心再試行の検証"
     },
     {
       "group": "network",
@@ -1176,6 +1404,44 @@
         "filter"
       ],
       "text": "通信再試行"
+    },
+    {
+      "group": "network",
+      "id": "network-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000M"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "通信再"
+    },
+    {
+      "group": "network",
+      "id": "network-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ＵＲＬＳｅｓｓｉｏｎ"
     },
     {
       "group": "queue",
@@ -1318,7 +1584,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "ジョブ再開の検証"
+      "text": "ジョプ再開の検証"
     },
     {
       "group": "queue",
@@ -1344,6 +1610,44 @@
         "filter"
       ],
       "text": "ジョブ再開"
+    },
+    {
+      "group": "queue",
+      "id": "queue-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000Q"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "ジョブ"
+    },
+    {
+      "group": "queue",
+      "id": "queue-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｒｅｓｕｍｅＰｅｎｄｉｎｇ"
     },
     {
       "group": "image",
@@ -1486,7 +1790,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "画像縮小の検証"
+      "text": "画象縮小の検証"
     },
     {
       "group": "image",
@@ -1512,6 +1816,44 @@
         "filter"
       ],
       "text": "画像縮小"
+    },
+    {
+      "group": "image",
+      "id": "image-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000T"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "画像縮"
+    },
+    {
+      "group": "image",
+      "id": "image-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｒｅｓｉｚｅＢｉｃｕｂｉｃ"
     },
     {
       "group": "ranking",
@@ -1654,7 +1996,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "順位融合の検証"
+      "text": "順立融合の検証"
     },
     {
       "group": "ranking",
@@ -1680,6 +2022,44 @@
         "filter"
       ],
       "text": "順位融合"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000X"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "順位融"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ＲＲＦ"
     },
     {
       "group": "memory",
@@ -1822,7 +2202,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "メモリ解放の検証"
+      "text": "メモリー解放の検証"
     },
     {
       "group": "memory",
@@ -1848,6 +2228,44 @@
         "filter"
       ],
       "text": "メモリ解放"
+    },
+    {
+      "group": "memory",
+      "id": "memory-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000010"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "メモリ"
+    },
+    {
+      "group": "memory",
+      "id": "memory-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｕｎｌｏａｄ"
     },
     {
       "group": "error",
@@ -1990,7 +2408,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "エラー診断の検証"
+      "text": "エラ一診断の検証"
     },
     {
       "group": "error",
@@ -2016,6 +2434,44 @@
         "filter"
       ],
       "text": "エラー診断"
+    },
+    {
+      "group": "error",
+      "id": "error-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000013"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "エラー"
+    },
+    {
+      "group": "error",
+      "id": "error-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ＥＲＲ＿ＴＯＫＥＮ＿ＥＸＰＩＲＥＤ"
     },
     {
       "group": "record",
@@ -2158,7 +2614,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "即時記録の検証"
+      "text": "即時記緑の検証"
     },
     {
       "group": "record",
@@ -2184,6 +2640,44 @@
         "filter"
       ],
       "text": "即時記録"
+    },
+    {
+      "group": "record",
+      "id": "record-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000016"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "即時記"
+    },
+    {
+      "group": "record",
+      "id": "record-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｃａｐｔｕｒｅＦｒｏｎｔｍｏｓｔ"
     },
     {
       "group": "guard",
@@ -2326,7 +2820,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "画像手渡しの検証"
+      "text": "画象手渡レの検証"
     },
     {
       "group": "guard",
@@ -2352,6 +2846,44 @@
         "filter"
       ],
       "text": "画像手渡し"
+    },
+    {
+      "group": "guard",
+      "id": "guard-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000019"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "画像手"
+    },
+    {
+      "group": "guard",
+      "id": "guard-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｎｅｅｄｓ＿ｒｅｖｉｅｗ"
     },
     {
       "group": "model",
@@ -2494,7 +3026,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "モデル取得の検証"
+      "text": "モデノレ取得の検証"
     },
     {
       "group": "model",
@@ -2520,6 +3052,44 @@
         "filter"
       ],
       "text": "モデル取得"
+    },
+    {
+      "group": "model",
+      "id": "model-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001C"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "モデル"
+    },
+    {
+      "group": "model",
+      "id": "model-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "ｓｈａ２５６"
     },
     {
       "group": "tests",
@@ -2662,7 +3232,7 @@
         "noise",
         "ocr_stt"
       ],
-      "text": "回帰評価の検証"
+      "text": "回帰評値の検証"
     },
     {
       "group": "tests",
@@ -2688,6 +3258,44 @@
         "filter"
       ],
       "text": "回帰評価"
+    },
+    {
+      "group": "tests",
+      "id": "tests-09",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001F"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "japanese_substring",
+        "exact"
+      ],
+      "text": "回帰評"
+    },
+    {
+      "group": "tests",
+      "id": "tests-10",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "width",
+        "identifier"
+      ],
+      "text": "Ｒｅｃａｌｌ＠３"
     },
     {
       "group": "none-dev-0",

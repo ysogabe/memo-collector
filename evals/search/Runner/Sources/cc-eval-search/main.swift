@@ -7,17 +7,20 @@ import CoreGraphics
 import Foundation
 import ImageIO
 import SearchEvaluation
+import SearchPoC
 
 struct Options {
     var values: [String: String] = [:]
     var refresh: Bool = false
     var liveQueries: Bool = false
+    var poc: Bool = false
     init() throws {
         var args = Array(CommandLine.arguments.dropFirst())
         while !args.isEmpty {
             let key = args.removeFirst()
             if key == "--refresh" { refresh = true; continue }
             if key == "--live-queries" { liveQueries = true; continue }
+            if key == "--poc" { poc = true; continue }
             guard ["--fixtures", "--models", "--cache", "--output", "--repeats", "--depth", "--compute"].contains(key), !args.isEmpty else {
                 throw EvaluationError.invalid("usage: cc-eval-search --fixtures PATH --cache PATH --output PATH [--models MODEL_ROOT] [--refresh] [--live-queries] [--compute cpuAndGPU|cpuAndNeuralEngine] [--repeats 3] [--depth 30]")
             }
@@ -60,6 +63,8 @@ struct FrozenEmbedder: Embedder {
 struct ModeReport: Codable {
     var summaries: [String: Summary]
     var results: [QueryResult]
+    var evidence: [String: [String: [Evidence]]]? = nil
+    var configuration: [String: String]? = nil
 }
 struct Report: Codable {
     var schemaVersion = 1
@@ -182,7 +187,12 @@ func summaries(_ results: [QueryResult]) -> [String: Summary] {
             }
             reports[mode] = ModeReport(summaries: summaries(results), results: results)
         }
-        let report = Report(corpusID: corpus.corpusID, metadata: [
+        var pocMetadata: [String: String] = [:]
+        if o.poc {
+            let measured = try await evaluatePoC(corpus: corpus, queries: set.queries, cache: cache, store: store, root: root, repeats: repeats, depth: depth)
+            reports.merge(measured.0) { _, new in new }; pocMetadata = measured.1
+        }
+        var report = Report(corpusID: corpus.corpusID, metadata: [
             "corpus_sha256": digest(corpusData), "queries_sha256": digest(queryData), "model_signature": config.indexSignature,
             "compute_units": units.rawValue, "index_vector_compute_units": cache.computeUnits,
             "os": ProcessInfo.processInfo.operatingSystemVersionString, "retrieval_depth": String(depth),
@@ -193,6 +203,7 @@ func summaries(_ results: [QueryResult]) -> [String: Summary] {
             "database_bytes": size.map { String($0.int64Value) } ?? "unknown", "mrr_depth": String(depth),
             "cold_latency": "first-pass percentile is separate; model load/first prepare recorded separately",
             "baseline_contract": "actual MCPToolHandlers.search_captures with actual SQLiteRecordStore"], modes: reports)
+        report.metadata.merge(pocMetadata) { _, new in new }
         try writeJSON(report, to: outputURL)
         if let coreML { await coreML.unload() }
         print("wrote \(outputURL.path): \(corpus.records.count) records, \(set.queries.count) queries")

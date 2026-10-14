@@ -1,0 +1,3110 @@
+{
+  "schemaVersion": 1,
+  "corpusID": "search-ja-v2",
+  "metadata": {
+    "baseline_contract": "actual MCPToolHandlers.search_captures with actual SQLiteRecordStore",
+    "cold_latency": "first-pass percentile is separate; model load/first prepare recorded separately",
+    "compute_units": "cpuAndGPU",
+    "corpus_sha256": "13fc0ee5f4e6f1db2cc40bf29d069e31446ca76325d672b69b6140948dfa7afc",
+    "database_bytes": "4096",
+    "document_inputs": "annotation + window title; image only when fixture screen is present; no app/url metadata added",
+    "index_vector_compute_units": "cpuAndGPU",
+    "model_signature": "embeddinggemma-2-coreml@3f978dd/d256/img280",
+    "mrr_depth": "30",
+    "os": "Version 27.0.1 (Build 26A434)",
+    "physical_memory_bytes": "25769803776",
+    "poc_capacity_10000_bytes": "11948032",
+    "poc_capacity_10000_index_ms": "504.935583",
+    "poc_capacity_10000_p50_ms": "7.064625",
+    "poc_capacity_10000_p95_ms": "191.946042",
+    "poc_capacity_1000_bytes": "1216512",
+    "poc_capacity_1000_index_ms": "53.111833",
+    "poc_capacity_1000_p50_ms": "0.752375",
+    "poc_capacity_1000_p95_ms": "20.255375",
+    "poc_capacity_scope": "repeated authored synthetic text; keyword retrieval only; shared projection + BOTH word/trigram FTS indexes; no quality claims",
+    "poc_database_bytes": "122880",
+    "poc_index_milliseconds": "4.638834",
+    "poc_limits": "48-record synthetic text-only set; no new product index; no raw OCR persisted",
+    "poc_sqlite_version": "3.54.0",
+    "poc_threshold": "0.65",
+    "poc_tuning_grid": "0.20:0.86484375,0.25:0.86484375,0.30:0.86484375,0.35:0.86484375,0.40:0.86484375,0.45:0.86484375,0.50:0.86484375,0.55:0.86484375,0.60:0.86484375,0.65:0.93703125,0.70:0.92359375,0.75:0.903125,0.80:0.8314583333333332",
+    "preparation_milliseconds": "14802.639",
+    "processor_count": "8",
+    "queries_sha256": "83b74ef6dd91e5a9208f8c5a9343b04739a3dda92340ba42a277e0a4cd51ee8c",
+    "query_source": "frozen CoreML vectors; latency is retrieval only",
+    "retrieval_depth": "30",
+    "store_index_milliseconds": "22.028625"
+  },
+  "sourceHashes": {
+    "evals/search/Runner/Sources/cc-eval-search/PoCBenchmark.swift": "5e032aed866e22f47c62d0e15da497b66c4430b16891ba3e96702fc10c273020",
+    "evals/search/Runner/Sources/cc-eval-search/main.swift": "59d33de6e782c89cf6a5c02e6f00c20ed1f311d392afbefc59ef8ba79c985f24",
+    "evals/search/Runner/Sources/SearchEvaluation/Evaluation.swift": "1ad529500a520b5d15db09150b59266d1a72a66510854aafe6cc30c3bb5fecdd",
+    "evals/search/Runner/Sources/SearchPoC/HybridSearch.swift": "0602b3be0fb5a2ca50fe7b89668be471f9421bbb729c3f85e3057c9422dd6cca"
+  },
+  "modes": {
+    "baseline_mcp_keyword": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 21.824792,
+          "hitRate": {
+            "1": 0.7625,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7729166666666666,
+          "ndcg": {
+            "1": 0.38750000000000046,
+            "10": 0.656153506879693,
+            "3": 0.6517055081510297
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 14.362292,
+          "p95Milliseconds": 21.513667,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.45833333333333337,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 21.756458,
+          "hitRate": {
+            "1": 0.75,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7666666666666666,
+          "ndcg": {
+            "1": 0.3749999999999997,
+            "10": 0.6515401287993374,
+            "3": 0.6470921300706739
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 14.123,
+          "p95Milliseconds": 21.290583,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4458333333333333,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 21.824792,
+          "hitRate": {
+            "1": 0.775,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7791666666666666,
+          "ndcg": {
+            "1": 0.39999999999999974,
+            "10": 0.660766884960051,
+            "3": 0.6563188862313875
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 14.590458,
+          "p95Milliseconds": 21.670084,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4708333333333333,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "tag:archived": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 22.7075,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 21.424583,
+          "p95Milliseconds": 22.459417,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:exact": {
+          "answerableCount": 64,
+          "firstPassP95Milliseconds": 17.739875,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.3333333333333332,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 14.337958,
+          "p95Milliseconds": 18.407334,
+          "queryCount": 64,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:filter": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 22.7075,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 21.424583,
+          "p95Milliseconds": 22.459417,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:identifier": {
+          "answerableCount": 32,
+          "firstPassP95Milliseconds": 17.323583,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 14.184167,
+          "p95Milliseconds": 16.328542,
+          "queryCount": 32,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:issue": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 21.497959,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 14.086417,
+          "p95Milliseconds": 17.376083,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:japanese": {
+          "answerableCount": 48,
+          "firstPassP95Milliseconds": 17.69575,
+          "hitRate": {
+            "1": 0.5833333333333334,
+            "10": 0.625,
+            "3": 0.625
+          },
+          "mrr": 0.5972222222222222,
+          "ndcg": {
+            "1": 0.2222222222222222,
+            "10": 0.4865407868535967,
+            "3": 0.47171412442471844
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 14.403083,
+          "p95Milliseconds": 19.287333,
+          "queryCount": 48,
+          "recall": {
+            "1": 0.2916666666666667,
+            "10": 0.6041666666666666,
+            "3": 0.5833333333333334
+          }
+        },
+        "tag:japanese_substring": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 71.296417,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 14.3525,
+          "p95Milliseconds": 16.132166,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:mixed": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 23.948208,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.97475,
+          "p95Milliseconds": 19.919125,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:no_answer": {
+          "answerableCount": 0,
+          "firstPassP95Milliseconds": 16.648125,
+          "hitRate": {},
+          "ndcg": {},
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 14.279833,
+          "p95Milliseconds": 15.134167,
+          "queryCount": 16,
+          "recall": {}
+        },
+        "tag:noise": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 20.250042,
+          "hitRate": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "mrr": 0,
+          "ndcg": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.856291,
+          "p95Milliseconds": 17.752875,
+          "queryCount": 16,
+          "recall": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          }
+        },
+        "tag:ocr_stt": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 20.250042,
+          "hitRate": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "mrr": 0,
+          "ndcg": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.856291,
+          "p95Milliseconds": 17.752875,
+          "queryCount": 16,
+          "recall": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          }
+        },
+        "tag:paraphrase": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 105.836458,
+          "hitRate": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "mrr": 0,
+          "ndcg": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 14.196042,
+          "p95Milliseconds": 23.463417,
+          "queryCount": 16,
+          "recall": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          }
+        },
+        "tag:short": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 17.043791,
+          "hitRate": {
+            "1": 0.75,
+            "10": 0.875,
+            "3": 0.875
+          },
+          "mrr": 0.7916666666666666,
+          "ndcg": {
+            "1": 0.33333333333333337,
+            "10": 0.6629147795702832,
+            "3": 0.6184347922836484
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 14.463208,
+          "p95Milliseconds": 17.010875,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.375,
+            "10": 0.8125,
+            "3": 0.75
+          }
+        },
+        "tag:url": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 17.153292,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 14.197583,
+          "p95Milliseconds": 18.581875,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:width": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 17.323583,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 14.292625,
+          "p95Milliseconds": 15.230416,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        }
+      },
+      "configuration": null
+    },
+    "baseline_mcp_vector": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 19.216416,
+          "hitRate": {
+            "1": 0.95,
+            "10": 1,
+            "3": 0.99375
+          },
+          "mrr": 0.9713541666666666,
+          "ndcg": {
+            "1": 0.608333333333333,
+            "10": 0.8621500168159365,
+            "3": 0.8492366002636844
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 18.488458,
+          "p95Milliseconds": 19.435625,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.5583333333333333,
+            "10": 0.9875,
+            "3": 0.953125
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 19.05825,
+          "hitRate": {
+            "1": 0.975,
+            "10": 1,
+            "3": 0.9875
+          },
+          "mrr": 0.984375,
+          "ndcg": {
+            "1": 0.6250000000000002,
+            "10": 0.8680147730346022,
+            "3": 0.8502409775248158
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 18.459417,
+          "p95Milliseconds": 18.951375,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5708333333333334,
+            "10": 0.99375,
+            "3": 0.95
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 19.216416,
+          "hitRate": {
+            "1": 0.925,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9583333333333333,
+          "ndcg": {
+            "1": 0.591666666666667,
+            "10": 0.8562852605972733,
+            "3": 0.8482322230025551
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 18.522417,
+          "p95Milliseconds": 19.586958,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5458333333333334,
+            "10": 0.98125,
+            "3": 0.95625
+          }
+        },
+        "tag:archived": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 19.272458,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7737712382045941,
+            "3": 0.7737712382045941
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.442333,
+          "p95Milliseconds": 31.769458,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:exact": {
+          "answerableCount": 64,
+          "firstPassP95Milliseconds": 19.033208,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.5520833333333334,
+            "10": 0.8628494752485695,
+            "3": 0.8628494752485695
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.45975,
+          "p95Milliseconds": 19.342166,
+          "queryCount": 64,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:filter": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 19.272458,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7737712382045941,
+            "3": 0.7737712382045941
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.442333,
+          "p95Milliseconds": 31.769458,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:identifier": {
+          "answerableCount": 32,
+          "firstPassP95Milliseconds": 18.954084,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.505292,
+          "p95Milliseconds": 19.165667,
+          "queryCount": 32,
+          "recall": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:issue": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 19.983083,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.5833333333333334,
+            "10": 0.8729422381190667,
+            "3": 0.8729422381190667
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.45975,
+          "p95Milliseconds": 19.519083,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:japanese": {
+          "answerableCount": 48,
+          "firstPassP95Milliseconds": 19.113,
+          "hitRate": {
+            "1": 0.8333333333333334,
+            "10": 1,
+            "3": 0.9791666666666666
+          },
+          "mrr": 0.904513888888889,
+          "ndcg": {
+            "1": 0.5277777777777777,
+            "10": 0.814635134344322,
+            "3": 0.7925485483304203
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.468417,
+          "p95Milliseconds": 19.012,
+          "queryCount": 48,
+          "recall": {
+            "1": 0.4166666666666667,
+            "10": 0.9583333333333334,
+            "3": 0.875
+          }
+        },
+        "tag:japanese_substring": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 18.899709,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.4583333333333333,
+            "10": 0.8348249095547867,
+            "3": 0.8348249095547867
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.4475,
+          "p95Milliseconds": 18.828084,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:mixed": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 18.815083,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.488792,
+          "p95Milliseconds": 19.559625,
+          "queryCount": 16,
+          "recall": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:no_answer": {
+          "answerableCount": 0,
+          "firstPassP95Milliseconds": 19.474916,
+          "hitRate": {},
+          "ndcg": {},
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 18.61725,
+          "p95Milliseconds": 19.967083,
+          "queryCount": 16,
+          "recall": {}
+        },
+        "tag:noise": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 19.216416,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.41666666666666663,
+            "10": 0.787250535482326,
+            "3": 0.7243761280015084
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.462125,
+          "p95Milliseconds": 19.439917,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 0.90625
+          }
+        },
+        "tag:ocr_stt": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 19.216416,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.41666666666666663,
+            "10": 0.787250535482326,
+            "3": 0.7243761280015084
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.462125,
+          "p95Milliseconds": 19.439917,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 0.90625
+          }
+        },
+        "tag:paraphrase": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 19.412209,
+          "hitRate": {
+            "1": 0.8125,
+            "10": 1,
+            "3": 0.9375
+          },
+          "mrr": 0.890625,
+          "ndcg": {
+            "1": 0.6875,
+            "10": 0.8309532874909054,
+            "3": 0.7698752256003014
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.503667,
+          "p95Milliseconds": 19.012,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.40625,
+            "10": 0.90625,
+            "3": 0.6875
+          }
+        },
+        "tag:short": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 18.739875,
+          "hitRate": {
+            "1": 0.6875,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.8229166666666667,
+          "ndcg": {
+            "1": 0.4374999999999999,
+            "10": 0.7781272059872734,
+            "3": 0.7729455098361725
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.449791,
+          "p95Milliseconds": 18.632291,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.34375,
+            "10": 0.96875,
+            "3": 0.9375
+          }
+        },
+        "tag:url": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 19.432,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.7083333333333333,
+            "10": 0.9088058437656376,
+            "3": 0.9088058437656376
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.459417,
+          "p95Milliseconds": 18.791792,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:width": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 19.335708,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 18.51125,
+          "p95Milliseconds": 19.165667,
+          "queryCount": 16,
+          "recall": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          }
+        }
+      },
+      "configuration": null
+    },
+    "baseline_native_vector": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 13.728125,
+          "hitRate": {
+            "1": 0.95,
+            "10": 1,
+            "3": 0.99375
+          },
+          "mrr": 0.9713541666666666,
+          "ndcg": {
+            "1": 0.608333333333333,
+            "10": 0.8621500168159365,
+            "3": 0.8492366002636844
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 12.555375,
+          "p95Milliseconds": 13.543583,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.5583333333333333,
+            "10": 0.9875,
+            "3": 0.953125
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 13.548167,
+          "hitRate": {
+            "1": 0.975,
+            "10": 1,
+            "3": 0.9875
+          },
+          "mrr": 0.984375,
+          "ndcg": {
+            "1": 0.6250000000000002,
+            "10": 0.8680147730346022,
+            "3": 0.8502409775248158
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 12.4735,
+          "p95Milliseconds": 13.303375,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5708333333333334,
+            "10": 0.99375,
+            "3": 0.95
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 13.728125,
+          "hitRate": {
+            "1": 0.925,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9583333333333333,
+          "ndcg": {
+            "1": 0.591666666666667,
+            "10": 0.8562852605972733,
+            "3": 0.8482322230025551
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 12.608292,
+          "p95Milliseconds": 13.771167,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5458333333333334,
+            "10": 0.98125,
+            "3": 0.95625
+          }
+        },
+        "tag:archived": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 12.84025,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7737712382045941,
+            "3": 0.7737712382045941
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.486042,
+          "p95Milliseconds": 12.937375,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:exact": {
+          "answerableCount": 64,
+          "firstPassP95Milliseconds": 13.346916,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.5520833333333334,
+            "10": 0.8628494752485695,
+            "3": 0.8628494752485695
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.578167,
+          "p95Milliseconds": 13.333583,
+          "queryCount": 64,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:filter": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 12.84025,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7737712382045941,
+            "3": 0.7737712382045941
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.486042,
+          "p95Milliseconds": 12.937375,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:identifier": {
+          "answerableCount": 32,
+          "firstPassP95Milliseconds": 14.502792,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.654583,
+          "p95Milliseconds": 13.634375,
+          "queryCount": 32,
+          "recall": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:issue": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 13.728125,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.5833333333333334,
+            "10": 0.8729422381190667,
+            "3": 0.8729422381190667
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.577833,
+          "p95Milliseconds": 13.299958,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:japanese": {
+          "answerableCount": 48,
+          "firstPassP95Milliseconds": 13.804125,
+          "hitRate": {
+            "1": 0.8333333333333334,
+            "10": 1,
+            "3": 0.9791666666666666
+          },
+          "mrr": 0.904513888888889,
+          "ndcg": {
+            "1": 0.5277777777777777,
+            "10": 0.814635134344322,
+            "3": 0.7925485483304203
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.605,
+          "p95Milliseconds": 13.873917,
+          "queryCount": 48,
+          "recall": {
+            "1": 0.4166666666666667,
+            "10": 0.9583333333333334,
+            "3": 0.875
+          }
+        },
+        "tag:japanese_substring": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 13.214417,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.4583333333333333,
+            "10": 0.8348249095547867,
+            "3": 0.8348249095547867
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.381375,
+          "p95Milliseconds": 13.320583,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:mixed": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.796875,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.733084,
+          "p95Milliseconds": 15.604916,
+          "queryCount": 16,
+          "recall": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:no_answer": {
+          "answerableCount": 0,
+          "firstPassP95Milliseconds": 12.555291,
+          "hitRate": {},
+          "ndcg": {},
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 12.203583,
+          "p95Milliseconds": 12.366959,
+          "queryCount": 16,
+          "recall": {}
+        },
+        "tag:noise": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.308541,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.41666666666666663,
+            "10": 0.787250535482326,
+            "3": 0.7243761280015084
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.688417,
+          "p95Milliseconds": 13.617458,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 0.90625
+          }
+        },
+        "tag:ocr_stt": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.308541,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.41666666666666663,
+            "10": 0.787250535482326,
+            "3": 0.7243761280015084
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.688417,
+          "p95Milliseconds": 13.617458,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 0.90625
+          }
+        },
+        "tag:paraphrase": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 15.084959,
+          "hitRate": {
+            "1": 0.8125,
+            "10": 1,
+            "3": 0.9375
+          },
+          "mrr": 0.890625,
+          "ndcg": {
+            "1": 0.6875,
+            "10": 0.8309532874909054,
+            "3": 0.7698752256003014
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.542625,
+          "p95Milliseconds": 14.777459,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.40625,
+            "10": 0.90625,
+            "3": 0.6875
+          }
+        },
+        "tag:short": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 15.221458,
+          "hitRate": {
+            "1": 0.6875,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.8229166666666667,
+          "ndcg": {
+            "1": 0.4374999999999999,
+            "10": 0.7781272059872734,
+            "3": 0.7729455098361725
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.512583,
+          "p95Milliseconds": 13.543583,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.34375,
+            "10": 0.96875,
+            "3": 0.9375
+          }
+        },
+        "tag:url": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.859167,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.7083333333333333,
+            "10": 0.9088058437656376,
+            "3": 0.9088058437656376
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.593875,
+          "p95Milliseconds": 13.288625,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:width": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.40125,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 12.529291,
+          "p95Milliseconds": 13.464292,
+          "queryCount": 16,
+          "recall": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          }
+        }
+      },
+      "configuration": {
+        "candidates_per_source": "50",
+        "dev_utility": "0.45 Recall@3 + 0.35 MRR + 0.20 no-answer-empty-rate",
+        "exact_lookup": "independent semantic and keyword",
+        "latency_scope": "retrieval only, fixed CoreML query vectors; excludes query inference",
+        "rrf_k": "60",
+        "threshold": "none",
+        "tuning_split": "dev only"
+      }
+    },
+    "poc_gated_rrf": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 19.722584,
+          "hitRate": {
+            "1": 0.95625,
+            "10": 1,
+            "3": 0.99375
+          },
+          "mrr": 0.9744791666666666,
+          "ndcg": {
+            "1": 0.5062499999999999,
+            "10": 0.8269003533789109,
+            "3": 0.8108232879159123
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0.8125,
+          "noAnswerFalseHitRate": 0.1875,
+          "p50Milliseconds": 13.386709,
+          "p95Milliseconds": 19.673459,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.5552083333333333,
+            "10": 0.978125,
+            "3": 0.94375
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 19.630209,
+          "hitRate": {
+            "1": 0.95,
+            "10": 1,
+            "3": 0.9875
+          },
+          "mrr": 0.971875,
+          "ndcg": {
+            "1": 0.4916666666666668,
+            "10": 0.8217309594904652,
+            "3": 0.7995091652520154
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0.875,
+          "noAnswerFalseHitRate": 0.125,
+          "p50Milliseconds": 13.363042,
+          "p95Milliseconds": 19.608708,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5458333333333334,
+            "10": 0.9875,
+            "3": 0.9375
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 19.726333,
+          "hitRate": {
+            "1": 0.9625,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9770833333333334,
+          "ndcg": {
+            "1": 0.5208333333333335,
+            "10": 0.8320697472673597,
+            "3": 0.8221374105798127
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0.75,
+          "noAnswerFalseHitRate": 0.25,
+          "p50Milliseconds": 13.423375,
+          "p95Milliseconds": 19.794667,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5645833333333334,
+            "10": 0.96875,
+            "3": 0.95
+          }
+        },
+        "tag:archived": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 21.103334,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 19.678917,
+          "p95Milliseconds": 20.548167,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:exact": {
+          "answerableCount": 64,
+          "firstPassP95Milliseconds": 14.512208,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.3333333333333332,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.423375,
+          "p95Milliseconds": 14.453209,
+          "queryCount": 64,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:filter": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 21.103334,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 19.678917,
+          "p95Milliseconds": 20.548167,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:identifier": {
+          "answerableCount": 32,
+          "firstPassP95Milliseconds": 14.349958,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.486958,
+          "p95Milliseconds": 14.256041,
+          "queryCount": 32,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:issue": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.698625,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.799875,
+          "p95Milliseconds": 14.640333,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:japanese": {
+          "answerableCount": 48,
+          "firstPassP95Milliseconds": 14.135417,
+          "hitRate": {
+            "1": 0.8958333333333334,
+            "10": 1,
+            "3": 0.9791666666666666
+          },
+          "mrr": 0.9357638888888888,
+          "ndcg": {
+            "1": 0.4791666666666665,
+            "10": 0.793280096690216,
+            "3": 0.76064801430716
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.211542,
+          "p95Milliseconds": 13.796958,
+          "queryCount": 48,
+          "recall": {
+            "1": 0.4479166666666667,
+            "10": 0.9270833333333334,
+            "3": 0.84375
+          }
+        },
+        "tag:japanese_substring": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 13.990625,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.322334,
+          "p95Milliseconds": 13.719709,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:mixed": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 15.161875,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.480625,
+          "p95Milliseconds": 14.23325,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:no_answer": {
+          "answerableCount": 0,
+          "firstPassP95Milliseconds": 13.435833,
+          "hitRate": {},
+          "ndcg": {},
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0.8125,
+          "noAnswerFalseHitRate": 0.1875,
+          "p50Milliseconds": 13.230917,
+          "p95Milliseconds": 13.463125,
+          "queryCount": 16,
+          "recall": {}
+        },
+        "tag:noise": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.107667,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.41666666666666663,
+            "10": 0.787250535482326,
+            "3": 0.7243761280015084
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.305458,
+          "p95Milliseconds": 14.350542,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 0.90625
+          }
+        },
+        "tag:ocr_stt": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.107667,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.41666666666666663,
+            "10": 0.787250535482326,
+            "3": 0.7243761280015084
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.305458,
+          "p95Milliseconds": 14.350542,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 0.90625
+          }
+        },
+        "tag:paraphrase": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 15.536334,
+          "hitRate": {
+            "1": 0.8125,
+            "10": 1,
+            "3": 0.9375
+          },
+          "mrr": 0.890625,
+          "ndcg": {
+            "1": 0.6875,
+            "10": 0.8095031782999775,
+            "3": 0.7612686145885457
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.198375,
+          "p95Milliseconds": 14.844458,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.40625,
+            "10": 0.8125,
+            "3": 0.65625
+          }
+        },
+        "tag:short": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.20175,
+          "hitRate": {
+            "1": 0.875,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9166666666666667,
+          "ndcg": {
+            "1": 0.4166666666666666,
+            "10": 0.773629530780163,
+            "3": 0.7239678473424276
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.239291,
+          "p95Milliseconds": 13.647542,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.4375,
+            "10": 0.96875,
+            "3": 0.875
+          }
+        },
+        "tag:url": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.87775,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.492667,
+          "p95Milliseconds": 14.460583,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:width": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.115667,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.486958,
+          "p95Milliseconds": 14.4775,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        }
+      },
+      "configuration": {
+        "candidates_per_source": "50",
+        "dev_utility": "0.45 Recall@3 + 0.35 MRR + 0.20 no-answer-empty-rate",
+        "exact_lookup": "keyword-only for URL, #number and single ASCII identifier",
+        "latency_scope": "retrieval only, fixed CoreML query vectors; excludes query inference",
+        "rrf_k": "60",
+        "threshold": "0.65",
+        "tuning_split": "dev only"
+      }
+    },
+    "poc_rrf": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 19.777625,
+          "hitRate": {
+            "1": 0.96875,
+            "10": 1,
+            "3": 0.99375
+          },
+          "mrr": 0.9807291666666667,
+          "ndcg": {
+            "1": 0.5229166666666665,
+            "10": 0.8349293199971696,
+            "3": 0.817567904716254
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 13.493083,
+          "p95Milliseconds": 19.719833,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.5677083333333333,
+            "10": 0.9875,
+            "3": 0.946875
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 19.722,
+          "hitRate": {
+            "1": 0.975,
+            "10": 1,
+            "3": 0.9875
+          },
+          "mrr": 0.984375,
+          "ndcg": {
+            "1": 0.5166666666666668,
+            "10": 0.8326790378535298,
+            "3": 0.81045724361508
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 13.547459,
+          "p95Milliseconds": 19.610875,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5708333333333334,
+            "10": 0.99375,
+            "3": 0.94375
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 19.81225,
+          "hitRate": {
+            "1": 0.9625,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9770833333333334,
+          "ndcg": {
+            "1": 0.5291666666666669,
+            "10": 0.8371796021408127,
+            "3": 0.8246785658174313
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 13.446083,
+          "p95Milliseconds": 19.819625,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5645833333333334,
+            "10": 0.98125,
+            "3": 0.95
+          }
+        },
+        "tag:archived": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 20.980542,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 19.7815,
+          "p95Milliseconds": 21.411333,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:exact": {
+          "answerableCount": 64,
+          "firstPassP95Milliseconds": 14.503083,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.3437499999999999,
+            "10": 0.7998840250375301,
+            "3": 0.7998840250375301
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.511,
+          "p95Milliseconds": 14.148458,
+          "queryCount": 64,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:filter": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 20.980542,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 19.7815,
+          "p95Milliseconds": 21.411333,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:identifier": {
+          "answerableCount": 32,
+          "firstPassP95Milliseconds": 14.374708,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.658541,
+          "p95Milliseconds": 14.512041,
+          "queryCount": 32,
+          "recall": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:issue": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 15.266958,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.837625,
+          "p95Milliseconds": 14.454417,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:japanese": {
+          "answerableCount": 48,
+          "firstPassP95Milliseconds": 13.97525,
+          "hitRate": {
+            "1": 0.8958333333333334,
+            "10": 1,
+            "3": 0.9791666666666666
+          },
+          "mrr": 0.9357638888888888,
+          "ndcg": {
+            "1": 0.4791666666666665,
+            "10": 0.8004301330871918,
+            "3": 0.763516884644412
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.284042,
+          "p95Milliseconds": 13.844792,
+          "queryCount": 48,
+          "recall": {
+            "1": 0.4479166666666667,
+            "10": 0.9583333333333334,
+            "3": 0.8541666666666666
+          }
+        },
+        "tag:japanese_substring": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.594042,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.348333,
+          "p95Milliseconds": 13.878459,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:mixed": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.374708,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.7465,
+          "p95Milliseconds": 15.054583,
+          "queryCount": 16,
+          "recall": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:no_answer": {
+          "answerableCount": 0,
+          "firstPassP95Milliseconds": 15.252875,
+          "hitRate": {},
+          "ndcg": {},
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 13.2545,
+          "p95Milliseconds": 15.23875,
+          "queryCount": 16,
+          "recall": {}
+        },
+        "tag:noise": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 13.754959,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.41666666666666663,
+            "10": 0.787250535482326,
+            "3": 0.7243761280015084
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.282334,
+          "p95Milliseconds": 13.964334,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 0.90625
+          }
+        },
+        "tag:ocr_stt": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 13.754959,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.41666666666666663,
+            "10": 0.787250535482326,
+            "3": 0.7243761280015084
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.282334,
+          "p95Milliseconds": 13.964334,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 0.90625
+          }
+        },
+        "tag:paraphrase": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.19675,
+          "hitRate": {
+            "1": 0.8125,
+            "10": 1,
+            "3": 0.9375
+          },
+          "mrr": 0.890625,
+          "ndcg": {
+            "1": 0.6875,
+            "10": 0.8309532874909054,
+            "3": 0.7698752256003014
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.284042,
+          "p95Milliseconds": 14.105333,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.40625,
+            "10": 0.90625,
+            "3": 0.6875
+          }
+        },
+        "tag:short": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 13.97525,
+          "hitRate": {
+            "1": 0.875,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9166666666666667,
+          "ndcg": {
+            "1": 0.4166666666666666,
+            "10": 0.773629530780163,
+            "3": 0.7239678473424276
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.242375,
+          "p95Milliseconds": 13.578833,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.4375,
+            "10": 0.96875,
+            "3": 0.875
+          }
+        },
+        "tag:url": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 13.976542,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.37499999999999994,
+            "10": 0.8094133571786001,
+            "3": 0.8094133571786001
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.511,
+          "p95Milliseconds": 14.383667,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:width": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 14.498708,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 13.51375,
+          "p95Milliseconds": 14.2385,
+          "queryCount": 16,
+          "recall": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          }
+        }
+      },
+      "configuration": {
+        "candidates_per_source": "50",
+        "dev_utility": "0.45 Recall@3 + 0.35 MRR + 0.20 no-answer-empty-rate",
+        "exact_lookup": "independent semantic and keyword",
+        "latency_scope": "retrieval only, fixed CoreML query vectors; excludes query inference",
+        "rrf_k": "60",
+        "threshold": "none",
+        "tuning_split": "dev only"
+      }
+    },
+    "poc_trigram_short_exact": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 0.669334,
+          "hitRate": {
+            "1": 0.7625,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7729166666666666,
+          "ndcg": {
+            "1": 0.38750000000000046,
+            "10": 0.656153506879693,
+            "3": 0.6517055081510297
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.144709,
+          "p95Milliseconds": 0.551166,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.45833333333333337,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 0.688,
+          "hitRate": {
+            "1": 0.75,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7666666666666666,
+          "ndcg": {
+            "1": 0.3749999999999997,
+            "10": 0.6515401287993374,
+            "3": 0.6470921300706739
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.144834,
+          "p95Milliseconds": 0.561,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4458333333333333,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 0.653292,
+          "hitRate": {
+            "1": 0.775,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7791666666666666,
+          "ndcg": {
+            "1": 0.39999999999999974,
+            "10": 0.660766884960051,
+            "3": 0.6563188862313875
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.142958,
+          "p95Milliseconds": 0.532,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4708333333333333,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "tag:archived": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.171333,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.151541,
+          "p95Milliseconds": 0.253542,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:exact": {
+          "answerableCount": 64,
+          "firstPassP95Milliseconds": 0.7265,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.3333333333333332,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.257167,
+          "p95Milliseconds": 0.584,
+          "queryCount": 64,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:filter": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.171333,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.151541,
+          "p95Milliseconds": 0.253542,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:identifier": {
+          "answerableCount": 32,
+          "firstPassP95Milliseconds": 0.542375,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.359666,
+          "p95Milliseconds": 0.518125,
+          "queryCount": 32,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:issue": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 1.262292,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.5515,
+          "p95Milliseconds": 1.176834,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:japanese": {
+          "answerableCount": 48,
+          "firstPassP95Milliseconds": 0.164625,
+          "hitRate": {
+            "1": 0.5833333333333334,
+            "10": 0.625,
+            "3": 0.625
+          },
+          "mrr": 0.5972222222222222,
+          "ndcg": {
+            "1": 0.2222222222222222,
+            "10": 0.4865407868535967,
+            "3": 0.47171412442471844
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.094125,
+          "p95Milliseconds": 0.14825,
+          "queryCount": 48,
+          "recall": {
+            "1": 0.2916666666666667,
+            "10": 0.6041666666666666,
+            "3": 0.5833333333333334
+          }
+        },
+        "tag:japanese_substring": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.175458,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.133792,
+          "p95Milliseconds": 0.164,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:mixed": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.666875,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.358042,
+          "p95Milliseconds": 0.520167,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:no_answer": {
+          "answerableCount": 0,
+          "firstPassP95Milliseconds": 0.162209,
+          "hitRate": {},
+          "ndcg": {},
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.138708,
+          "p95Milliseconds": 0.176917,
+          "queryCount": 16,
+          "recall": {}
+        },
+        "tag:noise": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.345042,
+          "hitRate": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "mrr": 0,
+          "ndcg": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.092583,
+          "p95Milliseconds": 0.177416,
+          "queryCount": 16,
+          "recall": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          }
+        },
+        "tag:ocr_stt": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.345042,
+          "hitRate": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "mrr": 0,
+          "ndcg": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.092583,
+          "p95Milliseconds": 0.177416,
+          "queryCount": 16,
+          "recall": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          }
+        },
+        "tag:paraphrase": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.101333,
+          "hitRate": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "mrr": 0,
+          "ndcg": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.093583,
+          "p95Milliseconds": 0.102542,
+          "queryCount": 16,
+          "recall": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          }
+        },
+        "tag:short": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.134625,
+          "hitRate": {
+            "1": 0.75,
+            "10": 0.875,
+            "3": 0.875
+          },
+          "mrr": 0.7916666666666666,
+          "ndcg": {
+            "1": 0.33333333333333337,
+            "10": 0.6629147795702832,
+            "3": 0.6184347922836484
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.083084,
+          "p95Milliseconds": 0.1345,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.375,
+            "10": 0.8125,
+            "3": 0.75
+          }
+        },
+        "tag:url": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.401459,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.285041,
+          "p95Milliseconds": 0.311458,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:width": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.523834,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.363667,
+          "p95Milliseconds": 0.518125,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        }
+      },
+      "configuration": {
+        "candidates_per_source": "50",
+        "dev_utility": "0.45 Recall@3 + 0.35 MRR + 0.20 no-answer-empty-rate",
+        "exact_lookup": "independent semantic and keyword",
+        "latency_scope": "retrieval only, fixed CoreML query vectors; excludes query inference",
+        "rrf_k": "60",
+        "threshold": "none",
+        "tuning_split": "dev only"
+      }
+    },
+    "poc_unicode61": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 0.673875,
+          "hitRate": {
+            "1": 0.66875,
+            "10": 0.69375,
+            "3": 0.69375
+          },
+          "mrr": 0.6791666666666666,
+          "ndcg": {
+            "1": 0.3562500000000003,
+            "10": 0.5814621711618335,
+            "3": 0.57701417243317
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.148334,
+          "p95Milliseconds": 0.547334,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.41145833333333337,
+            "10": 0.6875,
+            "3": 0.68125
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 0.678125,
+          "hitRate": {
+            "1": 0.6625,
+            "10": 0.7,
+            "3": 0.7
+          },
+          "mrr": 0.6791666666666666,
+          "ndcg": {
+            "1": 0.3458333333333331,
+            "10": 0.581828215462668,
+            "3": 0.5773802167340045
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.1495,
+          "p95Milliseconds": 0.571584,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4020833333333333,
+            "10": 0.69375,
+            "3": 0.6875
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 0.658125,
+          "hitRate": {
+            "1": 0.675,
+            "10": 0.6875,
+            "3": 0.6875
+          },
+          "mrr": 0.6791666666666666,
+          "ndcg": {
+            "1": 0.3666666666666665,
+            "10": 0.5810961268610002,
+            "3": 0.5766481281323368
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.147125,
+          "p95Milliseconds": 0.52925,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4208333333333333,
+            "10": 0.68125,
+            "3": 0.675
+          }
+        },
+        "tag:archived": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.182958,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.148292,
+          "p95Milliseconds": 0.16175,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:exact": {
+          "answerableCount": 64,
+          "firstPassP95Milliseconds": 0.712916,
+          "hitRate": {
+            "1": 0.765625,
+            "10": 0.765625,
+            "3": 0.765625
+          },
+          "mrr": 0.765625,
+          "ndcg": {
+            "1": 0.2552083333333335,
+            "10": 0.6099792416958567,
+            "3": 0.6099792416958567
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.196333,
+          "p95Milliseconds": 0.586375,
+          "queryCount": 64,
+          "recall": {
+            "1": 0.3828125,
+            "10": 0.765625,
+            "3": 0.765625
+          }
+        },
+        "tag:filter": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.182958,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7579237460681979,
+            "3": 0.7579237460681979
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.148292,
+          "p95Milliseconds": 0.16175,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.33333333333333326,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:identifier": {
+          "answerableCount": 32,
+          "firstPassP95Milliseconds": 0.609959,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.345167,
+          "p95Milliseconds": 0.518667,
+          "queryCount": 32,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:issue": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 1.356333,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.547334,
+          "p95Milliseconds": 1.109,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:japanese": {
+          "answerableCount": 48,
+          "firstPassP95Milliseconds": 0.214709,
+          "hitRate": {
+            "1": 0.5833333333333334,
+            "10": 0.625,
+            "3": 0.625
+          },
+          "mrr": 0.5972222222222222,
+          "ndcg": {
+            "1": 0.2222222222222222,
+            "10": 0.4865407868535967,
+            "3": 0.47171412442471844
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.13625,
+          "p95Milliseconds": 0.201333,
+          "queryCount": 48,
+          "recall": {
+            "1": 0.2916666666666667,
+            "10": 0.6041666666666666,
+            "3": 0.5833333333333334
+          }
+        },
+        "tag:japanese_substring": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.161875,
+          "hitRate": {
+            "1": 0.0625,
+            "10": 0.0625,
+            "3": 0.0625
+          },
+          "mrr": 0.0625,
+          "ndcg": {
+            "1": 0.020833333333333332,
+            "10": 0.049794223811906665,
+            "3": 0.049794223811906665
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.08975,
+          "p95Milliseconds": 0.135375,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.03125,
+            "10": 0.0625,
+            "3": 0.0625
+          }
+        },
+        "tag:mixed": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.678125,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.342875,
+          "p95Milliseconds": 0.518667,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:no_answer": {
+          "answerableCount": 0,
+          "firstPassP95Milliseconds": 0.1465,
+          "hitRate": {},
+          "ndcg": {},
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.136917,
+          "p95Milliseconds": 0.152458,
+          "queryCount": 16,
+          "recall": {}
+        },
+        "tag:noise": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.12925,
+          "hitRate": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "mrr": 0,
+          "ndcg": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.092583,
+          "p95Milliseconds": 0.101458,
+          "queryCount": 16,
+          "recall": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          }
+        },
+        "tag:ocr_stt": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.12925,
+          "hitRate": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "mrr": 0,
+          "ndcg": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.092583,
+          "p95Milliseconds": 0.101458,
+          "queryCount": 16,
+          "recall": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          }
+        },
+        "tag:paraphrase": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.108792,
+          "hitRate": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "mrr": 0,
+          "ndcg": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.092458,
+          "p95Milliseconds": 0.148334,
+          "queryCount": 16,
+          "recall": {
+            "1": 0,
+            "10": 0,
+            "3": 0
+          }
+        },
+        "tag:short": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.219791,
+          "hitRate": {
+            "1": 0.75,
+            "10": 0.875,
+            "3": 0.875
+          },
+          "mrr": 0.7916666666666666,
+          "ndcg": {
+            "1": 0.33333333333333337,
+            "10": 0.6629147795702832,
+            "3": 0.6184347922836484
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.167167,
+          "p95Milliseconds": 0.215458,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.375,
+            "10": 0.8125,
+            "3": 0.75
+          }
+        },
+        "tag:url": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.250959,
+          "hitRate": {
+            "1": 1,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 1,
+          "ndcg": {
+            "1": 0.33333333333333326,
+            "10": 0.7967075809905068,
+            "3": 0.7967075809905068
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.199959,
+          "p95Milliseconds": 0.255625,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.5,
+            "10": 1,
+            "3": 1
+          }
+        },
+        "tag:width": {
+          "answerableCount": 16,
+          "firstPassP95Milliseconds": 0.609959,
+          "hitRate": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.96875,
+          "ndcg": {
+            "1": 0.9375,
+            "10": 0.9769331095982161,
+            "3": 0.9769331095982161
+          },
+          "noAnswerCount": 0,
+          "p50Milliseconds": 0.347333,
+          "p95Milliseconds": 0.53075,
+          "queryCount": 16,
+          "recall": {
+            "1": 0.9375,
+            "10": 1,
+            "3": 1
+          }
+        }
+      },
+      "configuration": {
+        "candidates_per_source": "50",
+        "dev_utility": "0.45 Recall@3 + 0.35 MRR + 0.20 no-answer-empty-rate",
+        "exact_lookup": "independent semantic and keyword",
+        "latency_scope": "retrieval only, fixed CoreML query vectors; excludes query inference",
+        "rrf_k": "60",
+        "threshold": "none",
+        "tuning_split": "dev only"
+      }
+    }
+  }
+}
