@@ -27,8 +27,17 @@ final class TriageWiring {
     /// キャプチャ中の通知を順に渡すための鎖（Task を別々に投げると pause / resume の到着順が入れ替わりうる）。
     private var captureActivityChain: Task<Void, Never>?
 
-    init(queue: any TriageQueuing) {
+    private let postCaptureQuietPeriod: Duration
+    private let quietSleep: @Sendable (Duration) async throws -> Void
+    private var captureGeneration = 0
+    private(set) var quietResumeTask: Task<Void, Never>?
+
+    init(queue: any TriageQueuing, postCaptureQuietPeriod: Duration = .zero,
+         quietSleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }) {
+        precondition(postCaptureQuietPeriod >= .zero)
         self.queue = queue
+        self.postCaptureQuietPeriod = postCaptureQuietPeriod
+        self.quietSleep = quietSleep
     }
 
     func recordSaved(id: String) {
@@ -43,12 +52,40 @@ final class TriageWiring {
 
     /// キャプチャが始まった / すべて終わった（AppCoordinator が 0↔1 の切り替わりで呼ぶ）。呼ばれた順にキューへ渡す。
     func captureActivityChanged(_ active: Bool) {
-        CCLog.triage.notice("\(active ? "paused" : "resumed", privacy: .public) (capture \(active ? "started" : "finished", privacy: .public))")
+        captureGeneration += 1
+        let generation = captureGeneration
+        quietResumeTask?.cancel()
+        quietResumeTask = nil
+        if !active, postCaptureQuietPeriod > .zero {
+            let sleep = quietSleep, delay = postCaptureQuietPeriod, queue = queue
+            quietResumeTask = Task { [weak self] in
+                do { try await sleep(delay) } catch { return }
+                guard !Task.isCancelled else { return }
+                // A released wiring must not leave a live queue paused.
+                guard let self else { await queue.setCapturing(false); return }
+                guard self.captureGeneration == generation else { return }
+                self.forwardCaptureActivity(false, expectedGeneration: generation)
+                await self.captureActivityChain?.value
+            }
+        } else {
+            forwardCaptureActivity(active)
+        }
+    }
+
+    private func forwardCaptureActivity(_ active: Bool, expectedGeneration: Int? = nil) {
         let queue = queue, previous = captureActivityChain
-        captureActivityChain = Task {
+        captureActivityChain = Task { [weak self] in
             await previous?.value
+            if let expectedGeneration, self?.captureGeneration != expectedGeneration { return }
+            CCLog.triage.notice("\(active ? "paused" : "resumed", privacy: .public) (capture \(active ? "started" : "finished", privacy: .public))")
             await queue.setCapturing(active)
         }
+    }
+
+    /// Waits for the currently scheduled quiet period and its forwarded state (benchmark/test only).
+    func waitForCaptureQuietPeriod() async {
+        await quietResumeTask?.value
+        await captureActivityChain?.value
     }
 
     /// これまでの `captureActivityChanged` がキューへ届くまで待つ（テスト用）。

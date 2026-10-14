@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "phase": "confirm",
+  "sourceCommit": "39d515e44e9e0695903ef6e2a50e50676f4fb0e4",
+  "compiledTestSHA256": "a4b0d1f9c4fddd3b54bfab5e86393657b255707efd0545a58c4dec8c62c67011",
+  "trials": [
+    {
+      "preset": "baseline",
+      "captureCountPerCondition": 30,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndNeuralEngine",
+        "conditionOrder": [
+          "without_triage",
+          "with_triage"
+        ],
+        "quietMilliseconds": 0,
+        "textDecoderAllowedComputeUnits": "cpuAndNeuralEngine"
+      },
+      "thermalStart": 0,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 1983.2973750308156,
+          "meanCER": 0.07723197283148484,
+          "capturePhysicalPeakMB": 3945.894808,
+          "indexDeliveryP90Ms": 41692.524916,
+          "postBurstIndexDrainMs": 35297.037959,
+          "wallSeconds": 97.979325292,
+          "cpuSeconds": 75.76276599999998,
+          "encoderP90Ms": 1659.5979928970337,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 1403.819166822359,
+          "meanCER": 0.07723197283148484,
+          "capturePhysicalPeakMB": 3727.46308,
+          "indexDeliveryP90Ms": 49234.305,
+          "postBurstIndexDrainMs": 34249.189084,
+          "wallSeconds": 85.97249858299999,
+          "cpuSeconds": 58.554559,
+          "encoderP90Ms": 1083.6750268936157,
+          "maxFallbacks": 0,
+          "maxThermal": 0
+        }
+      },
+      "environment": {
+        "loadAverageBefore": "{ 3.17 4.43 9.32 }",
+        "loadAverageAfter": "{ 3.56 4.21 8.18 }"
+      },
+      "rawSHA256": "ec18bf0fa0cc6f8e8ba89223cea8fb2f4db8f3a2dd56f8652976b7dc2eb6922e",
+      "rawRelativePath": "trial-01-baseline/capture.json.gz",
+      "performancePassed": true,
+      "qualityPassed": true,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-01-baseline/acceptance.json"
+    },
+    {
+      "preset": "quiet-750",
+      "captureCountPerCondition": 30,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndNeuralEngine",
+        "conditionOrder": [
+          "with_triage",
+          "without_triage"
+        ],
+        "quietMilliseconds": 750,
+        "textDecoderAllowedComputeUnits": "cpuAndNeuralEngine"
+      },
+      "thermalStart": 1,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 1673.9687917288393,
+          "meanCER": 0.07723197283148484,
+          "capturePhysicalPeakMB": 3728.118368,
+          "indexDeliveryP90Ms": 55663.698792,
+          "postBurstIndexDrainMs": 44695.561209,
+          "wallSeconds": 102.90743674999999,
+          "cpuSeconds": 68.404304,
+          "encoderP90Ms": 1364.4800186157227,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 1713.162750005722,
+          "meanCER": 0.07723197283148484,
+          "capturePhysicalPeakMB": 3824.915304,
+          "indexDeliveryP90Ms": 56664.87575,
+          "postBurstIndexDrainMs": 44937.49375,
+          "wallSeconds": 104.298485875,
+          "cpuSeconds": 69.853868,
+          "encoderP90Ms": 1373.7809658050537,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        }
+      },
+      "environment": {
+        "loadAverageBefore": "{ 3.56 4.21 8.18 }",
+        "loadAverageAfter": "{ 4.13 4.25 7.26 }"
+      },
+      "rawSHA256": "bf8d0f60e3a92f524f713ce2775e4d784da6dc688ab242b81885b1701062a85f",
+      "rawRelativePath": "trial-02-quiet-750/capture.json.gz",
+      "performancePassed": true,
+      "qualityPassed": true,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-02-quiet-750/acceptance.json"
+    },
+    {
+      "preset": "quiet-750",
+      "captureCountPerCondition": 10,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndNeuralEngine",
+        "conditionOrder": [
+          "without_triage",
+          "with_triage"
+        ],
+        "quietMilliseconds": 750,
+        "textDecoderAllowedComputeUnits": "cpuAndNeuralEngine"
+      },
+      "thermalStart": 1,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 1740.6702083535492,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3819.23008,
+          "indexDeliveryP90Ms": 18949.161041,
+          "postBurstIndexDrainMs": 15560.317417,
+          "wallSeconds": 35.657765874999996,
+          "cpuSeconds": 23.908767000000005,
+          "encoderP90Ms": 1350.9619235992432,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 1723.783416673541,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3727.184552,
+          "indexDeliveryP90Ms": 19121.381041,
+          "postBurstIndexDrainMs": 15364.558333,
+          "wallSeconds": 35.879046959,
+          "cpuSeconds": 24.486567,
+          "encoderP90Ms": 1333.9269161224365,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        }
+      },
+      "environment": {
+        "loadAverageBefore": "{ 4.13 4.25 7.26 }",
+        "loadAverageAfter": "{ 3.09 3.90 6.81 }"
+      },
+      "rawSHA256": "86730d4794552c7412a18f3dc715f4c0d0ed30b0b8c1bdb30a4d25bc729b66f0",
+      "rawRelativePath": "trial-03-quiet-750/capture.json.gz",
+      "performancePassed": true,
+      "qualityPassed": true,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-03-quiet-750/acceptance.json"
+    },
+    {
+      "preset": "baseline",
+      "captureCountPerCondition": 10,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndNeuralEngine",
+        "conditionOrder": [
+          "with_triage",
+          "without_triage"
+        ],
+        "quietMilliseconds": 0,
+        "textDecoderAllowedComputeUnits": "cpuAndNeuralEngine"
+      },
+      "thermalStart": 1,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 2004.5667917001992,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3921.95776,
+          "indexDeliveryP90Ms": 13534.107083,
+          "postBurstIndexDrainMs": 10329.84525,
+          "wallSeconds": 32.307899667,
+          "cpuSeconds": 26.695163,
+          "encoderP90Ms": 1654.3220281600952,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 1704.0711666923016,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3823.997848,
+          "indexDeliveryP90Ms": 18566.694167,
+          "postBurstIndexDrainMs": 14982.677959,
+          "wallSeconds": 35.141560958,
+          "cpuSeconds": 23.943982999999996,
+          "encoderP90Ms": 1336.5880250930786,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        }
+      },
+      "environment": {
+        "loadAverageBefore": "{ 3.09 3.90 6.81 }",
+        "loadAverageAfter": "{ 3.10 3.74 6.45 }"
+      },
+      "rawSHA256": "ef0452fae748214b1ad989c21345f4e10d0a034823a05932188eef09f778b5da",
+      "rawRelativePath": "trial-04-baseline/capture.json.gz",
+      "performancePassed": false,
+      "qualityPassed": true,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-04-baseline/acceptance.json"
+    },
+    {
+      "preset": "baseline",
+      "captureCountPerCondition": 10,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndNeuralEngine",
+        "conditionOrder": [
+          "without_triage",
+          "with_triage"
+        ],
+        "quietMilliseconds": 0,
+        "textDecoderAllowedComputeUnits": "cpuAndNeuralEngine"
+      },
+      "thermalStart": 1,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 1953.551541781053,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3947.189072,
+          "indexDeliveryP90Ms": 13595.643334,
+          "postBurstIndexDrainMs": 10360.860458,
+          "wallSeconds": 32.329021125,
+          "cpuSeconds": 26.616968,
+          "encoderP90Ms": 1650.4030227661133,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 1744.8040833696723,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3727.3156,
+          "indexDeliveryP90Ms": 18391.861958,
+          "postBurstIndexDrainMs": 14953.610916,
+          "wallSeconds": 35.125734083000005,
+          "cpuSeconds": 23.968329,
+          "encoderP90Ms": 1342.960000038147,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        }
+      },
+      "environment": {
+        "loadAverageBefore": "{ 3.10 3.74 6.45 }",
+        "loadAverageAfter": "{ 2.89 3.54 6.12 }"
+      },
+      "rawSHA256": "59f07ce5b8acc4a54450042c2c1353f53fe11a9c3c23f9332f20c812376ee4c7",
+      "rawRelativePath": "trial-05-baseline/capture.json.gz",
+      "performancePassed": true,
+      "qualityPassed": true,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-05-baseline/acceptance.json"
+    },
+    {
+      "preset": "quiet-750",
+      "captureCountPerCondition": 10,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndNeuralEngine",
+        "conditionOrder": [
+          "with_triage",
+          "without_triage"
+        ],
+        "quietMilliseconds": 750,
+        "textDecoderAllowedComputeUnits": "cpuAndNeuralEngine"
+      },
+      "thermalStart": 1,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 1673.3842082321644,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3727.004352,
+          "indexDeliveryP90Ms": 18977.045084,
+          "postBurstIndexDrainMs": 15617.625875,
+          "wallSeconds": 35.701741,
+          "cpuSeconds": 23.997977,
+          "encoderP90Ms": 1319.6419477462769,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 1668.2896248530596,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3818.673048,
+          "indexDeliveryP90Ms": 18995.1795,
+          "postBurstIndexDrainMs": 15455.810875,
+          "wallSeconds": 35.49473725,
+          "cpuSeconds": 23.685001999999997,
+          "encoderP90Ms": 1357.7109575271606,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        }
+      },
+      "environment": {
+        "loadAverageBefore": "{ 2.89 3.54 6.12 }",
+        "loadAverageAfter": "{ 3.92 3.79 5.96 }"
+      },
+      "rawSHA256": "1bc7b3a9a5ef24c556065b7594f143e02f557d326bb6020fc873f8dfc5733894",
+      "rawRelativePath": "trial-06-quiet-750/capture.json.gz",
+      "performancePassed": true,
+      "qualityPassed": true,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-06-quiet-750/acceptance.json"
+    }
+  ],
+  "scope": "M3 fixture hardware and real models; no real mic/screen/toast; no automatic adoption"
+}

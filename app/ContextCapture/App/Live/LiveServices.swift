@@ -73,7 +73,7 @@ final class LiveServices {
         embedder = SwitchableEmbedder()
         triageQueue = TriageQueue(store: store, classifier: classifier, scanner: VisionSecretScanner(), embedder: embedder,
                                   screenshots: StoreScreenshotLoader(store: store))
-        triage = TriageWiring(queue: triageQueue)
+        triage = TriageWiring(queue: triageQueue, postCaptureQuietPeriod: .milliseconds(750))
 
         let embeddingPreparer = EmbeddingModelPreparer(paths: paths)
         let embeddingDirectory = paths.modelDirectory(.embedding)

@@ -1,10 +1,10 @@
 name: Search quality regression
 on:
   pull_request:
-    paths: ['Packages/ContextCaptureKit/**', 'app/**', 'evals/search/**', 'scripts/search-*.sh', 'scripts/eval-search.sh', 'scripts/e2e-acceptance.py', 'scripts/tests/**', 'scripts/capture-model-evaluation.sh', 'scripts/e2e.sh', '.github/workflows/search-quality.yml']
+    paths: ['Packages/ContextCaptureKit/**', 'app/**', 'evals/search/**', 'scripts/search-*.sh', 'scripts/eval-search.sh', 'scripts/e2e-acceptance.py', 'scripts/tests/**', 'scripts/capture-model-evaluation.sh', 'scripts/capture-stability.py', 'scripts/e2e.sh', '.github/workflows/search-quality.yml']
   push:
     branches: [main]
-    paths: ['Packages/ContextCaptureKit/**', 'app/**', 'evals/search/**', 'scripts/search-*.sh', 'scripts/eval-search.sh', 'scripts/e2e-acceptance.py', 'scripts/tests/**', 'scripts/capture-model-evaluation.sh', 'scripts/e2e.sh', '.github/workflows/search-quality.yml']
+    paths: ['Packages/ContextCaptureKit/**', 'app/**', 'evals/search/**', 'scripts/search-*.sh', 'scripts/eval-search.sh', 'scripts/e2e-acceptance.py', 'scripts/tests/**', 'scripts/capture-model-evaluation.sh', 'scripts/capture-stability.py', 'scripts/e2e.sh', '.github/workflows/search-quality.yml']
   workflow_dispatch:
     inputs:
       real_models:
@@ -25,8 +25,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Toolchain
         run: swift --version
-      - name: E2E acceptance gate contracts
-        run: python3 -m unittest discover -s scripts/tests -p 'test_e2e_acceptance.py'
+      - name: E2E and capture comparison contracts
+        run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'
       - name: Actual retrieval and quality gate
         env:
           CC_SEARCH_QA_OUTPUT: ${{ runner.temp }}/cc-search-quality
