@@ -87,6 +87,14 @@ class IntentEvaluationCLI(unittest.TestCase):
         self.assertNotEqual(self.run_cli('--database', db, '--output', db).returncode, 0)
         self.assertEqual(before, db.read_bytes())
 
+    def test_model_override_directory_is_protected_from_output(self):
+        self.write_input()
+        models = self.root / 'models-absent'; models.mkdir()
+        weights = models / 'model.safetensors'; weights.write_bytes(b'model sentinel')
+        result = self.run_cli('--input', self.input, '--output', weights)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(weights.read_bytes(), b'model sentinel')
+
     def test_recompute_without_models_fails_without_download(self):
         self.write_input()
         result = self.run_cli('--input', self.input, '--recompute')
