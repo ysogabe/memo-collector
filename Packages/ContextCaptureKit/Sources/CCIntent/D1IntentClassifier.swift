@@ -123,6 +123,15 @@ public actor D1IntentClassifier: IntentClassifying, ModelUnloadable {
         return D1Probabilities(intent: intent, datetime: deadline[0])
     }
 
+    /// Evaluation-only intent forward with validated, ordered descriptions (no deadline forward).
+    public func intentProbabilities(text: String, candidate: IntentQuestionCandidate = .product) throws -> [Intent: Double] {
+        let question = try candidate.validatedQuestion()
+        if loaded == nil { try load() }
+        let l = loaded!
+        let values = try answer(l, ids: l.prompt.encode(state: text, question: question), groups: l.prompt.readoutIds(question))
+        return Dictionary(uniqueKeysWithValues: zip(D1Questions.intentLabels, values))
+    }
+
     /// 与えた ID 列で 1 forward し、readout した確率を返す（テスト・診断用）。
     public func answer(ids: [Int], question: D1Question) throws -> [Double] {
         if loaded == nil { try load() }
