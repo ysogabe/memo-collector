@@ -75,6 +75,8 @@ public enum TriageEvent: Sendable, Equatable {
     case recordFinished(id: String)
     /// キューが空になった。
     case idle
+    /// Workerがcapture pauseの境界で待機に入った。
+    case suspendedForCapture
     /// 無使用時間が過ぎて意図モデル（d1）を解放した。
     case classifierUnloaded
 }

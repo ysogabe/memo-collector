@@ -19,6 +19,26 @@ final class ModelSlotIntegrityTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: dest.appendingPathComponent("model.safetensors")), Data("x".utf8))
     }
 
+    func testD1ManifestMismatchDoesNotReportPrepared() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("slot-mismatch-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        for name in D1ModelPreparer.requiredFiles { try Data("x".utf8).write(to: root.appendingPathComponent(name)) }
+        var manifest = D1ModelManifest(repo: D1ModelPreparer.repoId, revision: D1ModelPreparer.revision,
+            conversionVersion: D1ModelPreparer.conversionVersion, createdAt: "fixture", source: [:],
+            quantization: .init(bits: 8, groupSize: 64, mode: "affine"), tensorCount: 1,
+            files: Dictionary(uniqueKeysWithValues: D1ModelPreparer.requiredFiles.map { ($0, D1ModelManifest.FileEntry(sha256: String(repeating: "0", count: 64), bytes: 1)) }))
+        let url = root.appendingPathComponent("manifest.json")
+        try D1ModelManifest.encoder().encode(manifest).write(to: url)
+        let slot = D1ModelSlot(preparer: D1ModelPreparer(destination: root))
+        XCTAssertTrue(slot.filesPresent())
+        manifest.revision = "other"
+        try D1ModelManifest.encoder().encode(manifest).write(to: url)
+        XCTAssertFalse(slot.filesPresent())
+        let prepared = await slot.isPrepared()
+        XCTAssertFalse(prepared)
+    }
+
     func testD1AndEmbeddingUnmanifestedDevelopmentFilesAreReadOnly() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("slot-development-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }

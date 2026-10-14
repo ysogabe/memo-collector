@@ -23,6 +23,7 @@ final class SearchIndexMaintainer {
     private let store: any RecordStore
     private let stateURL: URL
     private let makeEmbedder: EmbedderFactory
+    private let resumeWhilePreparingDelay: Duration
     /// 状態が変わるたびに呼ぶ（メニューバーの表示）。
     var onReadinessChange: @MainActor (SearchReadiness) -> Void = { _ in }
 
@@ -40,13 +41,14 @@ final class SearchIndexMaintainer {
     private var generation = 0
     private var task: Task<Void, Never>?
 
-    init(embedder: SwitchableEmbedder, queue: any TriageQueuing, store: any RecordStore, stateURL: URL,
+    init(embedder: SwitchableEmbedder, queue: any TriageQueuing, store: any RecordStore, stateURL: URL, resumeWhilePreparingDelay: Duration = .seconds(5),
          makeEmbedder: @escaping EmbedderFactory) {
         self.embedder = embedder
         self.queue = queue
         self.store = store
         self.stateURL = stateURL
         self.makeEmbedder = makeEmbedder
+        self.resumeWhilePreparingDelay = resumeWhilePreparingDelay
     }
 
     /// Whisperのwarmupを待っている間も、検索モデルがあるなら「準備中」と表示する。
@@ -79,17 +81,18 @@ final class SearchIndexMaintainer {
 
     /// オンボーディングでモデルが揃ったとき。埋め込みが同じ設定で準備済み・準備中なら作り直さず、後回しのステップだけ拾う
     /// （`degraded` のときは `activate` し直して失敗分をやり直す）。
-    func modelsPrepared(imageTokens: Int) {
+    @discardableResult
+    func modelsPrepared(imageTokens: Int) -> Task<Void, Never> {
         let usable: [SearchReadiness] = [.ready, .preparing, .rebuilding]
         if usable.contains(readiness), activeImageTokens == imageTokens {
             let queue = queue
-            Task {
+            return Task {
                 do { _ = try await queue.resumePending() } catch {
                     CCLog.models.error("triage resume failed: \(String(describing: error), privacy: .public)")
                 }
             }
         } else {
-            activate(imageTokens: imageTokens)
+            return activate(imageTokens: imageTokens)
         }
     }
 
@@ -119,11 +122,20 @@ final class SearchIndexMaintainer {
             catch { readiness = .failed; return }
         } else { desired = nil }
         guard isCurrent(gen) else { return }
-        // 準備の間もガードと意図は進めてよい（索引ステップは EmbeddingNotReady ですぐ .skipped(.notReady) になり、後で拾われる）。
-        await resume()
-        guard isCurrent(gen) else { return }
+        // Common cached warmup scans pending records only once, after the encoder is ready.
+        // A long first compile still lets guard/intent proceed after a bounded grace period.
+        let deferredResume = Task { [weak self] in
+            guard let self else { return }
+            do { try await Task.sleep(for: self.resumeWhilePreparingDelay) } catch { return }
+            guard self.isCurrent(gen) else { return }
+            await self.resume()
+        }
+        defer { deferredResume.cancel() }
         let t0 = Date()
         let state = await embedder.install(e)
+        deferredResume.cancel()
+        guard isCurrent(gen) else { return }
+        await resume()
         guard isCurrent(gen) else { return }
         guard state == .ready else {
             readiness = .failed
@@ -139,14 +151,12 @@ final class SearchIndexMaintainer {
         if let saved, saved.indexSignature == e.indexSignature {
             if saved.status == .ready {
                 readiness = .ready
-                await resume()
                 return
             }
             if saved.status == .degraded, let failed = saved.failedIDs {
                 // 前回の作り直しで索引できなかった記録だけやり直す（全件はやり直さない）。
                 CCLog.models.notice("search index: retrying \(failed.count) records that failed last time")
                 readiness = .rebuilding
-                await resume()
                 await finishRebuild(ids: failed, state: saved, generation: gen)
                 return
             }
@@ -170,7 +180,6 @@ final class SearchIndexMaintainer {
         guard isCurrent(gen) else { return }
         // 先に resumePending（埋め込みの無い記録・未処理のガードや意図）を積み、そのあと全件の索引を積む。
         // キューは未着手の同じ id のジョブを 1 つにまとめるので、同じ記録を 2 回埋め込まない。
-        await resume()
         // list は新しい順。新しいものから埋め込む（検索で先に見つかってほしいのは最近のもの）。
         await finishRebuild(ids: ids, state: rebuilding, generation: gen)
     }
@@ -210,7 +219,6 @@ final class SearchIndexMaintainer {
                 write(SearchIndexState(indexSignature: active.pipeline.compatibilityKey, imageTokens: active.pipeline.imageTokens,
                                        dimension: active.pipeline.dimension, status: .ready, updatedAt: Date()))
                 readiness = .ready
-                await resume()
                 return
             }
             readiness = .rebuilding

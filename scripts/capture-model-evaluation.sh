@@ -22,3 +22,7 @@ TEST_RUNNER_CC_MODELS_DIR="$CC_MODELS_DIR" TEST_RUNNER_CC_RUN_CAPTURE_BENCH=1 \
  -only-testing:ContextCaptureTests/LiveCaptureBenchmarkTests test-without-building > "$out/xcode-test.log" 2>&1
 [[ -s "$out/capture.json" && "$out/capture.json" -nt "$measurement_stamp" ]] || { echo 'measurement absent (skip is not success)' >&2; exit 1; }
 printf 'Capture measurement: %s\n' "$out/capture.json"
+
+if [[ ${CC_PERF_ASSERT:-0} == 1 ]]; then
+ python3 "$root/scripts/e2e-acceptance.py" "$out/capture.json" --output "$out/acceptance.json"
+fi

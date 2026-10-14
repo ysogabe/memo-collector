@@ -84,6 +84,8 @@ final class TriageWiring {
             }
         case let .recordFinished(id):
             if visiblyChanged.remove(id) != nil { onRecordsChanged() }
+        case .suspendedForCapture:
+            CCLog.triage.info("queue waiting for capture pause to end")
         case .idle:
             CCLog.triage.info("queue idle")
         case .classifierUnloaded:

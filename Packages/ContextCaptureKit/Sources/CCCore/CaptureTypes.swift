@@ -46,13 +46,16 @@ public struct RecordedAudio: Sendable, Equatable {
     public var duration: TimeInterval
     /// 一時ファイルに書いた場合の場所（保存時に添付へ移す）。書いていなければ nil。
     public var fileURL: URL?
+    /// 入力デバイスの変更後に復旧できず、録音が途中で止まった。
+    public var wasInterrupted: Bool
 
     public static let sampleRate: Double = 16_000
 
-    public init(samples16kMono: [Float], duration: TimeInterval, fileURL: URL? = nil) {
+    public init(samples16kMono: [Float], duration: TimeInterval, fileURL: URL? = nil, wasInterrupted: Bool = false) {
         self.samples16kMono = samples16kMono
         self.duration = duration
         self.fileURL = fileURL
+        self.wasInterrupted = wasInterrupted
     }
 }
 

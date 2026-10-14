@@ -320,7 +320,7 @@ final class E2EHarnessTests: XCTestCase {
         let t0 = now()
         let capturedAt = Date().roundedToMilliseconds
         // 符号化（重い）は文字起こしと並行に（AppCoordinator と同じ detached / userInitiated）
-        let encodeTask = Task.detached(priority: .userInitiated) { () -> ((data: Data, fileExtension: String)?, Double) in
+        let encodeTask = Task.detached(priority: .userInitiated) { () -> (E2EEncodedImage?, Double) in
             let t = now()
             let e = E2EScreenshotEncoder.encode(image)
             return (e, now() - t)

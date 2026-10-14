@@ -33,7 +33,8 @@ final class TriagePauseTests: XCTestCase {
         let events = EventCollector(await q.events())
         await q.pause()
         await q.enqueue(id: r.id)
-        try await Task.sleep(for: .milliseconds(200))
+        let suspended = await events.wait { $0.contains(.suspendedForCapture) }
+        XCTAssertTrue(suspended, "worker reached the pause boundary")
         XCTAssertEqual(scanner.calls, 0, "止まっている間はガードを始めない")
         let texts = await classifier.texts
         XCTAssertEqual(texts, [])
@@ -65,7 +66,8 @@ final class TriagePauseTests: XCTestCase {
         await classifier.release()
         let intentDone = await events.wait { $0.contains(.stepFinished(id: r.id, step: .intent, outcome: .succeeded)) }
         XCTAssertTrue(intentDone, "進行中のステップは中断しない")
-        try await Task.sleep(for: .milliseconds(200))
+        let suspended = await events.wait { $0.contains(.suspendedForCapture) }
+        XCTAssertTrue(suspended, "worker reached the pause boundary")
         XCTAssertEqual(embedder.calls.count, 0, "次のステップ（索引）は始めない")
         XCTAssertFalse(events.events.contains(.recordFinished(id: r.id)))
 
@@ -88,7 +90,8 @@ final class TriagePauseTests: XCTestCase {
         await classifier.waitUntilHeld()
         await q.pause()
         await classifier.release()
-        try await Task.sleep(for: .milliseconds(200))
+        let suspended = await events.wait { $0.contains(.suspendedForCapture) }
+        XCTAssertTrue(suspended, "worker reached the pause boundary")
         let texts = await classifier.texts
         XCTAssertEqual(texts.count, 1, "2 件目の意図推定は始めない")
         XCTAssertFalse(events.events.contains { if case .stepFinished(b.id, _, _) = $0 { return true } else { return false } })

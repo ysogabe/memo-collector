@@ -86,6 +86,7 @@ final class AppCoordinatorTests: XCTestCase {
         case let .failed(f):
             switch f {
             case .noVoice: return "failed.noVoice"
+            case .recordingInterrupted: return "failed.interrupted"
             case .transcriptionFailed: return "failed.transcription"
             case .microphoneUnavailable: return "failed.microphone"
             case .saveFailed: return "failed.save"
@@ -112,6 +113,125 @@ final class AppCoordinatorTests: XCTestCase {
         await expect("ended")
         guard case let .saved(r, _)? = await next() else { XCTFail("not saved"); return nil }
         return r
+    }
+
+    func testInterruptedRecordingPreservesPartialAudioAndReportsBothNotices() async throws {
+        recorder.interrupted.set(true)
+        var context = capturer.context.get()
+        context.screenshot = nil
+        context.screenshotSkipReason = ScreenshotSkipReason.permissionDenied
+        capturer.context.set(context)
+        press(at: 1000)
+        await coordinator.waitUntilSettled()
+        release(at: 1001, held: 1)
+        await coordinator.waitUntilSettled()
+        await expect("started"); await expect("ended")
+        guard case let .saved(record, notice)? = await next() else { return XCTFail("partial recording should be saved") }
+        XCTAssertEqual(notice, .recordingInterruptedAndScreenRecordingDenied)
+        XCTAssertEqual(record.extra["recording_interrupted"], "true")
+        XCTAssertNotNil(record.audioPath)
+        XCTAssertEqual(record.annotation.text, "このissueの修正、Claude Codeにやらせて")
+    }
+
+    private actor RetryGate {
+        private var reply: CheckedContinuation<Transcript, Never>?
+        private var waiters: [CheckedContinuation<Void, Never>] = []
+        private(set) var calls = 0
+        func request() async -> Transcript {
+            calls += 1
+            return await withCheckedContinuation { continuation in
+                reply = continuation
+                let waiting = waiters; waiters = []
+                for waiter in waiting { waiter.resume() }
+            }
+        }
+        func waitUntilStarted() async {
+            if reply != nil { return }
+            await withCheckedContinuation { waiters.append($0) }
+        }
+        func release() {
+            reply?.resume(returning: Transcript(text: "retry transcript", engine: "fixture"))
+            reply = nil
+        }
+    }
+
+    private func insertRetryRecord() async throws -> ContextRecord {
+        var record = ContextRecord(id: "retry-fixture", capturedAt: Date(timeIntervalSince1970: 1), app: .unknown,
+                                   annotation: Annotation(text: "", sttEngine: nil))
+        let wav = try AudioFileIO.wavData(samples: Array(repeating: 0.1, count: 16000))
+        record.audioPath = try await store.writeAttachment(wav, id: record.id, kind: .audio, ext: "wav", capturedAt: record.capturedAt)
+        try await store.insert(record)
+        return record
+    }
+
+    func testConcurrentRetryOnlyTranscribesOnce() async throws {
+        let record = try await insertRetryRecord(), gate = RetryGate()
+        stt.handler.set { _, _ in await gate.request() }
+        let first = Task { await coordinator.retryTranscription(recordID: record.id) }
+        await gate.waitUntilStarted()
+        await coordinator.retryTranscription(recordID: record.id)
+        let calls = await gate.calls
+        XCTAssertEqual(calls, 1)
+        await gate.release(); await first.value
+        XCTAssertEqual(retried, [record.id])
+        let updated = try await store.get(id: record.id)
+        XCTAssertEqual(updated?.annotation.text, "retry transcript")
+    }
+
+    func testUndoDuringRetryDoesNotResurrectRecordOrPublishSaved() async throws {
+        let record = try await insertRetryRecord(), gate = RetryGate()
+        stt.handler.set { _, _ in await gate.request() }
+        let retry = Task { await coordinator.retryTranscription(recordID: record.id) }
+        await gate.waitUntilStarted()
+        try await coordinator.undo(recordID: record.id)
+        await gate.release(); await retry.value
+        let missing = try await store.get(id: record.id)
+        XCTAssertNil(missing)
+        XCTAssertTrue(retried.isEmpty)
+        XCTAssertEqual(removed, [record.id])
+        XCTAssertEqual(store.attachmentFileCount(), 0)
+    }
+
+    func testHotKeyResetWhileStartingHandlesPendingRelease() async {
+        recorder.startDelay.set(.milliseconds(20))
+        press(at: 1000)
+        XCTAssertEqual(coordinator.phase, .starting)
+        clock.set(1001)
+        coordinator.endActiveRecordingForHotKeyReset()
+        await coordinator.waitUntilSettled()
+        await expect("started"); await expect("ended"); await expect("saved")
+        XCTAssertEqual(store.records.get().count, 1)
+        XCTAssertEqual(coordinator.phase, .idle)
+    }
+
+    func testScreenshotWriteFailureStillSavesTranscriptAndAudio() async throws {
+        store.attachmentWriteFailures.set([.screenshot])
+        let captured = await captureOnce()
+        let record = try XCTUnwrap(captured)
+        XCTAssertNil(record.screenshotPath)
+        XCTAssertNotNil(record.audioPath)
+        XCTAssertFalse(record.annotation.text.isEmpty)
+        XCTAssertEqual(store.attachmentFileCount(), 1)
+    }
+
+    func testAudioWriteFailureStillSavesTranscriptAndRemovesTemporaryAudio() async throws {
+        store.attachmentWriteFailures.set([.audio])
+        let captured = await captureOnce()
+        let record = try XCTUnwrap(captured)
+        XCTAssertNil(record.audioPath)
+        XCTAssertNotNil(record.screenshotPath)
+        XCTAssertFalse(record.annotation.text.isEmpty)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: try XCTUnwrap(recorder.lastFileURL.get()).path))
+    }
+
+    func testInterruptedSilentRecordingReportsInterruptionRatherThanNoVoice() async {
+        recorder.interrupted.set(true)
+        stt.handler.set { _, _ in throw STTError.noSpeech(reason: .silent) }
+        press(at: 1000); await coordinator.waitUntilSettled()
+        release(at: 1001, held: 1); await coordinator.waitUntilSettled()
+        await expect("started"); await expect("ended"); await expect("failed.interrupted")
+        XCTAssertTrue(store.records.get().isEmpty)
+        XCTAssertEqual(store.attachmentFileCount(), 0)
     }
 
     // MARK: - 正常系

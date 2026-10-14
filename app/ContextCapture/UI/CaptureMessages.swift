@@ -47,9 +47,13 @@ enum CaptureMessages {
             body: record.annotation.text.isEmpty ? nil : "「\(record.annotation.text)」",
             actions: [.undo(recordID: record.id)]
         )
-        if notice == .screenRecordingDenied {
+        if notice == .screenRecordingDenied || notice == .recordingInterruptedAndScreenRecordingDenied {
             content.note = "スクショを撮るには画面収録の許可が必要です。注釈とアプリの情報だけで保存しました。"
             content.actions.append(.openSystemSettings(.screenRecording))
+        }
+        if notice == .recordingInterrupted || notice == .recordingInterruptedAndScreenRecordingDenied {
+            let interruption = "録音が途中で止まりました。止まるまでの音声を保存しました。必要ならもう一度録音してください。"
+            content.note = [interruption, content.note].compactMap { $0 }.joined(separator: "\n")
         }
         return content
     }
@@ -67,6 +71,9 @@ enum CaptureMessages {
             return ToastContent(kind: .error, title: "文字起こしに失敗しました",
                                 body: "音声は残して保存しました。",
                                 actions: [.retryTranscription(recordID: id)])
+        case .recordingInterrupted:
+            return ToastContent(kind: .error, title: "録音が途中で止まりました",
+                                body: "声を認識できませんでした。マイクを確認して、もう一度録音してください。")
         case .microphoneUnavailable:
             return ToastContent(kind: .error, title: "マイクを使えません",
                                 body: "録音するにはマイクの許可が必要です。",

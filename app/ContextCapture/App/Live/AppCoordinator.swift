@@ -93,6 +93,7 @@ final class AppCoordinator: CaptureControlling {
     private var state: State = .idle
     private var inFlight: [UUID: Task<Void, Never>] = [:]
     private var retrying: Set<String> = []
+    private var cancelledRetries: Set<String> = []
 
     init(dependencies: CaptureDependencies, latency: CaptureLatencyMonitor? = nil) {
         deps = dependencies
@@ -118,7 +119,9 @@ final class AppCoordinator: CaptureControlling {
     nonisolated func events() -> AsyncStream<CaptureEvent> { stream }
 
     func undo(recordID: String) async throws {
-        try await deps.store.delete(id: recordID)
+        if retrying.contains(recordID) { cancelledRetries.insert(recordID) }
+        do { try await deps.store.delete(id: recordID) }
+        catch { cancelledRetries.remove(recordID); throw error }
         CCLog.capture.notice("capture undone \(recordID, privacy: .public)")
         onRecordRemoved(recordID)
     }
@@ -129,6 +132,7 @@ final class AppCoordinator: CaptureControlling {
         beginActivity()
         defer {
             retrying.remove(recordID)
+            cancelledRetries.remove(recordID)
             endActivity()
         }
         guard let record = try? await deps.store.get(id: recordID), let audioPath = record.audioPath,
@@ -159,6 +163,7 @@ final class AppCoordinator: CaptureControlling {
             emit(.failed(.transcriptionFailed(recordID: recordID)))
             return
         }
+        guard !cancelledRetries.contains(recordID) else { return }
         let sttMs = max(0, (deps.uptime() - sttStart) * 1000)
         // 再試行の間にユーザーが詳細で手直ししたり、トリアージ・cc-mcp がガードやメモを書いたりしていても消さないよう、
         // 最新の記録に注釈（と STT エンジン）だけを当てる。
@@ -166,10 +171,12 @@ final class AppCoordinator: CaptureControlling {
         do {
             updated = try await Self.applyRetriedTranscript(transcript, id: recordID, store: deps.store)
         } catch {
+            if cancelledRetries.contains(recordID) { return }
             CCLog.capture.error("retry failed: update \(recordID, privacy: .public) \(Self.describe(error), privacy: .public)")
             emit(.failed(.saveFailed(detail: Self.describe(error))))
             return
         }
+        guard !cancelledRetries.contains(recordID) else { return }
         CCLog.capture.notice("retry saved \(recordID, privacy: .public) stt \(sttMs, format: .fixed(precision: 0), privacy: .public)ms")
         emit(.saved(updated, notice: nil))
         // ガードは保存時（STT 失敗の記録も）に回してあるので、注釈から作る意図と索引だけをやり直す。
@@ -343,7 +350,7 @@ final class AppCoordinator: CaptureControlling {
                 stt \(sttMs, format: .fixed(precision: 0), privacy: .public)ms
                 """)
             encodeTask.cancel()
-            emit(.failed(.noVoice))
+            emit(.failed(audio.wasInterrupted ? .recordingInterrupted : .noVoice))
             return
         } catch {
             // 音声を残して記録を作り、[再試行] を出す（PRD §6.3）。
@@ -382,13 +389,15 @@ final class AppCoordinator: CaptureControlling {
             CCLog.store.error("audio write failed: \(Self.describe(error), privacy: .public)")
         }
 
+        var extra = context.extra
+        if audio.wasInterrupted { extra["recording_interrupted"] = "true" }
         let record = ContextRecord(
             id: id,
             capturedAt: capturedAt,
             app: context.app ?? .unknown,
             window: context.window,
             url: context.url,
-            extra: context.extra,
+            extra: extra,
             screenshotPath: screenshotPath,
             audioPath: audioPath,
             annotation: Annotation(text: transcript?.text ?? "", sttEngine: transcript?.engine),
@@ -424,7 +433,13 @@ final class AppCoordinator: CaptureControlling {
             screenshot \(screenshotPath != nil ? "yes" : "no", privacy: .public) \
             sttBreakdown [\(transcript?.diagnostics?.logSummary ?? "-", privacy: .public)]
             """)
-        let notice: CaptureNotice? = context.screenshotSkipReason == ScreenshotSkipReason.permissionDenied ? .screenRecordingDenied : nil
+        let notice: CaptureNotice?
+        switch (audio.wasInterrupted, context.screenshotSkipReason == ScreenshotSkipReason.permissionDenied) {
+        case (true, true): notice = .recordingInterruptedAndScreenRecordingDenied
+        case (true, false): notice = .recordingInterrupted
+        case (false, true): notice = .screenRecordingDenied
+        case (false, false): notice = nil
+        }
         emit(.saved(record, notice: notice))
         onRecordSaved(id)
     }

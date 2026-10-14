@@ -236,7 +236,10 @@ public actor TriageQueue {
     /// 一時停止中なら解けるまで待つ（ステップの境目で呼ぶ）。
     private func waitWhilePaused() async {
         while paused {
-            await withCheckedContinuation { pauseWaiters.append($0) }
+            await withCheckedContinuation {
+                pauseWaiters.append($0)
+                broadcast(.suspendedForCapture)
+            }
         }
     }
 

@@ -4,12 +4,13 @@
 #   (a) swift test -c release で E2ETests（キャプチャ経路・トリアージ・メモリ・d1 の数値一致・ガード・意図・検索）
 #   (b) d1 の数値一致: SwiftPM（swift test -c release）と Xcode（xcodebuild test -configuration Release）で
 #       CCIntentTests/D1NumericsTests を回し、PyTorch 参照との差と、2 つのビルドの間の差を記録
+#   (d) 実AppCoordinator/TriageWiring: fixture capture + real models + durable index/query。
 #   (c) アプリのアイドル CPU: Release ビルドのアプリを一時データで起動 → モデル準備の完了を待つ → 60 秒待つ →
 #       60 秒間 1 秒ごとに ps -o %cpu と CPU 時間を取る → 終了させる
 #
 # 使い方:
 #   CC_MODELS_DIR=/path/to/models scripts/e2e.sh            # 全部
-#   CC_E2E_STEPS="a b" scripts/e2e.sh                       # 一部だけ（a / b / c）
+#   CC_E2E_STEPS="a b" scripts/e2e.sh                       # 一部だけ（a / b / c / d）
 # 環境変数:
 #   CC_MODELS_DIR       モデルの置き場（既定: メイン作業ツリーの spikes/dev-models）。**読み取りのみ**（manifest を書かない）
 #   CC_E2E_ROUNDS       (a) の周回数（既定 3）
@@ -31,7 +32,7 @@ work=${${TMPDIR:-/tmp}%/}/cc-e2e-work
 mkdir -p $results $work
 
 export CC_MODELS_DIR=${CC_MODELS_DIR:-/Users/yoshio/works/60-misc/memo-collector/spikes/dev-models}
-steps=(${=CC_E2E_STEPS:-a b c})
+steps=(${=CC_E2E_STEPS:-a b c d})
 stamp=$(date +%Y%m%d-%H%M%S)
 max_load=${CC_E2E_MAX_LOAD:-3.0}
 load_wait=${CC_E2E_LOAD_WAIT:-600}
@@ -255,6 +256,19 @@ print(f"  idle CPU: ps mean {res['ps_pcpu_mean']:.2f}% max {res['ps_pcpu_max']:.
 print(f"  footprint: {res['footprint_cmd']}")
 PY
   check_models_untouched
+fi
+
+# ---------------------------------------------------------------- (d)
+if (( ${steps[(Ie)d]} )); then
+  step "(d) actual coordinator Release capture E2E"
+  out=$work/$stamp-capture
+  CC_CAPTURE_BENCH_OUTPUT=$out CC_CAPTURE_BENCH_LIMIT=${CC_E2E_LIMIT:-10} "$root/scripts/capture-model-evaluation.sh"
+  cp "$out/capture.json" "$results/$stamp-actual-capture.json"
+  [[ ! -f "$out/acceptance.json" ]] || cp "$out/acceptance.json" "$results/$stamp-capture-acceptance.json"
+  check_models_untouched
+fi
+if [[ ${CC_PERF_ASSERT:-0} == 1 ]] && (( ${steps[(Ie)c]} )); then
+  python3 "$root/scripts/e2e-acceptance.py" "$results/$stamp-app-idle.json" --output "$results/$stamp-idle-acceptance.json"
 fi
 
 # ---------------------------------------------------------------- MLX の Metal カーネル（default.metallib）の同一性

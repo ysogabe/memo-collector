@@ -64,6 +64,17 @@ extension HotkeyCombo {
     }
 }
 
+@MainActor
+protocol HotKeyDriving: AnyObject {
+    var onEvent: ((HotKeyEvent) -> Void)? { get set }
+    var lastCarbonStatus: Int32? { get }
+    func stop()
+    func setShortcut(_ shortcut: HotKeyShortcut) throws
+    func start(allowEventTapFallback: Bool, preferEventTap: Bool) throws -> GlobalPushToTalkHotKey.Backend
+}
+
+extension GlobalPushToTalkHotKey: HotKeyDriving {}
+
 /// `GlobalPushToTalkHotKey` の持ち主。登録・登録し直し・失敗時の再試行を受け持つ。
 ///
 /// - Carbon（権限不要）→ 失敗したらアクセシビリティ権限があれば CGEventTap（CCCapture の既定動作）。
@@ -71,7 +82,7 @@ extension HotkeyCombo {
 ///   許可されたら登録し直す。
 @MainActor
 final class HotKeyController {
-    private let hotKey = GlobalPushToTalkHotKey()
+    private let hotKey: any HotKeyDriving
     private(set) var status: HotKeyStatus = .notRegistered
     private(set) var combo: HotkeyCombo = .default
     private var trustPoll: Timer?
@@ -82,7 +93,10 @@ final class HotKeyController {
     /// 状態が変わったとき。
     var onStatusChange: (HotKeyStatus) -> Void = { _ in }
 
-    init() {
+    convenience init() { self.init(hotKey: GlobalPushToTalkHotKey()) }
+
+    init(hotKey: any HotKeyDriving) {
+        self.hotKey = hotKey
         hotKey.onEvent = { [weak self] e in self?.onEvent(e) }
     }
 
@@ -95,7 +109,7 @@ final class HotKeyController {
         let newStatus: HotKeyStatus
         do {
             try hotKey.setShortcut(combo.shortcut)
-            let backend = try hotKey.start(allowEventTapFallback: true)
+            let backend = try hotKey.start(allowEventTapFallback: true, preferEventTap: false)
             newStatus = .active(backend)
         } catch GlobalPushToTalkHotKey.HotKeyError.alreadyInUse {
             newStatus = .alreadyInUse

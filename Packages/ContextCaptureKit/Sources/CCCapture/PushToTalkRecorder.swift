@@ -220,11 +220,12 @@ public final class PushToTalkRecorder: AudioRecording, @unchecked Sendable {
         s.lock.lock()
         s.samples.append(contentsOf: s.resampler.flush())
         let samples = s.samples
+        let interrupted = s.interrupted
         s.lock.unlock()
         finishLevels()
         let duration = Double(samples.count) / RecordedAudio.sampleRate
         let url = writesFile ? writeWAV(samples) : nil
-        return RecordedAudio(samples16kMono: samples, duration: duration, fileURL: url)
+        return RecordedAudio(samples16kMono: samples, duration: duration, fileURL: url, wasInterrupted: interrupted)
     }
 
     private func cancelLocked() {
