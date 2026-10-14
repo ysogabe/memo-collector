@@ -25,6 +25,18 @@ public struct D1ModelPreparer: Sendable {
     /// HF から取る元ファイル（.py のリモートコードは取らない）。
     public static let sourceFiles = ["config.json", "model.safetensors", "tokenizer.json", "tokenizer_config.json",
                                      "chat_template.jinja", "LICENSE"]
+    /// 固定revisionの元ファイル。重みだけでなく推論に使うconfig/tokenizerも検証する。
+    public static let sourceSHA256: [String: String] = [
+        "model.safetensors": sourceWeightsSHA256,
+        "config.json": "0cbac0f580bd8036ef94ac83aa632a57a170e66d20f381ef47c3f6486c9a3e8c",
+        "tokenizer.json": "8096ecb9f54599d756c8de728a598a340bc1e43c0deb77ddd62456c38349fcee",
+        "tokenizer_config.json": "ef6770d12dd9ac58d334e979bf160c5cdfd41f13d205fd5d5516857645feb0ea",
+        "chat_template.jinja": "86f4770449a4797c9b4212d110b0cc70fb993c1ce960095bcfb12eea22f61cca",
+        "LICENSE": "4d28ca14dedc0b3d0fcc2b3339f0e79931faa33874f3d24f522183a8fc70068c",
+    ]
+    // Small synthetic sources in tests; callers cannot override the production pins.
+    var sourceChecksums = Self.sourceSHA256
+
     /// 変換物にそのままコピーするファイル。
     static let copiedFiles = ["tokenizer.json", "tokenizer_config.json", "chat_template.jinja", "LICENSE"]
     static let languageModelPrefix = "model.language_model."
@@ -32,7 +44,7 @@ public struct D1ModelPreparer: Sendable {
     public var destination: URL
     public var groupSize: Int = 64
     public var bits: Int = 8
-    /// 元 checkpoint の sha256 を確かめるか（テストで別の checkpoint を使うときだけ false）。
+    /// 元ファイル一式の固定sha256を確かめるか（合成sourceを使うテストだけfalse）。
     public var verifySourceChecksum: Bool = true
     /// `prepare` が HF から取得した元モデル（`<destination の親>/.downloads/`、約 5.8GB）を変換の成功後に消すか。
     /// 既定は消す。`source` を渡したとき・Python の HF キャッシュを使ったときは、取得していないので何も消さない。
@@ -111,6 +123,27 @@ public struct D1ModelPreparer: Sendable {
         return try await hub.snapshot(from: HubApi.Repo(id: Self.repoId), revision: Self.revision, matching: files)
     }
 
+    /// Sourceを読み取るだけ。変換・MLX load・destination作成より前に、全入力の固定hashを検証する。
+    public func verifySource(directory: URL) throws -> [String: String] {
+        var hashes: [String: String] = [:]
+        for name in Self.sourceFiles {
+            let url = directory.appendingPathComponent(name)
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                if verifySourceChecksum { throw D1PrepareError.missingSourceFile(name) }
+                continue
+            }
+            let actual = try Self.sha256(of: url)
+            if verifySourceChecksum, actual != sourceChecksums[name] {
+                if name == "model.safetensors" {
+                    throw D1PrepareError.sourceChecksumMismatch(expected: sourceChecksums[name] ?? "", actual: actual)
+                }
+                throw D1PrepareError.sourceFileChecksumMismatch(path: name, expected: sourceChecksums[name] ?? "", actual: actual)
+            }
+            hashes[name] = actual
+        }
+        return hashes
+    }
+
     /// 変換する（数分・メモリ数 GB）。成功したら `destination` を置き換える。
     @discardableResult
     public func convert(source: URL, progress: Progress = { _, _ in }) throws -> D1ModelManifest {
@@ -120,11 +153,8 @@ public struct D1ModelPreparer: Sendable {
             throw D1PrepareError.missingSourceFile(name)
         }
         let srcWeights = source.appendingPathComponent("model.safetensors")
-        progress(0.02, "checking source checksum")
-        let srcSHA = try Self.sha256(of: srcWeights)
-        if verifySourceChecksum, srcSHA != Self.sourceWeightsSHA256 {
-            throw D1PrepareError.sourceChecksumMismatch(expected: Self.sourceWeightsSHA256, actual: srcSHA)
-        }
+        progress(0.02, "checking source checksums")
+        let sourceHashes = try verifySource(directory: source)
 
         let work = destination.deletingLastPathComponent()
             .appendingPathComponent(".\(destination.lastPathComponent).partial-\(UUID().uuidString)", isDirectory: true)
@@ -167,7 +197,7 @@ public struct D1ModelPreparer: Sendable {
         let manifest = D1ModelManifest(
             repo: Self.repoId, revision: Self.revision, conversionVersion: Self.conversionVersion,
             createdAt: ISO8601DateFormatter().string(from: Date()),
-            source: ["model.safetensors": srcSHA],
+            source: sourceHashes,
             quantization: .init(bits: bits, groupSize: groupSize, mode: "affine"),
             tensorCount: tensorCount, files: files)
         try D1ModelManifest.encoder().encode(manifest).write(to: work.appendingPathComponent(CCPaths.manifestFileName))
@@ -338,6 +368,7 @@ public typealias D1ModelManifest = CCCore.D1ModelManifest
 public enum D1PrepareError: Error, CustomStringConvertible {
     case missingSourceFile(String)
     case sourceChecksumMismatch(expected: String, actual: String)
+    case sourceFileChecksumMismatch(path: String, expected: String, actual: String)
     case invalidSourceConfig
     case noLanguageModelWeights
     case quantizationFailed(String)
@@ -346,6 +377,7 @@ public enum D1PrepareError: Error, CustomStringConvertible {
         switch self {
         case let .missingSourceFile(n): return "元モデルのファイルが無い: \(n)"
         case let .sourceChecksumMismatch(e, a): return "元モデルの sha256 が違う（期待 \(e)、実際 \(a)）"
+        case let .sourceFileChecksumMismatch(p, e, a): return "元ファイルのsha256が違う: \(p)（期待 \(e)、実際 \(a)）"
         case .invalidSourceConfig: return "元モデルの config.json に text_config / intermediate_size が無い"
         case .noLanguageModelWeights: return "model.language_model.* の重みが無い"
         case let .quantizationFailed(n): return "量子化に失敗: \(n)"

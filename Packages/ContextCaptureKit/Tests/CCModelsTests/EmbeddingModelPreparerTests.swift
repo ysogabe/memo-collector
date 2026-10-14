@@ -31,9 +31,17 @@ final class EmbeddingModelPreparerTests: XCTestCase {
         let m = EmbeddingModelManifest(
             formatVersion: 1, repo: EmbeddingModelPreparer.repoId, revision: revision, baseModel: "google/embeddinggemma-2",
             license: "Apache-2.0", preparationVersion: EmbeddingModelPreparer.preparationVersion, preparedWith: "test",
-            compiledOn: "test", createdAt: Date(timeIntervalSince1970: 1_760_000_000), sourceFiles: [],
+            compiledOn: "test", createdAt: Date(timeIntervalSince1970: 1_760_000_000), sourceFiles: EmbeddingModelPreparer.pinnedSourceFiles.map { .init(path: $0.path, size: $0.size, sha256: $0.sha256) },
             files: files.keys.sorted().map { .init(path: $0, size: Int64(files[$0]!.utf8.count), sha256: sha(files[$0]!)) })
         try m.encoded().write(to: dest.appendingPathComponent("manifest.json"))
+    }
+
+    func testSourceSizeFollowsHuggingFaceSnapshotSymlinks() throws {
+        let bytes = Data(repeating: 42, count: 4096)
+        let file = tmp.appendingPathComponent("blob"), link = tmp.appendingPathComponent("snapshot-file")
+        try bytes.write(to: file)
+        try FileManager.default.createSymbolicLink(at: link, withDestinationURL: file)
+        XCTAssertEqual(EmbeddingModelPreparer.fileSize(link, fileManager: .default), 4096)
     }
 
     func testPinnedSourcesCoverTextAndVisionButNotAudio() {
@@ -84,6 +92,20 @@ final class EmbeddingModelPreparerTests: XCTestCase {
         // 別 revision の manifest
         try makeFakeInstalled(dest, revision: String(repeating: "0", count: 40))
         XCTAssertEqual(try p.verify(), .mismatched(["manifest.json"]))
+    }
+
+    func testRejectsManifestWithoutVerifiedPackageProvenance() throws {
+        let dest = tmp.appendingPathComponent("embeddinggemma-2")
+        try makeFakeInstalled(dest)
+        let url = dest.appendingPathComponent("manifest.json")
+        var m = try EmbeddingModelManifest.decode(Data(contentsOf: url))
+        // Old adoption only checked tokenizer/tables; compiled content may be unrelated.
+        m.sourceFiles.removeAll { $0.path.contains(".mlpackage/") }
+        try m.encoded().write(to: url)
+        let p = EmbeddingModelPreparer(destination: dest)
+        XCTAssertEqual(try p.verify(), .mismatched(["manifest.json"]))
+        XCTAssertFalse(try p.canAdoptExisting())
+        XCTAssertThrowsError(try p.adoptExisting())
     }
 
     func testAlreadyPreparedDoesNothing() async throws {

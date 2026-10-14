@@ -1,6 +1,7 @@
 import CCCore
 import CoreGraphics
 import Foundation
+import OSLog
 
 /// 保存後に非同期で走るトリアージのキュー（PRD §4・§8.1、F-09 / F-10 / F-11）。
 ///
@@ -228,6 +229,7 @@ public actor TriageQueue {
     private func autoResume(generation: Int) {
         guard paused, generation == pauseGeneration else { return }
         autoResumeCount += 1
+        Logger(subsystem: "dev.ysogabe.ContextCapture", category: "triage").notice("triage auto-resumed: capture pause exceeded its maximum duration")
         resume()
     }
 

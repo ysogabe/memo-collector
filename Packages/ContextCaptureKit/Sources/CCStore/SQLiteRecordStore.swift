@@ -88,6 +88,13 @@ public final class SQLiteRecordStore: RecordStore, Sendable {
         try await pool.write { db in try RecordRow.insert(record, db: db) }
     }
 
+    /// 開発fixture等を一つのtransactionで投入する。重複/不正な行があれば全件rollbackする。
+    public func insertBatch(_ records: [ContextRecord]) async throws {
+        try await pool.write { db in
+            for record in records { try RecordRow.insert(record, db: db) }
+        }
+    }
+
     public func update(_ record: ContextRecord) async throws {
         try await pool.write { db in try RecordRow.update(record, db: db) }
     }

@@ -182,6 +182,7 @@ final class LiveServices {
         // → 3) 埋め込みの準備（ANE の初回特殊化で数分）と、未完了のトリアージの再開。2 と 3 はどちらも ANE を使うので順に。
         let transcriber = transcriber, whisperPresent = whisper.filesPresent(), queue = triageQueue
         let imageTokens = settings.load().imageTokenBudget
+        searchIndex.markPreparationPending(imageTokens: imageTokens)
         if !whisperPresent {
             CCLog.models.notice("whisper model not found under \(self.paths.modelsRoot.path, privacy: .public)")
         }
