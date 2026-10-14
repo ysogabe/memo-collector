@@ -58,7 +58,7 @@ CC_MODELS_DIR=/path/to/prepared/models scripts/search-model-evaluation.sh
 
 Swiftのscorer/validator/keyword/融合/実storeテストに加え、Pythonは故意のRecall低下、negative false-hit増加、件数・欠損・NaNを失敗として検証する。index時間はレポートmetadataに残すが品質gateでは速度を比較しない。通常jobはMCP serialization/画像guard/UI検索を通らない。`baseline_native_vector` の全176順位とMCP vectorの一致は #7 の実モデル測定で確認済み。
 
-**モデル更新時は実モデル job を実行する**。`search-model-evaluation.sh` は必ず `--refresh --live-queries --poc` を指定し、実CoreML query/doc生成、実MCP vector/keyword、同じPoC、索引・queryレイテンシを報告する。MCP2経路を含む7modeの`live-model-baseline.json`と比較し、通常jobの5mode baselineとは区別する。今回の集計は`live-model-measurement.json`に保存した。モデル未準備は失敗。通常CIが通っても実モデルの品質確認を代用しない。負荷を重ねず M3/M4 で計測する。GitHubの`workflow_dispatch → real_models=true`は、モデルとSwift6.4/Metalを用意した`self-hosted,macOS,ARM64,cc-search-models` runnerを要求する。runner環境の`CC_MODELS_DIR`が必須で、runner登録/モデル配置は自動で行わない。今回このjobのコマンドはローカルM3で実行し、hosted quality jobの実行と区別する。
+**モデル更新時は実モデル job を実行する**。`search-model-evaluation.sh` は必ず `--refresh --live-queries --poc` を指定し、実CoreML query/doc生成、実MCP vector/keyword、同じPoC、索引・queryレイテンシを報告する。MCP2経路を含む7modeの`live-model-baseline.json`と比較し、通常jobの5mode baselineとは区別する。今回の集計は`live-model-measurement.json`に保存した。モデル未準備は失敗。通常CIが通っても実モデルの品質確認を代用しない。負荷を重ねずM3 24GiBで計測する。M4 32GBはユーザー指定により本タスクの対象外で、前提条件にしない。GitHubの`workflow_dispatch → real_models=true`は、モデルとSwift6.4/Metalを用意した`self-hosted,macOS,ARM64,cc-search-models` runnerを要求する。runner環境の`CC_MODELS_DIR`が必須で、runner登録/モデル配置は自動で行わない。今回このjobのコマンドはローカルM3で実行し、hosted quality jobの実行と区別する。
 
 baselineを変更する場合は理由・モデル/pipeline・分割・差分をレビューする。通常QAコマンドはbaselineを書き換えない。更新コマンドは明示的:
 

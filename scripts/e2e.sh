@@ -18,6 +18,8 @@
 #   CC_E2E_LOAD_WAIT    上の待ちの上限秒（既定 600）
 #   CC_E2E_IDLE_SETTLE  (c) モデル準備の後に待つ秒（既定 60）
 #   CC_E2E_IDLE_SAMPLES (c) 取る回数（1 秒ごと、既定 60）
+#   CC_E2E_APP_DERIVED  (c) 事前buildのDerivedData（既定 DerivedData/e2e-app）
+#   CC_E2E_SKIP_APP_BUILD (c) 1なら事前buildのRelease appを使う（版の確認は呼び出し側）
 #   CC_E2E_CONFIG       (a) の結果ファイル名の構成名（既定 swiftpm-release）
 #   CC_E2E_MLX_CACHE_LIMIT_MB  (a) の MLX キャッシュ上限（MB）。既定は製品と同じ 256。旧計測と同じ無制限は `unlimited`。変えるときは CC_E2E_CONFIG も変えること
 set -euo pipefail
@@ -142,16 +144,19 @@ fi
 # ---------------------------------------------------------------- (c)
 if (( ${steps[(Ie)c]} )); then
   step "(c) アプリのアイドル CPU（Release ビルド）"
-  derived=$root/DerivedData/e2e-app
+  derived=${CC_E2E_APP_DERIVED:-$root/DerivedData/e2e-app}
   (cd $root/app && xcodegen generate --quiet)
   # Release は既定で universal（x86_64 も）を作るが、CCEmbedding の Float16 が x86_64 macOS で使えずビルドが落ちる
   # （製品側の問題として報告済み）。計測は Apple Silicon の arm64 だけで行う。
-  (cd $root/app && xcodebuild -project ContextCapture.xcodeproj -scheme ContextCapture -configuration Release \
-      -derivedDataPath $derived -skipMacroValidation -skipPackagePluginValidation \
-      ARCHS=arm64 ONLY_ACTIVE_ARCH=YES build >| $work/c-build.log 2>&1) \
-    || { grep -E "error:" $work/c-build.log | tail -n 30; exit 1 }
+  if [[ ${CC_E2E_SKIP_APP_BUILD:-0} != 1 ]]; then
+    (cd $root/app && xcodebuild -project ContextCapture.xcodeproj -scheme ContextCapture -configuration Release \
+        -derivedDataPath $derived -skipMacroValidation -skipPackagePluginValidation \
+        ARCHS=arm64 ONLY_ACTIVE_ARCH=YES build >| $work/c-build.log 2>&1) \
+      || { grep -E "error:" $work/c-build.log | tail -n 30; exit 1 }
+  fi
   app=$derived/Build/Products/Release/ContextCapture.app
   bin=$app/Contents/MacOS/ContextCapture
+  [[ -x $bin ]] || { print "Release app が無い: $bin"; exit 1 }
   data=$work/app-data-$stamp
   mkdir -p $data
   settle=${CC_E2E_IDLE_SETTLE:-60}
@@ -257,7 +262,7 @@ fi
 metallib_list=(
   "swiftpm_test:$pkg/.build/out/Products/Release/CCIntentTests.xctest/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib"
   "xcode_test:$root/DerivedData/e2e-kit/Build/Products/Release/CCIntentTests.xctest/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib"
-  "app_release:$root/DerivedData/e2e-app/Build/Products/Release/ContextCapture.app/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib"
+  "app_release:${CC_E2E_APP_DERIVED:-$root/DerivedData/e2e-app}/Build/Products/Release/ContextCapture.app/Contents/Resources/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib"
 )
 step "metallib の sha256"
 /usr/bin/python3 - $results/$stamp-metallib.json $metallib_list <<'PY'

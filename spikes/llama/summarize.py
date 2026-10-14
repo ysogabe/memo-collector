@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json,math,statistics,sys,subprocess,datetime,hashlib,platform
+import argparse,json,math,statistics,subprocess,datetime,hashlib,platform
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 def dot(a,b):return sum(x*y for x,y in zip(a,b))
@@ -7,10 +7,15 @@ def norm(v):
  n=math.sqrt(dot(v,v));return [x/n for x in v]
 def pct(x,p):
  x=sorted(x);return x[max(0,math.ceil(len(x)*p)-1)]
-reports={Path(p).stem:json.loads(Path(p).read_text()) for p in sys.argv[1:]}
+parser=argparse.ArgumentParser()
+parser.add_argument('inputs',nargs='+')
+parser.add_argument('--output',type=Path,default=ROOT/'spikes/llama/results.json')
+parser.add_argument('--build',default='Swift debug on both; native llama static library Release')
+args=parser.parse_args()
+reports={Path(p).stem:json.loads(Path(p).read_text()) for p in args.inputs}
 records=json.loads((ROOT/'evals/search/records.json').read_text())['records']
 queries=json.loads((ROOT/'evals/search/queries.json').read_text())['queries']
-summary={'hardware':subprocess.check_output(['sysctl','-n','machdep.cpu.brand_string'],text=True).strip(), 'memoryBytes':int(subprocess.check_output(['sysctl','-n','hw.memsize'],text=True)), 'os':platform.platform(), 'date':str(datetime.date.today()), 'build':'Swift debug on both; native llama static library Release', 'corpusSHA256':hashlib.sha256((ROOT/'evals/search/records.json').read_bytes()).hexdigest(), 'querySHA256':hashlib.sha256((ROOT/'evals/search/queries.json').read_bytes()).hexdigest(), 'reports':{},'agreement':{}}
+summary={'hardware':subprocess.check_output(['sysctl','-n','machdep.cpu.brand_string'],text=True).strip(), 'memoryBytes':int(subprocess.check_output(['sysctl','-n','hw.memsize'],text=True)), 'os':platform.platform(), 'date':str(datetime.date.today()), 'build':args.build, 'corpusSHA256':hashlib.sha256((ROOT/'evals/search/records.json').read_bytes()).hexdigest(), 'querySHA256':hashlib.sha256((ROOT/'evals/search/queries.json').read_bytes()).hexdigest(), 'reports':{},'agreement':{}}
 for name,r in reports.items():
  rows={x['id']:x for x in r['rows']}
  assert len(rows)==len(r['rows']), 'duplicate input ID'
@@ -49,5 +54,5 @@ for i,name in enumerate(names):
        'tokenIDsEqual':sum(a[k].get('tokenIDs') is not None and a[k].get('tokenIDs')==b[k].get('tokenIDs') for k in matched),
        'imageInputHashEqual':sum(a[k].get('imageInputHash') is not None and a[k].get('imageInputHash')==b[k].get('imageInputHash') for k in matched)}
   summary['agreement'][name+' vs '+other]=agreement
-out=ROOT/'spikes/llama/results.json';out.write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n')
+out=args.output;out.write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n')
 for name,r in summary['reports'].items():print(name,r['latency'],r['holdout256'])

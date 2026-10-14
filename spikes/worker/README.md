@@ -7,14 +7,14 @@ python3 -m unittest discover -s spikes/worker -p 'test_*.py' -v
 CC_MODELS_DIR=/path/to/prepared/models spikes/worker/run.sh
 ```
 
-macOS / Swift / Python 3、既存 Core ML モデルが必要。出力は `results.json`（合成データの集計）、重み・個人 DB は読み込まない。M1/M3/M4 で同じ手順を使えるが、今回の実測は M3 のみ。単独で実行し、他の推論/ビルドと重ねない。
+macOS / Swift / Python 3、既存 Core ML モデルが必要。出力は `results.json`（合成データの集計）、重み・個人 DB は読み込まない。今回の実測はM3 24GiB。M4 32GBはユーザー指定により対象外。M1はmilestone 1「録って残す」を指す。単独で実行し、他の推論/ビルドと重ねない。
 
 ## 現行ソースと基準
 
 - `AppCoordinator.save` は screenshot encode と STT を並行し、STT 後に添付を書いて Record を insert。STT失敗時は空 annotation と音声を保存、noSpeech 時は保存しない。**STT完了前のプロセス死亡は現在も未保存となる**。
 - `TriageWiring` は Record 保存直後に enqueue、capture中は次の triage step を開始しない。d1 は idle10分で unload。CoreMLEmbedder は actor + utility serial queue + autoreleasepool、SwitchableEmbedder は旧 model を unload。
 - 既存 [3モデル同時の実測](../../docs/e2e/report.md)（2026-10-11、今回の新計測ではない）: paced capture p90 1.80秒、連続 capture 4.38秒、MLX cache256MBで peak約4.1GB。Whisper/d1 の支配的な使用量を text helper の数百MB削減から推定しない。
-- UIブロック、実機 hotkey→toast、M1、3モデルの今回の同時再計測は未実施。`scripts/e2e.sh` / `docs/manual-tests/m1.md` が追加検証入口。PoC の保存時間は音声/スクショ/STTを含まない。
+- main統合後にactual coordinator / TriageWiringのRelease fixture試験と3モデルの同時測定を追加した。[追加結果](../../docs/research/post-merge-runtime-validation.md)。MainActorの待ちは測ったが、実機hotkey→toastとbattery/low-power切替は未実施。`scripts/e2e.sh` / `docs/manual-tests/m1.md` が追加検証入口。PoC の保存時間は音声/スクショ/STTを含まない。
 
 ## 保存と状態遷移
 

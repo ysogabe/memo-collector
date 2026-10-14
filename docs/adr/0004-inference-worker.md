@@ -1,13 +1,13 @@
 # ADR-0004: 永続 job 契約を採用し、helper の製品導入は保留
 
 - 状態: 提案、2026-10-14。関連: #10 / #9。
-- 根拠: [PoC/実測/制約](../../spikes/worker/README.md)。
+- 根拠: [PoC/実測/制約](../../spikes/worker/README.md)、[main統合後のRelease/電力/actual coordinator測定](../research/post-merge-runtime-validation.md)。M1はmilestone 1「録って残す」であり、CPU名ではない。測定対象はM3 24GiB、M4は対象外。
 
 ## 決定
 
 Record と job を同一transactionで保存し、version/generation/lease token を照合して結果を書き込む契約を採用候補とする。embeddingの世代と編集競合は #9 の製品実装で先行した。guard/intent/STT全体の scheduler と helper化は、このPoCだけでは採用しない。
 
-text helperは障害を隔離し、停止しても保存済み48記録が残った。M3のwarm physical最大はhelper209.9MB / inline208.6MBで削減効果を確認できず、warm query P95は24.83 / 20.71ms。kill復旧7.98秒、hang停止138ms、親死亡時954msで終了した。実モデルと IPC、kill復旧、timeout、親終了を検証できた。一方、起動には数秒以上のモデルprepareが必要で、IPCの温間遅延と総メモリにも費用がある。Whisper/d1の実アプリ総メモリやUI応答性を、embeddingだけの結果から保証できない。
+text helperは障害を隔離し、停止しても保存済み48記録が残った。M3のwarm physical最大はhelper209.9MB / inline208.6MBで削減効果を確認できず、warm query P95は24.83 / 20.71ms。kill復旧7.98秒、hang停止138ms、親死亡時954msで終了した。実モデルと IPC、kill復旧、timeout、親終了を検証できた。一方、起動には数秒以上のモデルprepareが必要で、IPCの温間遅延と総メモリにも費用がある。後続のactual coordinator Release試験では3モデルのlifetime physical peak 3.94GB、全20件の保存・索引を確認した。並行triageの保存P90は1.758秒だったが、先行passの2.538秒と差があり、安定した目標達成を保証しない。16ms MainActor wake interval P95は20.11ms、実hotkey/mic/screen/toastは未測定である。これもinline経路の測定で、3モデルをhelperへ移した比較ではない。
 
 ## 採用の条件
 

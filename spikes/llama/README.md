@@ -30,7 +30,7 @@ CC_MODELS_DIR=/path/to/models DIGUP_MODELS=/tmp/cc-gguf \
   CC_RUNTIME_RESULTS=/tmp/cc-runtime-results spikes/llama/run.sh
 ```
 
-Swift、Xcode、git、Python 3、CMake（上流は未インストールなら uv を使う）を要する。専用 temporary clone の `codex/runtime-benchmark` でのみ DigUp に変更する。第三者コードの MIT 表示は `LICENSE-DigUp.txt`。M3/M4 で同じコマンドを使用し、hardware は実行ホストから収集する。
+Swift、Xcode、git、Python 3、CMake（上流は未インストールなら uv を使う）を要する。専用 temporary clone の `codex/runtime-benchmark` でのみ DigUp に変更する。第三者コードの MIT 表示は `LICENSE-DigUp.txt`。hardwareは実行ホストから収集する。今回の対象はM3 24GiB。M4 32GBはユーザー指定により対象外で、前提条件にしない。
 
 `run.sh` は推論を並列化しない。両 Swift ハーネスは Debug、llama C/C++ は上流 Release。Core ML は XCTest にリンクされ、native は小さな standalone executable。baseline footprint/RSS と unload 後も記録し、ハーネス由来の差を残す。Release アプリの性能を直接保証しない。
 
@@ -41,9 +41,9 @@ Swift、Xcode、git、Python 3、CMake（上流は未インストールなら uv
 - native batch は query 176 件の sequence packing（最大 16 sequence）。Core ML batch は現在の public scalar API の 176 回逐次呼び出しで、pack_256 の新実装を作っていない。
 - peak RSS / physical footprint はプロセス全体。Core ML XCTest の起動時 RSS を含む。モデルだけの常駐量ではない。CPU seconds は `getrusage`、GPU/ANE の時間を含まない。
 - 品質は全 runtime の **text-only 文書**を 256d で同じ holdout 正例 80 query に対して再順位付け。Recall@3 / MRR(depth30) / nDCG@3、同じ archived filter。回答なし query は vector top-k のため常に非空。#7 と同じ合成 v2 data だが、実画像を追加した検索品質の評価ではない。
-- CPU/GPU/ANE 利用率と電力は未測定。`powermetrics --samplers cpu_power,gpu_power,ane_power -n 1` は `must be invoked as the superuser` で実行できなかった。利用許可のある実機で同コマンドを benchmark 実行中に採取し、idle 差分と測定秒数を記録する。M4 32GB は手元にないため未実測。
+- 当初のDebug測定では電力は未測定だった。main統合後にM3で管理者認証を経てpowermetricsを採取し、両SwiftのRelease比較を追加した。[追加結果とscope](../../docs/research/post-merge-runtime-validation.md)、[Release集計](results-release.json)、[SoC電力集計](../power/results-runtime-release.json)。ANE利用率はOSが提供しないため未提供と記録する。
 
-未測定項目を 0 と解釈しない。採用を決める前に Release の実アプリ、長文/実画像、M4、電力の比較を補う。
+未測定項目を 0 と解釈しない。長文/実画像や実hotkeyでの影響はruntime切替の具体化時に確認する。Release・電力の追加結果だけで入力経路や重みの互換性を保証しない。
 
 ## M3 の結果（2026-10-14）
 
