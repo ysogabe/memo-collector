@@ -4,7 +4,7 @@ import Foundation
 import XCTest
 @testable import CCModels
 
-/// Wave 6: 埋め込みの manifest の無い既存を取り直さずに採用する・d1 のサイズだけの検証。
+/// 未検証compiledファイルの採用拒否と、d1のサイズだけの検証。
 /// どれも一時ディレクトリのダミーで（モデル・ネットワーク不要。spikes/dev-models には書き込まない）。
 final class Wave6PreparerTests: XCTestCase {
     private var tmp: URL!
@@ -44,42 +44,26 @@ final class Wave6PreparerTests: XCTestCase {
         return p
     }
 
-    func testPrepareAdoptsUnmanifestedEmbeddingWithoutNetwork() async throws {
+    func testUnmanifestedCompiledFilesCannotEstablishProvenance() async throws {
         let p = try makeUnmanifestedEmbedding()
         XCTAssertEqual(try p.verify(level: .size), .unmanifested)
-        XCTAssertTrue(try p.canAdoptExisting())
-
-        guard case .prepared(let m) = try await p.prepare() else { return XCTFail("採用して manifest を作る") }
-        XCTAssertEqual(m.revision, EmbeddingModelPreparer.revision)
-        XCTAssertTrue(m.preparedWith.contains("adopted"))
-        XCTAssertEqual(Set(m.sourceFiles.map(\.path)), Set(EmbeddingModelPreparer.copiedFiles), "照合できた元ファイルだけを記録")
-        let paths = Set(m.files.map(\.path))
-        XCTAssertTrue(paths.isSuperset(of: ["LICENSE", "NOTICE.txt", "EmbeddingGemma2Text.mlmodelc/coremldata.bin", "tokenizer.json"]))
-        guard case .ready = try p.verify(level: .sha256) else { return XCTFail("採用後は ready") }
-
-        // 2 回目は何もしない。
-        guard case .alreadyPrepared = try await p.prepare() else { return XCTFail() }
+        XCTAssertFalse(try p.canAdoptExisting())
+        XCTAssertThrowsError(try p.adoptExisting()) {
+            XCTAssertEqual($0 as? EmbeddingPrepareError, .unverifiedCompiledModels)
+        }
+        do { _ = try await p.prepare(); XCTFail("unverified compiled models must not be adopted") } catch {}
+        XCTAssertFalse(FileManager.default.fileExists(atPath: p.manifestURL.path))
+        XCTAssertEqual(try String(contentsOf: p.destination.appendingPathComponent("EmbeddingGemma2Text.mlmodelc/coremldata.bin"), encoding: .utf8), "t")
     }
 
-    func testDoesNotAdoptEmbeddingWithOtherContentsOrMissingFiles() async throws {
+    func testMissingOrChangedSourcesDoNotPermitCompiledAdoption() throws {
         let p = try makeUnmanifestedEmbedding()
-        try Data("EEEE".utf8).write(to: p.destination.appendingPathComponent("embeddings.bf16"))  // 大きさ同じ・中身違い
+        try Data("EEEE".utf8).write(to: p.destination.appendingPathComponent("embeddings.bf16"))
         XCTAssertFalse(try p.canAdoptExisting())
-        XCTAssertThrowsError(try p.adoptExisting()) { error in
-            guard case EmbeddingPrepareError.checksumMismatch(let path, _, _)? = error as? EmbeddingPrepareError else {
-                return XCTFail("\(error)")
-            }
-            XCTAssertEqual(path, "embeddings.bf16")
-        }
-        XCTAssertFalse(FileManager.default.fileExists(atPath: p.manifestURL.path), "採用できなければ何も書かない")
-        // 採用できないときは取りに行く（ここでは取得先が無いので失敗する）。
-        do {
-            _ = try await p.prepare()
-            XCTFail("取得に進んで失敗するはず")
-        } catch {}
-
         try FileManager.default.removeItem(at: p.destination.appendingPathComponent("tokenizer.json"))
         XCTAssertFalse(try p.canAdoptExisting())
+        XCTAssertThrowsError(try p.adoptExisting())
+        XCTAssertFalse(FileManager.default.fileExists(atPath: p.manifestURL.path))
     }
 
     // MARK: - d1: verify(level:)

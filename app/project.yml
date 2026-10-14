@@ -92,6 +92,7 @@ targets:
       - path: ContextCapture/App/Live/TriageAssembly.swift
       - path: ContextCapture/App/Live/LiveGuardReviewer.swift
       - path: ContextCapture/App/Live/ModelPreparationPipeline.swift
+      - path: ContextCapture/App/Live/ModelSlots.swift
       # 詳細ビューの保存（RecordModifying.modify）。Clipboard と DateText のために InboxViewModel / Theme も入れる。
       - path: ContextCapture/UI/DetailViewModel.swift
       - path: ContextCapture/UI/InboxViewModel.swift
@@ -109,6 +110,8 @@ targets:
         product: CCStore        # 世代索引の実 SQLite 結合テスト
       - package: ContextCaptureKit
         product: CCIntent       # opt-in Release capture benchmark の実モデル
+      - package: ContextCaptureKit
+        product: CCModels       # ModelSlotsの検証失敗・再取得分岐
       - package: ContextCaptureKit
         product: CCEmbedding    # TriageAssembly と opt-in 実モデル計測
       - package: ContextCaptureKit

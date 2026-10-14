@@ -49,6 +49,13 @@ final class SearchIndexMaintainer {
         self.makeEmbedder = makeEmbedder
     }
 
+    /// Whisperのwarmupを待っている間も、検索モデルがあるなら「準備中」と表示する。
+    /// Installはここでは行わず、ANEのwarmupを直列のまま保つ。
+    func markPreparationPending(imageTokens: Int) {
+        guard task == nil else { return }
+        readiness = makeEmbedder(imageTokens) == nil ? .unavailable : .preparing
+    }
+
     /// 埋め込みを（作り直して）準備し、索引を合わせる。前の `activate` の途中なら、その続きは捨てる。
     @discardableResult
     func activate(imageTokens: Int) -> Task<Void, Never> {

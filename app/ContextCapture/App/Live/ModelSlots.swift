@@ -37,7 +37,7 @@ struct WhisperModelSlot: ModelSlotPreparing {
     }
 
     func prepare(progress: @escaping @Sendable (ModelPreparationProgress.Phase, Double) -> Void) async throws {
-        let status = (try? preparer.verify(level: .size)) ?? .missing([])
+        let status = try preparer.verify(level: .size)
         CCLog.models.notice("whisper status: \(String(describing: status), privacy: .public) at \(preparer.root.path, privacy: .public)")
         switch status {
         case .ready, .unmanifested:
@@ -132,7 +132,7 @@ struct D1ModelSlot: ModelSlotPreparing {
     func isPrepared() async -> Bool { filesPresent() }
 
     func prepare(progress: @escaping @Sendable (ModelPreparationProgress.Phase, Double) -> Void) async throws {
-        switch (try? preparer.verify(level: .size)) ?? .missing([]) {
+        switch try preparer.verify(level: .size) {
         case .ready, .unmanifested:
             return
         case let .missing(names):
