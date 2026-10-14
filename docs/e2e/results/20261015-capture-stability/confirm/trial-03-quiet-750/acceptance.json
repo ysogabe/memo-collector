@@ -1,0 +1,57 @@
+{
+  "schema": "cc-e2e-acceptance/1",
+  "passed": true,
+  "checks": [
+    {
+      "name": "captureSampleCountAtLeast10",
+      "passed": true,
+      "measured": true
+    },
+    {
+      "name": "with_triage.releaseToSavedP90Ms",
+      "value": 1740.6702083535492,
+      "limit": 2000,
+      "passed": true,
+      "measured": true
+    },
+    {
+      "name": "with_triage.peakPhysicalMB",
+      "value": 3819.23008,
+      "limit": 10000,
+      "passed": true,
+      "measured": true
+    },
+    {
+      "name": "with_triage.savedAndIndexedAll",
+      "passed": true,
+      "measured": true
+    },
+    {
+      "name": "without_triage.releaseToSavedP90Ms",
+      "value": 1723.783416673541,
+      "limit": 2000,
+      "passed": true,
+      "measured": true
+    },
+    {
+      "name": "without_triage.peakPhysicalMB",
+      "value": 3727.184552,
+      "limit": 10000,
+      "passed": true,
+      "measured": true
+    },
+    {
+      "name": "without_triage.savedAndIndexedAll",
+      "passed": true,
+      "measured": true
+    },
+    {
+      "name": "idleAfterD1UnloadPhysicalMB",
+      "value": 2455.065424,
+      "limit": 4000,
+      "passed": true,
+      "measured": true
+    }
+  ],
+  "scope": "fixture capture/d1-unload memory or actual app idle CPU; real hotkey/microphone/toast checks remain separate"
+}

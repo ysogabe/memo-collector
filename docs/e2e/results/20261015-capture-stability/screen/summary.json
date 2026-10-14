@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "phase": "screen",
+  "sourceCommit": "da82928ad43a2ea4ae6e06279fbffb372116cd2f",
+  "trials": [
+    {
+      "preset": "baseline",
+      "captureCountPerCondition": 10,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndNeuralEngine",
+        "conditionOrder": [
+          "without_triage",
+          "with_triage"
+        ],
+        "quietMilliseconds": 0,
+        "textDecoderAllowedComputeUnits": "cpuAndNeuralEngine"
+      },
+      "thermalStart": 1,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 4470.690083457157,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3840.758704,
+          "indexDeliveryP90Ms": 27721.904,
+          "postBurstIndexDrainMs": 18114.143042,
+          "wallSeconds": 60.913202917,
+          "cpuSeconds": 45.633703,
+          "encoderP90Ms": 4123.70502948761,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 4750.719874864444,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3532.165776,
+          "indexDeliveryP90Ms": 39365.530333,
+          "postBurstIndexDrainMs": 26746.17375,
+          "wallSeconds": 71.876327208,
+          "cpuSeconds": 48.31001,
+          "encoderP90Ms": 4061.682105064392,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        }
+      },
+      "rawSHA256": "bfb7ab156df3c67da8f81152c8dcdb53fd4917ba4bae8952d51fd9dd2e9529d2",
+      "rawRelativePath": "trial-01-baseline/capture.json.gz",
+      "performancePassed": false,
+      "qualityPassed": true,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-01-baseline/acceptance.json"
+    },
+    {
+      "preset": "encoder-gpu",
+      "captureCountPerCondition": 10,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndGPU",
+        "conditionOrder": [
+          "with_triage",
+          "without_triage"
+        ],
+        "quietMilliseconds": 0,
+        "textDecoderAllowedComputeUnits": "cpuAndNeuralEngine"
+      },
+      "thermalStart": 1,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 10924.66783337295,
+          "meanCER": 0.09440194226084983,
+          "capturePhysicalPeakMB": 3957.871464,
+          "indexDeliveryP90Ms": 55126.170125,
+          "postBurstIndexDrainMs": 16589.873167,
+          "wallSeconds": 86.045148541,
+          "cpuSeconds": 15.456721,
+          "encoderP90Ms": 9894.807934761047,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 2603.38700003922,
+          "meanCER": 0.09440194226084983,
+          "capturePhysicalPeakMB": 3896.071064,
+          "indexDeliveryP90Ms": 25671.023042,
+          "postBurstIndexDrainMs": 20595.636834,
+          "wallSeconds": 47.679150125,
+          "cpuSeconds": 10.567554999999999,
+          "encoderP90Ms": 1751.038908958435,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        }
+      },
+      "rawSHA256": "f3e78c4edfb3e50403efb3ce546e4d8524aa98001a238af3ceb6174e471aead6",
+      "rawRelativePath": "trial-02-encoder-gpu/capture.json.gz",
+      "performancePassed": false,
+      "qualityPassed": false,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-02-encoder-gpu/acceptance.json"
+    },
+    {
+      "preset": "quiet-750",
+      "captureCountPerCondition": 10,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndNeuralEngine",
+        "conditionOrder": [
+          "without_triage",
+          "with_triage"
+        ],
+        "quietMilliseconds": 750,
+        "textDecoderAllowedComputeUnits": "cpuAndNeuralEngine"
+      },
+      "thermalStart": 1,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 2105.813874863088,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3726.840728,
+          "indexDeliveryP90Ms": 22127.143333,
+          "postBurstIndexDrainMs": 17878.644,
+          "wallSeconds": 41.769347666,
+          "cpuSeconds": 29.553779999999996,
+          "encoderP90Ms": 1665.5949354171753,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 2632.016916759312,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3614.135,
+          "indexDeliveryP90Ms": 25322.098167,
+          "postBurstIndexDrainMs": 19884.347166,
+          "wallSeconds": 46.579854667,
+          "cpuSeconds": 33.621738,
+          "encoderP90Ms": 2130.2390098571777,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        }
+      },
+      "rawSHA256": "02097efa09eb71ecad7aa21d5be03962a256c26fe7b52fe0a32e2ca7d8cf0f36",
+      "rawRelativePath": "trial-03-quiet-750/capture.json.gz",
+      "performancePassed": false,
+      "qualityPassed": true,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-03-quiet-750/acceptance.json"
+    },
+    {
+      "preset": "decoder-gpu",
+      "captureCountPerCondition": 10,
+      "configuration": {
+        "audioEncoderAllowedComputeUnits": "cpuAndNeuralEngine",
+        "conditionOrder": [
+          "with_triage",
+          "without_triage"
+        ],
+        "quietMilliseconds": 0,
+        "textDecoderAllowedComputeUnits": "cpuAndGPU"
+      },
+      "thermalStart": 1,
+      "thermalEnd": 1,
+      "conditions": {
+        "with_triage": {
+          "p90Ms": 3796.435791766271,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3801.617448,
+          "indexDeliveryP90Ms": 22878.86525,
+          "postBurstIndexDrainMs": 16445.823625,
+          "wallSeconds": 52.789823542,
+          "cpuSeconds": 44.352929,
+          "encoderP90Ms": 3110.9009981155396,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        },
+        "without_triage": {
+          "p90Ms": 3867.884999839589,
+          "meanCER": 0.07970895980470946,
+          "capturePhysicalPeakMB": 3743.24128,
+          "indexDeliveryP90Ms": 33746.878791,
+          "postBurstIndexDrainMs": 21981.93125,
+          "wallSeconds": 58.973755084,
+          "cpuSeconds": 45.399277,
+          "encoderP90Ms": 3027.598023414612,
+          "maxFallbacks": 0,
+          "maxThermal": 1
+        }
+      },
+      "rawSHA256": "7b62bd0a5812cca0bcd7a93db82f8be5d36358044dc1dcf41096ccf1978ae199",
+      "rawRelativePath": "trial-04-decoder-gpu/capture.json.gz",
+      "performancePassed": false,
+      "qualityPassed": true,
+      "rawCompression": "gzip",
+      "performanceGateRelativePath": "trial-04-decoder-gpu/acceptance.json"
+    }
+  ],
+  "scope": "M3 fixture hardware and real models; no real mic/screen/toast; no automatic adoption"
+}

@@ -21,3 +21,7 @@ Release buildとモデルなしテストを先に完了し、計測中は他のb
 #10をhelperへ切り替える根拠にはしない。改善があれば必要な最小の設定だけを製品へ反映し、通常のアプリテスト・CI後に既存のマージ指示に従って統合する。完了後のworktreeは片付ける。
 
 一次screenではGPUencoder単独の並行P90が10.9秒、quiet750msでも2.11秒で不達。OS背景処理の高CPUも観測したため、GPUのencoder/decoderとquietの組み合わせを追加して比較する。各trialのload averageと同じ測定バイナリのSHA256を残す。
+
+## 到達点
+
+13trial/340件の保存・索引は成功。confirmではquiet750が3passすべて1.67〜1.74秒、全30音声CER7.72%で通過し、製品に750msを指定した。GPU案は採用しない。索引の遅延と外部負荷による不達を残す。[結果と採否](../research/capture-stability-20261015.md)。
