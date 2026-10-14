@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-14",
+  "hardware": "Apple M3",
+  "memoryBytes": 25769803776,
+  "runtime": "Core ML cpuAndGPU, text-only, 256d, Swift Debug",
+  "key": "embedding/50bdcd7c2dd0ae8a16a3a720817bce2b5299ed4439281fadc8db88e9690c123e",
+  "save48BeforeInference": {
+    "p50Ms": 0.08204206824302673,
+    "p95Ms": 0.1291248481720686,
+    "n": 48
+  },
+  "helperStartupMs": 12812.803250038996,
+  "helperReady": {
+    "beforeFootprintMB": 2.998896,
+    "dimension": 256,
+    "event": "ready",
+    "footprintMB": 205.637936,
+    "key": "embedding/50bdcd7c2dd0ae8a16a3a720817bce2b5299ed4439281fadc8db88e9690c123e",
+    "loadMilliseconds": 12758.820083
+  },
+  "helperRequestEndToEnd": {
+    "p50Ms": 21.07012504711747,
+    "p95Ms": 28.484417125582695,
+    "n": 48
+  },
+  "helperWarmRequest": {
+    "p50Ms": 21.007166942581534,
+    "p95Ms": 24.82516597956419,
+    "n": 32
+  },
+  "helperMaxWarmPhysicalMB": 209.865152,
+  "helperAfterUnloadPhysicalMB": 53.642272,
+  "parentAndHelperMaxSampledRSSMB": 1853.19424,
+  "orphanWatchExitMs": 954.2022501118481,
+  "inlineMaxInferencePhysicalMB": 208.619896,
+  "inlineLoadMs": 7849.692833,
+  "inlineWarmInference": {
+    "p50Ms": 15.528833,
+    "p95Ms": 20.707583,
+    "n": 32
+  },
+  "inlineAfterUnloadPhysicalMB": 145.900504,
+  "minInlineHelperCosine": 1.0,
+  "killedHelperRecoveryMs": 7975.406625075266,
+  "hangDetectionAndKillMs": 138.14858393743634,
+  "parentPeakRSSMB": 24.117248,
+  "e2e": {
+    "savedBeforeWorker": 48,
+    "currentVersionResults": 48,
+    "obsoleteResultRejected": true,
+    "matchingQueryTop3": true,
+    "wrongGenerationEmpty": true
+  },
+  "scope": "standalone synthetic queue/text helper; no AppCoordinator, STT, intent, UI event loop, real capture attachments, battery or M1 measurements"
+}
