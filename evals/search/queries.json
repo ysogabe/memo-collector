@@ -1,0 +1,2870 @@
+{
+  "corpusID": "search-ja-v1",
+  "queries": [
+    {
+      "group": "search",
+      "id": "search-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000002"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "日本語検索"
+    },
+    {
+      "group": "search",
+      "id": "search-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000002"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "曖昧なメモを日本語で探す設計"
+    },
+    {
+      "group": "search",
+      "id": "search-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000002"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "検索"
+    },
+    {
+      "group": "search",
+      "id": "search-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "API検索"
+    },
+    {
+      "group": "search",
+      "id": "search-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000002"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/search/issues/6"
+    },
+    {
+      "group": "search",
+      "id": "search-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000002"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "search #6"
+    },
+    {
+      "group": "search",
+      "id": "search-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000002"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "日本語検策の検証"
+    },
+    {
+      "group": "search",
+      "id": "search-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000001"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000002"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000003"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "日本語検索"
+    },
+    {
+      "group": "audio",
+      "id": "audio-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000005"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "音声転写"
+    },
+    {
+      "group": "audio",
+      "id": "audio-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000005"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "話した言葉を正確に文字にする方法"
+    },
+    {
+      "group": "audio",
+      "id": "audio-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000005"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "音声"
+    },
+    {
+      "group": "audio",
+      "id": "audio-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "transcribe"
+    },
+    {
+      "group": "audio",
+      "id": "audio-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000005"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/audio/issues/60"
+    },
+    {
+      "group": "audio",
+      "id": "audio-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000005"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "audio #60"
+    },
+    {
+      "group": "audio",
+      "id": "audio-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000005"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "音声転舎の検証"
+    },
+    {
+      "group": "audio",
+      "id": "audio-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000004"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000005"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000006"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "音声転写"
+    },
+    {
+      "group": "calendar",
+      "id": "calendar-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000008"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "予定登録"
+    },
+    {
+      "group": "calendar",
+      "id": "calendar-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000008"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "次の会議を忘れないよう予定表に入れる"
+    },
+    {
+      "group": "calendar",
+      "id": "calendar-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000008"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "予定"
+    },
+    {
+      "group": "calendar",
+      "id": "calendar-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "createEvent"
+    },
+    {
+      "group": "calendar",
+      "id": "calendar-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000008"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/calendar/issues/18"
+    },
+    {
+      "group": "calendar",
+      "id": "calendar-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000008"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "calendar #18"
+    },
+    {
+      "group": "calendar",
+      "id": "calendar-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000008"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "予定登録の検証"
+    },
+    {
+      "group": "calendar",
+      "id": "calendar-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000007"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000008"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000009"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "予定登録"
+    },
+    {
+      "group": "battery",
+      "id": "battery-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000B"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "低電力"
+    },
+    {
+      "group": "battery",
+      "id": "battery-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000B"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "電池を長持ちさせながら索引を作る"
+    },
+    {
+      "group": "battery",
+      "id": "battery-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000B"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "電池"
+    },
+    {
+      "group": "battery",
+      "id": "battery-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "ANE"
+    },
+    {
+      "group": "battery",
+      "id": "battery-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000B"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/battery/issues/25"
+    },
+    {
+      "group": "battery",
+      "id": "battery-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000B"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "battery #25"
+    },
+    {
+      "group": "battery",
+      "id": "battery-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000B"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "低電力の検証"
+    },
+    {
+      "group": "battery",
+      "id": "battery-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000A"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000B"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000C"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "低電力"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000E"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "秘密保護"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000E"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "パスワードの写ったスクショを安全に共有する"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000E"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "秘密"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "scanSecrets"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000E"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/privacy/issues/31"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000E"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "privacy #31"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000E"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "秘密保護の検証"
+    },
+    {
+      "group": "privacy",
+      "id": "privacy-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000D"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000E"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000F"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "秘密保護"
+    },
+    {
+      "group": "database",
+      "id": "database-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000H"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "世代切替"
+    },
+    {
+      "group": "database",
+      "id": "database-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000H"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "検索モデル変更中も元のデータを守る"
+    },
+    {
+      "group": "database",
+      "id": "database-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000H"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "索引"
+    },
+    {
+      "group": "database",
+      "id": "database-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "setEmbedding"
+    },
+    {
+      "group": "database",
+      "id": "database-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000H"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/database/issues/41"
+    },
+    {
+      "group": "database",
+      "id": "database-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000H"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "database #41"
+    },
+    {
+      "group": "database",
+      "id": "database-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000H"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "世代切替の検証"
+    },
+    {
+      "group": "database",
+      "id": "database-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000G"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000H"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000J"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "世代切替"
+    },
+    {
+      "group": "network",
+      "id": "network-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000M"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "通信再試行"
+    },
+    {
+      "group": "network",
+      "id": "network-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000M"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "一時的な通信失敗から自動で回復させる"
+    },
+    {
+      "group": "network",
+      "id": "network-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000M"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "通信"
+    },
+    {
+      "group": "network",
+      "id": "network-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "URLSession"
+    },
+    {
+      "group": "network",
+      "id": "network-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000M"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/network/issues/51"
+    },
+    {
+      "group": "network",
+      "id": "network-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000M"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "network #51"
+    },
+    {
+      "group": "network",
+      "id": "network-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000M"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "通信再試行の検証"
+    },
+    {
+      "group": "network",
+      "id": "network-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000K"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000M"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000N"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "通信再試行"
+    },
+    {
+      "group": "queue",
+      "id": "queue-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000Q"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "ジョブ再開"
+    },
+    {
+      "group": "queue",
+      "id": "queue-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000Q"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "アプリが落ちても処理の続きをやる"
+    },
+    {
+      "group": "queue",
+      "id": "queue-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000Q"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "再開"
+    },
+    {
+      "group": "queue",
+      "id": "queue-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "resumePending"
+    },
+    {
+      "group": "queue",
+      "id": "queue-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000Q"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/queue/issues/61"
+    },
+    {
+      "group": "queue",
+      "id": "queue-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000Q"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "queue #61"
+    },
+    {
+      "group": "queue",
+      "id": "queue-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000Q"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "ジョブ再開の検証"
+    },
+    {
+      "group": "queue",
+      "id": "queue-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000P"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000Q"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000R"
+        }
+      ],
+      "split": "dev",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "ジョブ再開"
+    },
+    {
+      "group": "image",
+      "id": "image-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000T"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "画像縮小"
+    },
+    {
+      "group": "image",
+      "id": "image-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000T"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "スクショを小さくして埋め込みの品質を保つ"
+    },
+    {
+      "group": "image",
+      "id": "image-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000T"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "画像"
+    },
+    {
+      "group": "image",
+      "id": "image-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "resizeBicubic"
+    },
+    {
+      "group": "image",
+      "id": "image-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000T"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/image/issues/72"
+    },
+    {
+      "group": "image",
+      "id": "image-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000T"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "image #72"
+    },
+    {
+      "group": "image",
+      "id": "image-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000T"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "画像縮小の検証"
+    },
+    {
+      "group": "image",
+      "id": "image-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000S"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000T"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000V"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "画像縮小"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000X"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "順位融合"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000X"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "単語の一致と意味の近さを両立して探す"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000X"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "順位"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "RRF"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000X"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/ranking/issues/82"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000X"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "ranking #82"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000X"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "順位融合の検証"
+    },
+    {
+      "group": "ranking",
+      "id": "ranking-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000W"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000X"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000000Y"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "順位融合"
+    },
+    {
+      "group": "memory",
+      "id": "memory-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000010"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "メモリ解放"
+    },
+    {
+      "group": "memory",
+      "id": "memory-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000010"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "常駐アプリのメモリ消費を減らす"
+    },
+    {
+      "group": "memory",
+      "id": "memory-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000010"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "解放"
+    },
+    {
+      "group": "memory",
+      "id": "memory-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "unload"
+    },
+    {
+      "group": "memory",
+      "id": "memory-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000010"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/memory/issues/92"
+    },
+    {
+      "group": "memory",
+      "id": "memory-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000010"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "memory #92"
+    },
+    {
+      "group": "memory",
+      "id": "memory-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000010"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "メモリ解放の検証"
+    },
+    {
+      "group": "memory",
+      "id": "memory-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000000Z"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000010"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000011"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "メモリ解放"
+    },
+    {
+      "group": "error",
+      "id": "error-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000013"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "エラー診断"
+    },
+    {
+      "group": "error",
+      "id": "error-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000013"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "ログインが突然切れるエラーの対処"
+    },
+    {
+      "group": "error",
+      "id": "error-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000013"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "障害"
+    },
+    {
+      "group": "error",
+      "id": "error-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "ERR_TOKEN_EXPIRED"
+    },
+    {
+      "group": "error",
+      "id": "error-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000013"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/error/issues/102"
+    },
+    {
+      "group": "error",
+      "id": "error-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000013"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "error #102"
+    },
+    {
+      "group": "error",
+      "id": "error-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000013"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "エラー診断の検証"
+    },
+    {
+      "group": "error",
+      "id": "error-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000012"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000013"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000014"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "エラー診断"
+    },
+    {
+      "group": "record",
+      "id": "record-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000016"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "即時記録"
+    },
+    {
+      "group": "record",
+      "id": "record-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000016"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "見ている画面に一言音声でメモを付ける"
+    },
+    {
+      "group": "record",
+      "id": "record-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000016"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "記録"
+    },
+    {
+      "group": "record",
+      "id": "record-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "captureFrontmost"
+    },
+    {
+      "group": "record",
+      "id": "record-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000016"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/record/issues/112"
+    },
+    {
+      "group": "record",
+      "id": "record-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000016"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "record #112"
+    },
+    {
+      "group": "record",
+      "id": "record-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000016"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "即時記録の検証"
+    },
+    {
+      "group": "record",
+      "id": "record-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000015"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000016"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000017"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "即時記録"
+    },
+    {
+      "group": "guard",
+      "id": "guard-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000019"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "画像手渡し"
+    },
+    {
+      "group": "guard",
+      "id": "guard-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000019"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "確認が必要な画像の外部公開を止める"
+    },
+    {
+      "group": "guard",
+      "id": "guard-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000019"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "確認"
+    },
+    {
+      "group": "guard",
+      "id": "guard-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "needs_review"
+    },
+    {
+      "group": "guard",
+      "id": "guard-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000019"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/guard/issues/122"
+    },
+    {
+      "group": "guard",
+      "id": "guard-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000019"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "guard #122"
+    },
+    {
+      "group": "guard",
+      "id": "guard-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000019"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "画像手渡しの検証"
+    },
+    {
+      "group": "guard",
+      "id": "guard-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH00000000000000018"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH00000000000000019"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001A"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "画像手渡し"
+    },
+    {
+      "group": "model",
+      "id": "model-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001C"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "モデル取得"
+    },
+    {
+      "group": "model",
+      "id": "model-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001C"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "ダウンロードした推論モデルが正しいか確認する"
+    },
+    {
+      "group": "model",
+      "id": "model-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001C"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "取得"
+    },
+    {
+      "group": "model",
+      "id": "model-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "sha256"
+    },
+    {
+      "group": "model",
+      "id": "model-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001C"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/model/issues/132"
+    },
+    {
+      "group": "model",
+      "id": "model-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001C"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "model #132"
+    },
+    {
+      "group": "model",
+      "id": "model-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001C"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "モデル取得の検証"
+    },
+    {
+      "group": "model",
+      "id": "model-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001B"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001C"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001D"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "モデル取得"
+    },
+    {
+      "group": "tests",
+      "id": "tests-01",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001F"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "exact",
+        "japanese"
+      ],
+      "text": "回帰評価"
+    },
+    {
+      "group": "tests",
+      "id": "tests-02",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001F"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "paraphrase",
+        "japanese"
+      ],
+      "text": "検索ロジック更新で品質が落ちないか測る"
+    },
+    {
+      "group": "tests",
+      "id": "tests-03",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001F"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "short",
+        "japanese"
+      ],
+      "text": "評価"
+    },
+    {
+      "group": "tests",
+      "id": "tests-04",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "identifier",
+        "mixed"
+      ],
+      "text": "Recall@3"
+    },
+    {
+      "group": "tests",
+      "id": "tests-05",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001F"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "url",
+        "exact"
+      ],
+      "text": "https://github.com/example-fixtures/tests/issues/142"
+    },
+    {
+      "group": "tests",
+      "id": "tests-06",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001F"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "issue",
+        "exact"
+      ],
+      "text": "tests #142"
+    },
+    {
+      "group": "tests",
+      "id": "tests-07",
+      "includeArchived": false,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001F"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "noise",
+        "ocr_stt"
+      ],
+      "text": "回帰評価の検証"
+    },
+    {
+      "group": "tests",
+      "id": "tests-08",
+      "includeArchived": true,
+      "relevant": [
+        {
+          "grade": 2,
+          "recordID": "01JSEARCH0000000000000001E"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001F"
+        },
+        {
+          "grade": 1,
+          "recordID": "01JSEARCH0000000000000001G"
+        }
+      ],
+      "split": "holdout",
+      "tags": [
+        "archived",
+        "filter"
+      ],
+      "text": "回帰評価"
+    },
+    {
+      "group": "none-dev-0",
+      "id": "none-dev-0",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "dev",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "ペンギンが砂漠で踊る写真"
+    },
+    {
+      "group": "none-dev-1",
+      "id": "none-dev-1",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "dev",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "ERR_MISSING_Z9Q8X7"
+    },
+    {
+      "group": "none-dev-2",
+      "id": "none-dev-2",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "dev",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "https://example.invalid/unknown/999999"
+    },
+    {
+      "group": "none-dev-3",
+      "id": "none-dev-3",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "dev",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "#999999"
+    },
+    {
+      "group": "none-dev-4",
+      "id": "none-dev-4",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "dev",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "量子化されていない火星の植木鉢"
+    },
+    {
+      "group": "none-dev-5",
+      "id": "none-dev-5",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "dev",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "全く存在しないプロジェクト Q7J9V3"
+    },
+    {
+      "group": "none-dev-6",
+      "id": "none-dev-6",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "dev",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "未登録の領収書 987654321"
+    },
+    {
+      "group": "none-dev-7",
+      "id": "none-dev-7",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "dev",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "NO_SUCH_API_7319"
+    },
+    {
+      "group": "none-holdout-0",
+      "id": "none-holdout-0",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "holdout",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "海底にある架空の恐竜牧場"
+    },
+    {
+      "group": "none-holdout-1",
+      "id": "none-holdout-1",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "holdout",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "ERR_ABSENT_W2K4B6"
+    },
+    {
+      "group": "none-holdout-2",
+      "id": "none-holdout-2",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "holdout",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "https://example.invalid/absent/888888"
+    },
+    {
+      "group": "none-holdout-3",
+      "id": "none-holdout-3",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "holdout",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "#888888"
+    },
+    {
+      "group": "none-holdout-4",
+      "id": "none-holdout-4",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "holdout",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "金星の空飛ぶ味噌汁"
+    },
+    {
+      "group": "none-holdout-5",
+      "id": "none-holdout-5",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "holdout",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "未発見のソフトウェア X8C6M4"
+    },
+    {
+      "group": "none-holdout-6",
+      "id": "none-holdout-6",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "holdout",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "存在しない請求番号 123456789"
+    },
+    {
+      "group": "none-holdout-7",
+      "id": "none-holdout-7",
+      "includeArchived": false,
+      "relevant": [],
+      "split": "holdout",
+      "tags": [
+        "no_answer"
+      ],
+      "text": "NONEXISTENT_FUNCTION_8421"
+    }
+  ],
+  "schemaVersion": 1
+}

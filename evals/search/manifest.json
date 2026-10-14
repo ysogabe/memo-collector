@@ -1,0 +1,15 @@
+{
+  "corpusID": "search-ja-v1",
+  "files": {
+    "queries.json": "bd148f126a133e06a1c672258fc72157fda1ede058e3a7700bb6c36f7f666c9d",
+    "records.json": "84e46b44b3856a4e41a04a9d50b481f8363c0131afc7ec36b6078b7c5bf6670a"
+  },
+  "generator": "generate.py",
+  "license": "CC0-1.0",
+  "provenance": "Authored synthetic Japanese text; no personal records, screenshots, audio, or upstream evaluation data copied.",
+  "queries": 144,
+  "records": 48,
+  "schemaVersion": 1,
+  "seed": 0,
+  "splitPolicy": "Topic groups, their records and all paraphrases belong to exactly one dev/holdout split."
+}
