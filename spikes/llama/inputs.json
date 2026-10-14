@@ -1,0 +1,1221 @@
+{
+  "schemaVersion": 1,
+  "inputs": [
+    {
+      "id": "doc:01JSEARCH00000000000000001",
+      "kind": "document",
+      "text": "SQLite の日本語検索にキーワード検索を足す方式を比較する。API検索 の実装を読む。",
+      "title": "日本語検索 · Issue #6"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000002",
+      "kind": "document",
+      "text": "日本語検索の比較資料。先行方式と新方式を検証する。",
+      "title": "日本語検索 · Issue #6"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000003",
+      "kind": "document",
+      "text": "完了した日本語検索の過去メモ。SQLite の日本語検索にキーワード検索を足す方式を比較する",
+      "title": "日本語検索 · Issue #6 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000004",
+      "kind": "document",
+      "text": "音声認識で固有名詞の文字起こし誤りを修正する辞書を作る。transcribe の実装を読む。",
+      "title": "音声転写 · Issue #60"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000005",
+      "kind": "document",
+      "text": "音声転写の比較資料。先行方式と新方式を検証する。",
+      "title": "音声転写 · Issue #60"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000006",
+      "kind": "document",
+      "text": "完了した音声転写の過去メモ。音声認識で固有名詞の文字起こし誤りを修正する辞書を作る",
+      "title": "音声転写 · Issue #60 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000007",
+      "kind": "document",
+      "text": "来週の打ち合わせの日時と会議室をカレンダーへ登録する。createEvent の実装を読む。",
+      "title": "予定登録 · Issue #18"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000008",
+      "kind": "document",
+      "text": "予定登録の比較資料。先行方式と新方式を検証する。",
+      "title": "予定登録 · Issue #18"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000009",
+      "kind": "document",
+      "text": "完了した予定登録の過去メモ。来週の打ち合わせの日時と会議室をカレンダーへ登録する",
+      "title": "予定登録 · Issue #18 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000A",
+      "kind": "document",
+      "text": "バッテリー駆動の低電力モードでは過去の埋め込み処理を後回しにする。ANE の実装を読む。",
+      "title": "低電力 · Issue #25"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000B",
+      "kind": "document",
+      "text": "低電力の比較資料。先行方式と新方式を検証する。",
+      "title": "低電力 · Issue #25"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000C",
+      "kind": "document",
+      "text": "完了した低電力の過去メモ。バッテリー駆動の低電力モードでは過去の埋め込み処理を後回しにする",
+      "title": "低電力 · Issue #25 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000D",
+      "kind": "document",
+      "text": "画面に含まれる秘密情報を検出してマスク画像だけを渡す。scanSecrets の実装を読む。",
+      "title": "秘密保護 · Issue #31"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000E",
+      "kind": "document",
+      "text": "秘密保護の比較資料。先行方式と新方式を検証する。",
+      "title": "秘密保護 · Issue #31"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000F",
+      "kind": "document",
+      "text": "完了した秘密保護の過去メモ。画面に含まれる秘密情報を検出してマスク画像だけを渡す",
+      "title": "秘密保護 · Issue #31 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000G",
+      "kind": "document",
+      "text": "埋め込み索引の世代を保ち再構築が失敗しても旧世代に戻す。setEmbedding の実装を読む。",
+      "title": "世代切替 · Issue #41"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000H",
+      "kind": "document",
+      "text": "世代切替の比較資料。先行方式と新方式を検証する。",
+      "title": "世代切替 · Issue #41"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000J",
+      "kind": "document",
+      "text": "完了した世代切替の過去メモ。埋め込み索引の世代を保ち再構築が失敗しても旧世代に戻す",
+      "title": "世代切替 · Issue #41 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000K",
+      "kind": "document",
+      "text": "HTTP の接続が切れたら回数上限付きの指数バックオフで再試行する。URLSession の実装を読む。",
+      "title": "通信再試行 · Issue #51"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000M",
+      "kind": "document",
+      "text": "通信再試行の比較資料。先行方式と新方式を検証する。",
+      "title": "通信再試行 · Issue #51"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000N",
+      "kind": "document",
+      "text": "完了した通信再試行の過去メモ。HTTP の接続が切れたら回数上限付きの指数バックオフで再試行する",
+      "title": "通信再試行 · Issue #51 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000P",
+      "kind": "document",
+      "text": "非同期ジョブを保存しアプリの再起動後に未完了の要求を再開する。resumePending の実装を読む。",
+      "title": "ジョブ再開 · Issue #61"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000Q",
+      "kind": "document",
+      "text": "ジョブ再開の比較資料。先行方式と新方式を検証する。",
+      "title": "ジョブ再開 · Issue #61"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000R",
+      "kind": "document",
+      "text": "完了したジョブ再開の過去メモ。非同期ジョブを保存しアプリの再起動後に未完了の要求を再開する",
+      "title": "ジョブ再開 · Issue #61 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000S",
+      "kind": "document",
+      "text": "画像を bicubic で縮小し前処理の画素値を参照と一致させる。resizeBicubic の実装を読む。",
+      "title": "画像縮小 · Issue #72"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000T",
+      "kind": "document",
+      "text": "画像縮小の比較資料。先行方式と新方式を検証する。",
+      "title": "画像縮小 · Issue #72"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000V",
+      "kind": "document",
+      "text": "完了した画像縮小の過去メモ。画像を bicubic で縮小し前処理の画素値を参照と一致させる",
+      "title": "画像縮小 · Issue #72 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000W",
+      "kind": "document",
+      "text": "意味検索と全文検索の順位を RRF で融合して検索品質を比較する。RRF の実装を読む。",
+      "title": "順位融合 · Issue #82"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000X",
+      "kind": "document",
+      "text": "順位融合の比較資料。先行方式と新方式を検証する。",
+      "title": "順位融合 · Issue #82"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000Y",
+      "kind": "document",
+      "text": "完了した順位融合の過去メモ。意味検索と全文検索の順位を RRF で融合して検索品質を比較する",
+      "title": "順位融合 · Issue #82 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000000Z",
+      "kind": "document",
+      "text": "使っていない推論モデルを解放しプロセスの物理メモリを計測する。unload の実装を読む。",
+      "title": "メモリ解放 · Issue #92"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000010",
+      "kind": "document",
+      "text": "メモリ解放の比較資料。先行方式と新方式を検証する。",
+      "title": "メモリ解放 · Issue #92"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000011",
+      "kind": "document",
+      "text": "完了したメモリ解放の過去メモ。使っていない推論モデルを解放しプロセスの物理メモリを計測する",
+      "title": "メモリ解放 · Issue #92 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000012",
+      "kind": "document",
+      "text": "ERR_TOKEN_EXPIRED の原因と期限切れセッションの更新を調査する。ERR_TOKEN_EXPIRED の実装を読む。",
+      "title": "エラー診断 · Issue #102"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000013",
+      "kind": "document",
+      "text": "エラー診断の比較資料。先行方式と新方式を検証する。",
+      "title": "エラー診断 · Issue #102"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000014",
+      "kind": "document",
+      "text": "完了したエラー診断の過去メモ。ERR_TOKEN_EXPIRED の原因と期限切れセッションの更新を調査する",
+      "title": "エラー診断 · Issue #102 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000015",
+      "kind": "document",
+      "text": "ホットキーで画面と声のメモを素早く保存する。captureFrontmost の実装を読む。",
+      "title": "即時記録 · Issue #112"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000016",
+      "kind": "document",
+      "text": "即時記録の比較資料。先行方式と新方式を検証する。",
+      "title": "即時記録 · Issue #112"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000017",
+      "kind": "document",
+      "text": "完了した即時記録の過去メモ。ホットキーで画面と声のメモを素早く保存する",
+      "title": "即時記録 · Issue #112 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000018",
+      "kind": "document",
+      "text": "needs_review の画像は確認が済むまでエージェントに渡さない。needs_review の実装を読む。",
+      "title": "画像手渡し · Issue #122"
+    },
+    {
+      "id": "doc:01JSEARCH00000000000000019",
+      "kind": "document",
+      "text": "画像手渡しの比較資料。先行方式と新方式を検証する。",
+      "title": "画像手渡し · Issue #122"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000001A",
+      "kind": "document",
+      "text": "完了した画像手渡しの過去メモ。needs_review の画像は確認が済むまでエージェントに渡さない",
+      "title": "画像手渡し · Issue #122 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000001B",
+      "kind": "document",
+      "text": "固定 revision のモデルを取得し sha256 を検証してから使う。sha256 の実装を読む。",
+      "title": "モデル取得 · Issue #132"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000001C",
+      "kind": "document",
+      "text": "モデル取得の比較資料。先行方式と新方式を検証する。",
+      "title": "モデル取得 · Issue #132"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000001D",
+      "kind": "document",
+      "text": "完了したモデル取得の過去メモ。固定 revision のモデルを取得し sha256 を検証してから使う",
+      "title": "モデル取得 · Issue #132 過去資料"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000001E",
+      "kind": "document",
+      "text": "検索の正解集合を固定して Recall と MRR の回帰を検出する。Recall@3 の実装を読む。",
+      "title": "回帰評価 · Issue #142"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000001F",
+      "kind": "document",
+      "text": "回帰評価の比較資料。先行方式と新方式を検証する。",
+      "title": "回帰評価 · Issue #142"
+    },
+    {
+      "id": "doc:01JSEARCH0000000000000001G",
+      "kind": "document",
+      "text": "完了した回帰評価の過去メモ。検索の正解集合を固定して Recall と MRR の回帰を検出する",
+      "title": "回帰評価 · Issue #142 過去資料"
+    },
+    {
+      "id": "query:search-01",
+      "kind": "query",
+      "text": "日本語検索"
+    },
+    {
+      "id": "query:search-02",
+      "kind": "query",
+      "text": "曖昧なメモを日本語で探す設計"
+    },
+    {
+      "id": "query:search-03",
+      "kind": "query",
+      "text": "検索"
+    },
+    {
+      "id": "query:search-04",
+      "kind": "query",
+      "text": "API検索"
+    },
+    {
+      "id": "query:search-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/search/issues/6"
+    },
+    {
+      "id": "query:search-06",
+      "kind": "query",
+      "text": "search #6"
+    },
+    {
+      "id": "query:search-07",
+      "kind": "query",
+      "text": "日本語検策の検証"
+    },
+    {
+      "id": "query:search-08",
+      "kind": "query",
+      "text": "日本語検索"
+    },
+    {
+      "id": "query:search-09",
+      "kind": "query",
+      "text": "日本語"
+    },
+    {
+      "id": "query:search-10",
+      "kind": "query",
+      "text": "ＡＰＩ検索"
+    },
+    {
+      "id": "query:audio-01",
+      "kind": "query",
+      "text": "音声転写"
+    },
+    {
+      "id": "query:audio-02",
+      "kind": "query",
+      "text": "話した言葉を正確に文字にする方法"
+    },
+    {
+      "id": "query:audio-03",
+      "kind": "query",
+      "text": "音声"
+    },
+    {
+      "id": "query:audio-04",
+      "kind": "query",
+      "text": "transcribe"
+    },
+    {
+      "id": "query:audio-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/audio/issues/60"
+    },
+    {
+      "id": "query:audio-06",
+      "kind": "query",
+      "text": "audio #60"
+    },
+    {
+      "id": "query:audio-07",
+      "kind": "query",
+      "text": "音声転舎の検証"
+    },
+    {
+      "id": "query:audio-08",
+      "kind": "query",
+      "text": "音声転写"
+    },
+    {
+      "id": "query:audio-09",
+      "kind": "query",
+      "text": "音声転"
+    },
+    {
+      "id": "query:audio-10",
+      "kind": "query",
+      "text": "ｔｒａｎｓｃｒｉｂｅ"
+    },
+    {
+      "id": "query:calendar-01",
+      "kind": "query",
+      "text": "予定登録"
+    },
+    {
+      "id": "query:calendar-02",
+      "kind": "query",
+      "text": "次の会議を忘れないよう予定表に入れる"
+    },
+    {
+      "id": "query:calendar-03",
+      "kind": "query",
+      "text": "予定"
+    },
+    {
+      "id": "query:calendar-04",
+      "kind": "query",
+      "text": "createEvent"
+    },
+    {
+      "id": "query:calendar-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/calendar/issues/18"
+    },
+    {
+      "id": "query:calendar-06",
+      "kind": "query",
+      "text": "calendar #18"
+    },
+    {
+      "id": "query:calendar-07",
+      "kind": "query",
+      "text": "予定登録の検証"
+    },
+    {
+      "id": "query:calendar-08",
+      "kind": "query",
+      "text": "予定登録"
+    },
+    {
+      "id": "query:calendar-09",
+      "kind": "query",
+      "text": "予定登"
+    },
+    {
+      "id": "query:calendar-10",
+      "kind": "query",
+      "text": "ｃｒｅａｔｅＥｖｅｎｔ"
+    },
+    {
+      "id": "query:battery-01",
+      "kind": "query",
+      "text": "低電力"
+    },
+    {
+      "id": "query:battery-02",
+      "kind": "query",
+      "text": "電池を長持ちさせながら索引を作る"
+    },
+    {
+      "id": "query:battery-03",
+      "kind": "query",
+      "text": "電池"
+    },
+    {
+      "id": "query:battery-04",
+      "kind": "query",
+      "text": "ANE"
+    },
+    {
+      "id": "query:battery-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/battery/issues/25"
+    },
+    {
+      "id": "query:battery-06",
+      "kind": "query",
+      "text": "battery #25"
+    },
+    {
+      "id": "query:battery-07",
+      "kind": "query",
+      "text": "低電カの検証"
+    },
+    {
+      "id": "query:battery-08",
+      "kind": "query",
+      "text": "低電力"
+    },
+    {
+      "id": "query:battery-09",
+      "kind": "query",
+      "text": "低電力"
+    },
+    {
+      "id": "query:battery-10",
+      "kind": "query",
+      "text": "ＡＮＥ"
+    },
+    {
+      "id": "query:privacy-01",
+      "kind": "query",
+      "text": "秘密保護"
+    },
+    {
+      "id": "query:privacy-02",
+      "kind": "query",
+      "text": "パスワードの写ったスクショを安全に共有する"
+    },
+    {
+      "id": "query:privacy-03",
+      "kind": "query",
+      "text": "秘密"
+    },
+    {
+      "id": "query:privacy-04",
+      "kind": "query",
+      "text": "scanSecrets"
+    },
+    {
+      "id": "query:privacy-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/privacy/issues/31"
+    },
+    {
+      "id": "query:privacy-06",
+      "kind": "query",
+      "text": "privacy #31"
+    },
+    {
+      "id": "query:privacy-07",
+      "kind": "query",
+      "text": "秘蜜保護の検証"
+    },
+    {
+      "id": "query:privacy-08",
+      "kind": "query",
+      "text": "秘密保護"
+    },
+    {
+      "id": "query:privacy-09",
+      "kind": "query",
+      "text": "秘密保"
+    },
+    {
+      "id": "query:privacy-10",
+      "kind": "query",
+      "text": "ｓｃａｎＳｅｃｒｅｔｓ"
+    },
+    {
+      "id": "query:database-01",
+      "kind": "query",
+      "text": "世代切替"
+    },
+    {
+      "id": "query:database-02",
+      "kind": "query",
+      "text": "検索モデル変更中も元のデータを守る"
+    },
+    {
+      "id": "query:database-03",
+      "kind": "query",
+      "text": "索引"
+    },
+    {
+      "id": "query:database-04",
+      "kind": "query",
+      "text": "setEmbedding"
+    },
+    {
+      "id": "query:database-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/database/issues/41"
+    },
+    {
+      "id": "query:database-06",
+      "kind": "query",
+      "text": "database #41"
+    },
+    {
+      "id": "query:database-07",
+      "kind": "query",
+      "text": "世帯切替の検証"
+    },
+    {
+      "id": "query:database-08",
+      "kind": "query",
+      "text": "世代切替"
+    },
+    {
+      "id": "query:database-09",
+      "kind": "query",
+      "text": "世代切"
+    },
+    {
+      "id": "query:database-10",
+      "kind": "query",
+      "text": "ｓｅｔＥｍｂｅｄｄｉｎｇ"
+    },
+    {
+      "id": "query:network-01",
+      "kind": "query",
+      "text": "通信再試行"
+    },
+    {
+      "id": "query:network-02",
+      "kind": "query",
+      "text": "一時的な通信失敗から自動で回復させる"
+    },
+    {
+      "id": "query:network-03",
+      "kind": "query",
+      "text": "通信"
+    },
+    {
+      "id": "query:network-04",
+      "kind": "query",
+      "text": "URLSession"
+    },
+    {
+      "id": "query:network-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/network/issues/51"
+    },
+    {
+      "id": "query:network-06",
+      "kind": "query",
+      "text": "network #51"
+    },
+    {
+      "id": "query:network-07",
+      "kind": "query",
+      "text": "通心再試行の検証"
+    },
+    {
+      "id": "query:network-08",
+      "kind": "query",
+      "text": "通信再試行"
+    },
+    {
+      "id": "query:network-09",
+      "kind": "query",
+      "text": "通信再"
+    },
+    {
+      "id": "query:network-10",
+      "kind": "query",
+      "text": "ＵＲＬＳｅｓｓｉｏｎ"
+    },
+    {
+      "id": "query:queue-01",
+      "kind": "query",
+      "text": "ジョブ再開"
+    },
+    {
+      "id": "query:queue-02",
+      "kind": "query",
+      "text": "アプリが落ちても処理の続きをやる"
+    },
+    {
+      "id": "query:queue-03",
+      "kind": "query",
+      "text": "再開"
+    },
+    {
+      "id": "query:queue-04",
+      "kind": "query",
+      "text": "resumePending"
+    },
+    {
+      "id": "query:queue-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/queue/issues/61"
+    },
+    {
+      "id": "query:queue-06",
+      "kind": "query",
+      "text": "queue #61"
+    },
+    {
+      "id": "query:queue-07",
+      "kind": "query",
+      "text": "ジョプ再開の検証"
+    },
+    {
+      "id": "query:queue-08",
+      "kind": "query",
+      "text": "ジョブ再開"
+    },
+    {
+      "id": "query:queue-09",
+      "kind": "query",
+      "text": "ジョブ"
+    },
+    {
+      "id": "query:queue-10",
+      "kind": "query",
+      "text": "ｒｅｓｕｍｅＰｅｎｄｉｎｇ"
+    },
+    {
+      "id": "query:image-01",
+      "kind": "query",
+      "text": "画像縮小"
+    },
+    {
+      "id": "query:image-02",
+      "kind": "query",
+      "text": "スクショを小さくして埋め込みの品質を保つ"
+    },
+    {
+      "id": "query:image-03",
+      "kind": "query",
+      "text": "画像"
+    },
+    {
+      "id": "query:image-04",
+      "kind": "query",
+      "text": "resizeBicubic"
+    },
+    {
+      "id": "query:image-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/image/issues/72"
+    },
+    {
+      "id": "query:image-06",
+      "kind": "query",
+      "text": "image #72"
+    },
+    {
+      "id": "query:image-07",
+      "kind": "query",
+      "text": "画象縮小の検証"
+    },
+    {
+      "id": "query:image-08",
+      "kind": "query",
+      "text": "画像縮小"
+    },
+    {
+      "id": "query:image-09",
+      "kind": "query",
+      "text": "画像縮"
+    },
+    {
+      "id": "query:image-10",
+      "kind": "query",
+      "text": "ｒｅｓｉｚｅＢｉｃｕｂｉｃ"
+    },
+    {
+      "id": "query:ranking-01",
+      "kind": "query",
+      "text": "順位融合"
+    },
+    {
+      "id": "query:ranking-02",
+      "kind": "query",
+      "text": "単語の一致と意味の近さを両立して探す"
+    },
+    {
+      "id": "query:ranking-03",
+      "kind": "query",
+      "text": "順位"
+    },
+    {
+      "id": "query:ranking-04",
+      "kind": "query",
+      "text": "RRF"
+    },
+    {
+      "id": "query:ranking-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/ranking/issues/82"
+    },
+    {
+      "id": "query:ranking-06",
+      "kind": "query",
+      "text": "ranking #82"
+    },
+    {
+      "id": "query:ranking-07",
+      "kind": "query",
+      "text": "順立融合の検証"
+    },
+    {
+      "id": "query:ranking-08",
+      "kind": "query",
+      "text": "順位融合"
+    },
+    {
+      "id": "query:ranking-09",
+      "kind": "query",
+      "text": "順位融"
+    },
+    {
+      "id": "query:ranking-10",
+      "kind": "query",
+      "text": "ＲＲＦ"
+    },
+    {
+      "id": "query:memory-01",
+      "kind": "query",
+      "text": "メモリ解放"
+    },
+    {
+      "id": "query:memory-02",
+      "kind": "query",
+      "text": "常駐アプリのメモリ消費を減らす"
+    },
+    {
+      "id": "query:memory-03",
+      "kind": "query",
+      "text": "解放"
+    },
+    {
+      "id": "query:memory-04",
+      "kind": "query",
+      "text": "unload"
+    },
+    {
+      "id": "query:memory-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/memory/issues/92"
+    },
+    {
+      "id": "query:memory-06",
+      "kind": "query",
+      "text": "memory #92"
+    },
+    {
+      "id": "query:memory-07",
+      "kind": "query",
+      "text": "メモリー解放の検証"
+    },
+    {
+      "id": "query:memory-08",
+      "kind": "query",
+      "text": "メモリ解放"
+    },
+    {
+      "id": "query:memory-09",
+      "kind": "query",
+      "text": "メモリ"
+    },
+    {
+      "id": "query:memory-10",
+      "kind": "query",
+      "text": "ｕｎｌｏａｄ"
+    },
+    {
+      "id": "query:error-01",
+      "kind": "query",
+      "text": "エラー診断"
+    },
+    {
+      "id": "query:error-02",
+      "kind": "query",
+      "text": "ログインが突然切れるエラーの対処"
+    },
+    {
+      "id": "query:error-03",
+      "kind": "query",
+      "text": "障害"
+    },
+    {
+      "id": "query:error-04",
+      "kind": "query",
+      "text": "ERR_TOKEN_EXPIRED"
+    },
+    {
+      "id": "query:error-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/error/issues/102"
+    },
+    {
+      "id": "query:error-06",
+      "kind": "query",
+      "text": "error #102"
+    },
+    {
+      "id": "query:error-07",
+      "kind": "query",
+      "text": "エラ一診断の検証"
+    },
+    {
+      "id": "query:error-08",
+      "kind": "query",
+      "text": "エラー診断"
+    },
+    {
+      "id": "query:error-09",
+      "kind": "query",
+      "text": "エラー"
+    },
+    {
+      "id": "query:error-10",
+      "kind": "query",
+      "text": "ＥＲＲ＿ＴＯＫＥＮ＿ＥＸＰＩＲＥＤ"
+    },
+    {
+      "id": "query:record-01",
+      "kind": "query",
+      "text": "即時記録"
+    },
+    {
+      "id": "query:record-02",
+      "kind": "query",
+      "text": "見ている画面に一言音声でメモを付ける"
+    },
+    {
+      "id": "query:record-03",
+      "kind": "query",
+      "text": "記録"
+    },
+    {
+      "id": "query:record-04",
+      "kind": "query",
+      "text": "captureFrontmost"
+    },
+    {
+      "id": "query:record-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/record/issues/112"
+    },
+    {
+      "id": "query:record-06",
+      "kind": "query",
+      "text": "record #112"
+    },
+    {
+      "id": "query:record-07",
+      "kind": "query",
+      "text": "即時記緑の検証"
+    },
+    {
+      "id": "query:record-08",
+      "kind": "query",
+      "text": "即時記録"
+    },
+    {
+      "id": "query:record-09",
+      "kind": "query",
+      "text": "即時記"
+    },
+    {
+      "id": "query:record-10",
+      "kind": "query",
+      "text": "ｃａｐｔｕｒｅＦｒｏｎｔｍｏｓｔ"
+    },
+    {
+      "id": "query:guard-01",
+      "kind": "query",
+      "text": "画像手渡し"
+    },
+    {
+      "id": "query:guard-02",
+      "kind": "query",
+      "text": "確認が必要な画像の外部公開を止める"
+    },
+    {
+      "id": "query:guard-03",
+      "kind": "query",
+      "text": "確認"
+    },
+    {
+      "id": "query:guard-04",
+      "kind": "query",
+      "text": "needs_review"
+    },
+    {
+      "id": "query:guard-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/guard/issues/122"
+    },
+    {
+      "id": "query:guard-06",
+      "kind": "query",
+      "text": "guard #122"
+    },
+    {
+      "id": "query:guard-07",
+      "kind": "query",
+      "text": "画象手渡レの検証"
+    },
+    {
+      "id": "query:guard-08",
+      "kind": "query",
+      "text": "画像手渡し"
+    },
+    {
+      "id": "query:guard-09",
+      "kind": "query",
+      "text": "画像手"
+    },
+    {
+      "id": "query:guard-10",
+      "kind": "query",
+      "text": "ｎｅｅｄｓ＿ｒｅｖｉｅｗ"
+    },
+    {
+      "id": "query:model-01",
+      "kind": "query",
+      "text": "モデル取得"
+    },
+    {
+      "id": "query:model-02",
+      "kind": "query",
+      "text": "ダウンロードした推論モデルが正しいか確認する"
+    },
+    {
+      "id": "query:model-03",
+      "kind": "query",
+      "text": "取得"
+    },
+    {
+      "id": "query:model-04",
+      "kind": "query",
+      "text": "sha256"
+    },
+    {
+      "id": "query:model-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/model/issues/132"
+    },
+    {
+      "id": "query:model-06",
+      "kind": "query",
+      "text": "model #132"
+    },
+    {
+      "id": "query:model-07",
+      "kind": "query",
+      "text": "モデノレ取得の検証"
+    },
+    {
+      "id": "query:model-08",
+      "kind": "query",
+      "text": "モデル取得"
+    },
+    {
+      "id": "query:model-09",
+      "kind": "query",
+      "text": "モデル"
+    },
+    {
+      "id": "query:model-10",
+      "kind": "query",
+      "text": "ｓｈａ２５６"
+    },
+    {
+      "id": "query:tests-01",
+      "kind": "query",
+      "text": "回帰評価"
+    },
+    {
+      "id": "query:tests-02",
+      "kind": "query",
+      "text": "検索ロジック更新で品質が落ちないか測る"
+    },
+    {
+      "id": "query:tests-03",
+      "kind": "query",
+      "text": "評価"
+    },
+    {
+      "id": "query:tests-04",
+      "kind": "query",
+      "text": "Recall@3"
+    },
+    {
+      "id": "query:tests-05",
+      "kind": "query",
+      "text": "https://github.com/example-fixtures/tests/issues/142"
+    },
+    {
+      "id": "query:tests-06",
+      "kind": "query",
+      "text": "tests #142"
+    },
+    {
+      "id": "query:tests-07",
+      "kind": "query",
+      "text": "回帰評値の検証"
+    },
+    {
+      "id": "query:tests-08",
+      "kind": "query",
+      "text": "回帰評価"
+    },
+    {
+      "id": "query:tests-09",
+      "kind": "query",
+      "text": "回帰評"
+    },
+    {
+      "id": "query:tests-10",
+      "kind": "query",
+      "text": "Ｒｅｃａｌｌ＠３"
+    },
+    {
+      "id": "query:none-dev-0",
+      "kind": "query",
+      "text": "ペンギンが砂漠で踊る写真"
+    },
+    {
+      "id": "query:none-dev-1",
+      "kind": "query",
+      "text": "ERR_MISSING_Z9Q8X7"
+    },
+    {
+      "id": "query:none-dev-2",
+      "kind": "query",
+      "text": "https://example.invalid/unknown/999999"
+    },
+    {
+      "id": "query:none-dev-3",
+      "kind": "query",
+      "text": "#999999"
+    },
+    {
+      "id": "query:none-dev-4",
+      "kind": "query",
+      "text": "量子化されていない火星の植木鉢"
+    },
+    {
+      "id": "query:none-dev-5",
+      "kind": "query",
+      "text": "全く存在しないプロジェクト Q7J9V3"
+    },
+    {
+      "id": "query:none-dev-6",
+      "kind": "query",
+      "text": "未登録の領収書 987654321"
+    },
+    {
+      "id": "query:none-dev-7",
+      "kind": "query",
+      "text": "NO_SUCH_API_7319"
+    },
+    {
+      "id": "query:none-holdout-0",
+      "kind": "query",
+      "text": "海底にある架空の恐竜牧場"
+    },
+    {
+      "id": "query:none-holdout-1",
+      "kind": "query",
+      "text": "ERR_ABSENT_W2K4B6"
+    },
+    {
+      "id": "query:none-holdout-2",
+      "kind": "query",
+      "text": "https://example.invalid/absent/888888"
+    },
+    {
+      "id": "query:none-holdout-3",
+      "kind": "query",
+      "text": "#888888"
+    },
+    {
+      "id": "query:none-holdout-4",
+      "kind": "query",
+      "text": "金星の空飛ぶ味噌汁"
+    },
+    {
+      "id": "query:none-holdout-5",
+      "kind": "query",
+      "text": "未発見のソフトウェア X8C6M4"
+    },
+    {
+      "id": "query:none-holdout-6",
+      "kind": "query",
+      "text": "存在しない請求番号 123456789"
+    },
+    {
+      "id": "query:none-holdout-7",
+      "kind": "query",
+      "text": "NONEXISTENT_FUNCTION_8421"
+    },
+    {
+      "id": "image:s01",
+      "kind": "image",
+      "image": "poc/fixtures/screens/s01.png"
+    },
+    {
+      "id": "fused:s01",
+      "kind": "fused",
+      "image": "poc/fixtures/screens/s01.png",
+      "text": "この画面の内容を後で確認する",
+      "title": "検証用の画面"
+    },
+    {
+      "id": "image:s02",
+      "kind": "image",
+      "image": "poc/fixtures/screens/s02.png"
+    },
+    {
+      "id": "fused:s02",
+      "kind": "fused",
+      "image": "poc/fixtures/screens/s02.png",
+      "text": "この画面の内容を後で確認する",
+      "title": "検証用の画面"
+    },
+    {
+      "id": "image:s03",
+      "kind": "image",
+      "image": "poc/fixtures/screens/s03.png"
+    },
+    {
+      "id": "fused:s03",
+      "kind": "fused",
+      "image": "poc/fixtures/screens/s03.png",
+      "text": "この画面の内容を後で確認する",
+      "title": "検証用の画面"
+    },
+    {
+      "id": "image:s04",
+      "kind": "image",
+      "image": "poc/fixtures/screens/s04.png"
+    },
+    {
+      "id": "fused:s04",
+      "kind": "fused",
+      "image": "poc/fixtures/screens/s04.png",
+      "text": "この画面の内容を後で確認する",
+      "title": "検証用の画面"
+    }
+  ]
+}

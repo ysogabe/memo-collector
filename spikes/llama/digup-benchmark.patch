@@ -1,0 +1,46 @@
+diff --git a/Sources/LlamaRuntime/LlamaEmbedder.swift b/Sources/LlamaRuntime/LlamaEmbedder.swift
+index cb31991..3f03b7c 100644
+--- a/Sources/LlamaRuntime/LlamaEmbedder.swift
++++ b/Sources/LlamaRuntime/LlamaEmbedder.swift
+@@ -1,4 +1,5 @@
+ import CLlama
++import CryptoKit
+ import DigUpKit
+ import Foundation
+ 
+@@ -164,17 +165,32 @@ public final class LlamaEmbedder: Embedder {
+         }
+     }
+ 
++    public func debugTextTokens(_ text: String) -> [Int32] { tokenize(text) }
++    public func debugImageHash(_ path: String, budget: Int) throws -> String {
++        let bitmap=try load(path,image:true,budget:budget)
++        defer { mtmd_bitmap_free(bitmap) }
++        let width=mtmd_bitmap_get_nx(bitmap), height=mtmd_bitmap_get_ny(bitmap)
++        let bytes=Data(bytes:mtmd_bitmap_get_data(bitmap),count:Int(width*height*3))
++        return "\(width)x\(height):" + SHA256.hash(data:bytes).map { String(format:"%02x",$0) }.joined()
++    }
++    public func embedFused(text: String, title: String?, path: String, budget: Int) throws -> [Float] {
++        try embedMedia(path, image: true, budget: budget, prefix: Prompts.document(title: title, text: text))
++    }
++
+     // MARK: Media
+ 
+-    private func embedMedia(_ path: String, image: Bool, budget: Int) throws -> [Float] {
++    private func embedMedia(_ path: String, image: Bool, budget: Int, prefix: String? = nil) throws -> [Float] {
+         let bitmap = try load(path, image: image, budget: budget)
+         defer { mtmd_bitmap_free(bitmap) }
+         let chunks = mtmd_input_chunks_init()
+         defer { mtmd_input_chunks_free(chunks) }
+         var bitmaps: [OpaquePointer?] = [bitmap]
+         let status = String(cString: mtmd_default_marker()).withCString { marker in
+-            var text = mtmd_input_text(text: marker, text_len: strlen(marker), add_special: true, parse_special: true)
+-            return mtmd_tokenize(media, chunks, &text, &bitmaps, 1)
++            let framed = prefix.map { $0 + " " + String(cString: marker) } ?? String(cString: marker)
++            return framed.withCString { value in
++                var text = mtmd_input_text(text: value, text_len: strlen(value), add_special: true, parse_special: true)
++                return mtmd_tokenize(media, chunks, &text, &bitmaps, 1)
++            }
+         }
+         guard status == 0 else { throw LlamaError("can't tokenize \(path) (\(status))") }
+         reset()
