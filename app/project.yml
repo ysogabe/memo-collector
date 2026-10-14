@@ -93,6 +93,7 @@ targets:
       - path: ContextCapture/App/Live/LiveGuardReviewer.swift
       - path: ContextCapture/App/Live/ModelPreparationPipeline.swift
       - path: ContextCapture/App/Live/ModelSlots.swift
+      - path: ContextCapture/App/Live/HotKeyController.swift
       # 詳細ビューの保存（RecordModifying.modify）。Clipboard と DateText のために InboxViewModel / Theme も入れる。
       - path: ContextCapture/UI/DetailViewModel.swift
       - path: ContextCapture/UI/InboxViewModel.swift

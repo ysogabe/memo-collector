@@ -64,6 +64,7 @@ final class FakeRecorder: AudioRecording, @unchecked Sendable {
     let startDelay = Box<Duration>(.zero)
     let samples = Box<[Float]>(Array(repeating: 0.1, count: 16_000))
     let writesFile = Box(true)
+    let interrupted = Box(false)
     let recording = Box(false)
     let levelContinuation = Box<AsyncStream<Float>.Continuation?>(nil)
     /// stop で返した一時ファイル。
@@ -91,7 +92,7 @@ final class FakeRecorder: AudioRecording, @unchecked Sendable {
             url = u
         }
         lastFileURL.set(url)
-        return RecordedAudio(samples16kMono: s, duration: Double(s.count) / 16_000, fileURL: url)
+        return RecordedAudio(samples16kMono: s, duration: Double(s.count) / 16_000, fileURL: url, wasInterrupted: interrupted.get())
     }
 
     func cancel() async {
@@ -134,6 +135,7 @@ final class TestStore: RecordStore, @unchecked Sendable {
     let root: URL
     let records = Box<[String: ContextRecord]>([:])
     let insertError = Box<Error?>(nil)
+    let attachmentWriteFailures = Box<Set<AttachmentKind>>([])
 
     init() {
         root = FileManager.default.temporaryDirectory.appendingPathComponent("cc-store-\(UUID().uuidString)", isDirectory: true)
@@ -200,6 +202,7 @@ final class TestStore: RecordStore, @unchecked Sendable {
     }
 
     func writeAttachment(_ data: Data, id: String, kind: AttachmentKind, ext: String, capturedAt: Date) async throws -> String {
+        if attachmentWriteFailures.get().contains(kind) { throw CocoaError(.fileWriteOutOfSpace) }
         let rel = CCPaths.attachmentRelativePath(id: id, kind: kind, ext: ext, capturedAt: capturedAt)
         let url = root.appendingPathComponent(rel)
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)

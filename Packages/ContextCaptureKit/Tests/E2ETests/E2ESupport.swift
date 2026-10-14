@@ -1,3 +1,4 @@
+import CCCapture
 import AVFoundation
 import CCCore
 import CoreGraphics
@@ -112,38 +113,9 @@ enum E2EMedia {
     }
 }
 
-/// アプリの `ScreenshotEncoder`（app/ContextCapture/App/Live/ScreenshotEncoder.swift）と同じ規則:
-/// ImageIO が書ける形式を WebP → HEIC → PNG の順に選び、非可逆は品質 0.85。
-enum E2EScreenshotEncoder {
-    struct Format: Sendable, Equatable {
-        var type: UTType
-        var fileExtension: String
-    }
-
-    static let preferred: [Format] = [
-        Format(type: .webP, fileExtension: "webp"),
-        Format(type: .heic, fileExtension: "heic"),
-        Format(type: .png, fileExtension: "png"),
-    ]
-    static let quality: Double = 0.85
-
-    static let writableFormats: [Format] = {
-        let ids = Set((CGImageDestinationCopyTypeIdentifiers() as? [String]) ?? [])
-        return preferred.filter { ids.contains($0.type.identifier) }
-    }()
-
-    static func encode(_ image: CGImage) -> (data: Data, fileExtension: String)? {
-        for f in writableFormats {
-            let out = NSMutableData()
-            guard let dest = CGImageDestinationCreateWithData(out as CFMutableData, f.type.identifier as CFString, 1, nil) else { continue }
-            var props: [CFString: Any] = [:]
-            if f.type != .png { props[kCGImageDestinationLossyCompressionQuality] = quality }
-            CGImageDestinationAddImage(dest, image, props as CFDictionary)
-            if CGImageDestinationFinalize(dest) { return (out as Data, f.fileExtension) }
-        }
-        return nil
-    }
-}
+// Uses the exact same package encoder as the app.
+typealias E2EScreenshotEncoder = CCCapture.ScreenshotEncoder
+typealias E2EEncodedImage = CCCapture.EncodedImage
 
 // MARK: - 時間・統計
 

@@ -26,12 +26,16 @@ enum CaptureEvent: Sendable {
 enum CaptureNotice: Sendable, Equatable {
     /// 画面収録の許可が無く、スクショなしで保存した。
     case screenRecordingDenied
+    case recordingInterrupted
+    case recordingInterruptedAndScreenRecordingDenied
 }
 
 /// 失敗の種類（PRD §6.3）。文言は `CaptureMessages` が決める。
 enum CaptureFailure: Sendable, Equatable {
     /// 無音・短すぎる録音。記録は作らない。
     case noVoice
+    /// 録音中断で、保存できる発話を認識できなかった。
+    case recordingInterrupted
     /// 文字起こしに失敗した。音声ファイルを残して保存済み（`recordID`）。[再試行] を出す。
     case transcriptionFailed(recordID: String)
     /// マイクが使えない（権限なし・デバイスなし）。
