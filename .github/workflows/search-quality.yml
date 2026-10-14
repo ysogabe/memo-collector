@@ -1,0 +1,53 @@
+name: Search quality regression
+on:
+  pull_request:
+    paths: ['Packages/ContextCaptureKit/**', 'app/**', 'evals/search/**', 'scripts/search-*.sh', 'scripts/eval-search.sh', '.github/workflows/search-quality.yml']
+  push:
+    branches: [main]
+    paths: ['Packages/ContextCaptureKit/**', 'app/**', 'evals/search/**', 'scripts/search-*.sh', 'scripts/eval-search.sh', '.github/workflows/search-quality.yml']
+  workflow_dispatch:
+    inputs:
+      real_models:
+        description: 'Also run live models on a configured cc-search-models macOS runner'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: search-quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts:
+    # Pinned dependencies require Swift 6.4. No MLX/Metal targets are built here.
+    runs-on: xcode-27
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: swift --version
+      - name: Actual retrieval and quality gate
+        env:
+          CC_SEARCH_QA_OUTPUT: ${{ runner.temp }}/cc-search-quality
+        run: scripts/search-quality.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: search-quality
+          path: ${{ runner.temp }}/cc-search-quality/contract.json
+          if-no-files-found: warn
+  live_models:
+    if: github.event_name == 'workflow_dispatch' && inputs.real_models
+    runs-on: [self-hosted, macOS, ARM64, cc-search-models]
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Live model quality and environment-dependent latency
+        env:
+          CC_SEARCH_EVAL_OUTPUT: ${{ runner.temp }}/cc-live-search
+        run: scripts/search-model-evaluation.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: search-live-models
+          path: ${{ runner.temp }}/cc-live-search/baseline.json
+          if-no-files-found: warn
