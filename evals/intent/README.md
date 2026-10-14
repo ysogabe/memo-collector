@@ -16,6 +16,8 @@ CC_MODELS_DIR=/path/to/models "$bin/cc-models" eval-intent \
 "$bin/cc-models" eval-intent --print-question > /tmp/product-question.json
 ```
 
+手動修正後も元の確率を保持する。修正前の古い実装で確率が消えた記録は、再推論で比較する。
+
 保存済み確率を必ず集計し、`--recompute` または `--candidate` があれば製品質問文を再推論して基準にする。候補は `name`、`instructions`、全5意図の `descriptions` を持つJSON。`product` は予約名。ラベル順は製品と同じに固定する。再推論は製品と同じ特殊トークン除去・600文字制限を通し、意図のみ1 forwardする。
 
 DB順は撮影日時・ID。確率の欠落を除く前に最初の80%をdevelopment、最後の20%をholdoutに固定する。5件未満はdevelopmentだけ。外部JSONの順は入力者が固定する。holdoutで候補・しきい値を選び直さず、developmentで選んだ案を一度検証する。各setのgoldCountsと混同行列で、少数クラス・note/researchの取り違えも確認する。

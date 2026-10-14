@@ -16,6 +16,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Install Metal compiler component for MLX build
+        run: xcodebuild -downloadComponent MetalToolchain
       - name: Pure metrics, readonly DB, question validation
         env:
           CC_CHECK_SKIP_APP: '1'

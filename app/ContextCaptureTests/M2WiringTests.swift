@@ -175,13 +175,32 @@ final class TriageWiringTests: XCTestCase {
         r.triage = TriageResult(intent: .todo, intentConfidence: 0.8, mentionsDatetime: true, datetimeProbability: 0.9,
                                 model: "LiquidAI/d1-3B@051bcc4+mlx-q8")
         RecordEdits.setManualIntent(.code, on: &r)
-        XCTAssertEqual(r.triage, TriageResult.manual(intent: .code, mentionsDatetime: true))
+        XCTAssertEqual(r.triage?.intent, .code)
+        XCTAssertEqual(r.triage?.datetimeProbability, 0.9)
+        XCTAssertEqual(r.triage?.mentionsDatetime, true)
         XCTAssertEqual(r.triage?.model, TriageMarkers.manualModel)
         XCTAssertTrue(r.triage?.isManual == true)
 
         var empty = makeRecord("x")
         RecordEdits.setManualIntent(nil, on: &empty)
         XCTAssertEqual(empty.triage, TriageResult.manual(intent: nil, mentionsDatetime: false))
+    }
+
+    func testManualIntentKeepsOriginalPredictionForEvaluation() throws {
+        var r = makeRecord("名詞だけのメモ")
+        let probabilities: [Intent: Double] = [.todo: 0.05, .research: 0.4, .code: 0.05, .note: 0.45, .schedule: 0.05]
+        r.triage = TriageResult(probabilities: probabilities, datetimeProbability: 0.2, model: "test-model")
+        RecordEdits.setManualIntent(.note, on: &r)
+        XCTAssertEqual(r.triage?.intentProbabilities, probabilities)
+        XCTAssertEqual(r.triage?.intent, .note)
+        XCTAssertEqual(r.triage?.model, TriageMarkers.manualModel)
+        // Subsequent correction or removing the label must not erase the stored prediction either.
+        RecordEdits.setManualIntent(.research, on: &r)
+        RecordEdits.setManualIntent(nil, on: &r)
+        let decoded = try CCJSON.decoder().decode(ContextRecord.self, from: CCJSON.encoder().encode(r))
+        XCTAssertEqual(decoded.triage?.intentProbabilities, probabilities)
+        XCTAssertNil(decoded.triage?.intent)
+        XCTAssertEqual(decoded.triage?.datetimeProbability, 0.2)
     }
 
     /// 本物の TriageQueue（分類器などはフェイク）: アプリの依頼口から、手で変えた意図が注釈の編集後も上書きされないこと。
