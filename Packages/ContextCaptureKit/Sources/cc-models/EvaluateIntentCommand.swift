@@ -120,8 +120,8 @@ struct EvaluateIntentCommand: AsyncParsableCommand {
         if let output {
             let destination = URL(fileURLWithPath: output).standardizedFileURL
             let db = database.map { URL(fileURLWithPath: $0) } ?? paths.databaseURL
-            let protectedRoots = [paths.dataRoot, CCPaths.resolve(environment: [:]).dataRoot]
-            guard !protectedRoots.contains(where: { destination.resolvingSymlinksInPath().path.hasPrefix($0.resolvingSymlinksInPath().path + "/") }) else { throw ValidationError("アプリのデータ領域へレポートを書き込めません") }
+            let protectedRoots = [paths.dataRoot, paths.modelsRoot, CCPaths.resolve(environment: [:]).dataRoot, CCPaths.resolve(environment: [:]).modelsRoot]
+            guard !protectedRoots.contains(where: { destination.resolvingSymlinksInPath().path.hasPrefix($0.resolvingSymlinksInPath().path + "/") }) else { throw ValidationError("アプリのデータ・モデル領域へレポートを書き込めません") }
             let protected = [db, paths.databaseURL, CCPaths.resolve(environment: [:]).databaseURL] + [input].compactMap { $0 }.map { URL(fileURLWithPath: $0) } + candidate.map { URL(fileURLWithPath: $0) }
             guard !protected.contains(where: { $0.resolvingSymlinksInPath() == destination.resolvingSymlinksInPath() }) else { throw ValidationError("出力で DB・入力を上書きできません") }
             try data.write(to: destination, options: .atomic)
