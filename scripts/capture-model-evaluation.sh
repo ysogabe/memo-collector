@@ -14,7 +14,11 @@ if [[ ${CC_CAPTURE_SKIP_BUILD:-0} != 1 ]]; then
 fi
 [[ ${CC_CAPTURE_BUILD_ONLY:-0} != 1 ]] || exit 0
 measurement_stamp=$(mktemp "$out/measurement-start.XXXXXX")
-TEST_RUNNER_CC_MODELS_DIR="$CC_MODELS_DIR" TEST_RUNNER_CC_RUN_CAPTURE_BENCH=1 \
+TEST_RUNNER_CC_CAPTURE_STT_ENCODER="${CC_CAPTURE_STT_ENCODER:-ane}" \
+ TEST_RUNNER_CC_CAPTURE_STT_DECODER="${CC_CAPTURE_STT_DECODER:-ane}" \
+ TEST_RUNNER_CC_CAPTURE_QUIET_MS="${CC_CAPTURE_QUIET_MS:-0}" \
+ TEST_RUNNER_CC_CAPTURE_CONDITION_ORDER="${CC_CAPTURE_CONDITION_ORDER:-without_triage,with_triage}" \
+ TEST_RUNNER_CC_MODELS_DIR="$CC_MODELS_DIR" TEST_RUNNER_CC_RUN_CAPTURE_BENCH=1 \
  TEST_RUNNER_CC_CAPTURE_BENCH_OUT="$out/capture.json" TEST_RUNNER_CC_CAPTURE_BENCH_LIMIT="${CC_CAPTURE_BENCH_LIMIT:-10}" \
  xcodebuild -project "$root/app/ContextCapture.xcodeproj" -scheme ContextCapture \
  -configuration Release ARCHS=arm64 ONLY_ACTIVE_ARCH=YES -destination 'platform=macOS' -derivedDataPath "$root/DerivedData" \
