@@ -1,0 +1,251 @@
+{
+  "hardware": "Apple M3",
+  "memoryBytes": 25769803776,
+  "os": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "date": "2026-10-14",
+  "build": "Swift Release on both; native llama static library Release; CoreML XCTest hostless vs native standalone executable",
+  "corpusSHA256": "13fc0ee5f4e6f1db2cc40bf29d069e31446ca76325d672b69b6140948dfa7afc",
+  "querySHA256": "83b74ef6dd91e5a9208f8c5a9343b04739a3dda92340ba42a277e0a4cd51ee8c",
+  "reports": {
+    "coreml-gpu": {
+      "afterUnloadFootprintMB": 395.920728,
+      "batchMilliseconds": 2342.4995,
+      "batchStrategy": "sequential public scalar API",
+      "cpuSeconds": 20.60335,
+      "idleFootprintMB": 149.32464,
+      "loadMilliseconds": 12066.319041,
+      "modelRevision": "3f978ddf92cac9aa07eb2dcf6eb36cf450f3dba4",
+      "peakFootprintMB": 690.490368,
+      "peakRSSMB": 2408.513536,
+      "runtime": "coreml",
+      "units": "cpuAndGPU",
+      "latency": {
+        "query": {
+          "p50Ms": 12.765667,
+          "p95Ms": 15.099291,
+          "n": 352,
+          "firstPassP95Ms": 16.659
+        },
+        "document": {
+          "p50Ms": 15.30775,
+          "p95Ms": 19.823709,
+          "n": 96,
+          "firstPassP95Ms": 24.103625
+        },
+        "image": {
+          "p50Ms": 536.640709,
+          "p95Ms": 571.070458,
+          "n": 8,
+          "firstPassP95Ms": 986.77025
+        },
+        "fused": {
+          "p50Ms": 554.786375,
+          "p95Ms": 577.014583,
+          "n": 8,
+          "firstPassP95Ms": 575.285667
+        }
+      },
+      "output768NormRange": [
+        0.9999995022554399,
+        1.0000005408226427
+      ],
+      "holdoutPositiveCount": 80,
+      "holdout256": {
+        "recall3": 0.95625,
+        "mrr": 0.9583333333333334,
+        "ndcg3": 0.8482322230025551
+      }
+    },
+    "coreml-ane": {
+      "afterUnloadFootprintMB": 112.428064,
+      "batchMilliseconds": 885.075625,
+      "batchStrategy": "sequential public scalar API",
+      "cpuSeconds": 5.595901,
+      "idleFootprintMB": 149.357408,
+      "loadMilliseconds": 5051.134791,
+      "modelRevision": "3f978ddf92cac9aa07eb2dcf6eb36cf450f3dba4",
+      "peakFootprintMB": 308.8722,
+      "peakRSSMB": 375.963648,
+      "runtime": "coreml",
+      "units": "cpuAndNeuralEngine",
+      "latency": {
+        "query": {
+          "p50Ms": 4.99075,
+          "p95Ms": 5.124541,
+          "n": 352,
+          "firstPassP95Ms": 5.121208
+        },
+        "document": {
+          "p50Ms": 5.256458,
+          "p95Ms": 5.586166,
+          "n": 96,
+          "firstPassP95Ms": 5.633042
+        },
+        "image": {
+          "p50Ms": 524.595584,
+          "p95Ms": 530.961959,
+          "n": 8,
+          "firstPassP95Ms": 534.295916
+        },
+        "fused": {
+          "p50Ms": 524.828833,
+          "p95Ms": 526.71275,
+          "n": 8,
+          "firstPassP95Ms": 530.479916
+        }
+      },
+      "output768NormRange": [
+        0.9999990820452902,
+        1.0000004627584154
+      ],
+      "holdoutPositiveCount": 80,
+      "holdout256": {
+        "recall3": 0.95625,
+        "mrr": 0.9583333333333334,
+        "ndcg3": 0.8482322230025551
+      }
+    },
+    "llama": {
+      "afterUnloadFootprintMB": 102.417296,
+      "batchMilliseconds": 1044.954541,
+      "batchStrategy": "native sequence packing, max16 sequences",
+      "cpuSeconds": 2.568369,
+      "idleFootprintMB": 2.949648,
+      "loadMilliseconds": 1170.556541,
+      "maxTextTokens": 2048,
+      "modelRevision": "bfcd298762cc34d0357ece5ebdd31791a3a374d8",
+      "peakFootprintMB": 892.503792,
+      "peakRSSMB": 1183.219712,
+      "runtime": "llama.cpp b11461 + no-logits + fused spike",
+      "units": "Metal/Q8_0",
+      "latency": {
+        "query": {
+          "p50Ms": 8.13075,
+          "p95Ms": 12.604667,
+          "n": 352,
+          "firstPassP95Ms": 12.679
+        },
+        "document": {
+          "p50Ms": 14.541417,
+          "p95Ms": 16.176542,
+          "n": 96,
+          "firstPassP95Ms": 17.663291
+        },
+        "image": {
+          "p50Ms": 995.521709,
+          "p95Ms": 1282.092958,
+          "n": 8,
+          "firstPassP95Ms": 1309.925125
+        },
+        "fused": {
+          "p50Ms": 1114.645791,
+          "p95Ms": 1415.669792,
+          "n": 8,
+          "firstPassP95Ms": 1349.471541
+        }
+      },
+      "output768NormRange": [
+        0.9999999475142187,
+        1.0000000597806722
+      ],
+      "holdoutPositiveCount": 80,
+      "holdout256": {
+        "recall3": 0.95,
+        "mrr": 0.9572916666666667,
+        "ndcg3": 0.8435190009790434
+      }
+    }
+  },
+  "agreement": {
+    "coreml-gpu vs coreml-ane": {
+      "query": {
+        "minCosine": 0.9999222638311884,
+        "meanCosine": 0.9999765695688035,
+        "count": 176,
+        "tokenIDsEqual": 176,
+        "imageInputHashEqual": 0
+      },
+      "document": {
+        "minCosine": 0.9999607631587133,
+        "meanCosine": 0.9999731166002005,
+        "count": 48,
+        "tokenIDsEqual": 48,
+        "imageInputHashEqual": 0
+      },
+      "image": {
+        "minCosine": 0.9996082779301944,
+        "meanCosine": 0.999793742467346,
+        "count": 4,
+        "tokenIDsEqual": 0,
+        "imageInputHashEqual": 4
+      },
+      "fused": {
+        "minCosine": 0.9997616508199392,
+        "meanCosine": 0.9998343765779094,
+        "count": 4,
+        "tokenIDsEqual": 0,
+        "imageInputHashEqual": 4
+      }
+    },
+    "coreml-gpu vs llama": {
+      "query": {
+        "minCosine": 0.999591538286071,
+        "meanCosine": 0.9999441010999638,
+        "count": 176,
+        "tokenIDsEqual": 176,
+        "imageInputHashEqual": 0
+      },
+      "document": {
+        "minCosine": 0.9998854323518058,
+        "meanCosine": 0.999924947976077,
+        "count": 48,
+        "tokenIDsEqual": 48,
+        "imageInputHashEqual": 0
+      },
+      "image": {
+        "minCosine": 0.9993553996296322,
+        "meanCosine": 0.9994568977859501,
+        "count": 4,
+        "tokenIDsEqual": 0,
+        "imageInputHashEqual": 0
+      },
+      "fused": {
+        "minCosine": 0.9995391644167294,
+        "meanCosine": 0.9996552700543129,
+        "count": 4,
+        "tokenIDsEqual": 0,
+        "imageInputHashEqual": 0
+      }
+    },
+    "coreml-ane vs llama": {
+      "query": {
+        "minCosine": 0.9996455880577915,
+        "meanCosine": 0.9999218778539113,
+        "count": 176,
+        "tokenIDsEqual": 176,
+        "imageInputHashEqual": 0
+      },
+      "document": {
+        "minCosine": 0.9998616368679207,
+        "meanCosine": 0.9998974495771902,
+        "count": 48,
+        "tokenIDsEqual": 48,
+        "imageInputHashEqual": 0
+      },
+      "image": {
+        "minCosine": 0.9991826414271573,
+        "meanCosine": 0.9993635752881158,
+        "count": 4,
+        "tokenIDsEqual": 0,
+        "imageInputHashEqual": 0
+      },
+      "fused": {
+        "minCosine": 0.9994638628347556,
+        "meanCosine": 0.9996059507431102,
+        "count": 4,
+        "tokenIDsEqual": 0,
+        "imageInputHashEqual": 0
+      }
+    }
+  }
+}

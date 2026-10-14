@@ -1,0 +1,451 @@
+{
+  "schema": "cc-runtime-power/1",
+  "baseCommit": "3b70228968c0e7892ab5f589feeb030552374eb9",
+  "hardware": "Apple M3 24GiB",
+  "date": "2026-10-14",
+  "powerSource": "AC attached, battery 80%, lowpowermode 0",
+  "excludedHardware": "M4 32GB is excluded by user instruction; no M4 prerequisite.",
+  "sampler": "Apple powermetrics cpu_power,gpu_power,ane_power at 1000ms; workloads unprivileged",
+  "build": "Swift Release on both; native llama static library Release; CoreML XCTest hostless vs native standalone executable",
+  "inputCount": 232,
+  "repeats": 3,
+  "queryBatchCount": 176,
+  "reportedVectorDimension": 768,
+  "windows": {
+    "idle": {
+      "sampleCount": 7,
+      "channels": {
+        "CPU": {
+          "available": true,
+          "samples": 7,
+          "meanWatts": 2.682571428571429,
+          "maxWatts": 3.339,
+          "durationSeconds": 7.08578,
+          "estimatedJoules": 19.008196950000002
+        },
+        "GPU": {
+          "available": true,
+          "samples": 7,
+          "meanWatts": 0.08399999999999999,
+          "maxWatts": 0.119,
+          "durationSeconds": 7.08578,
+          "estimatedJoules": 0.59519444
+        },
+        "ANE": {
+          "available": true,
+          "samples": 7,
+          "meanWatts": 0.0,
+          "maxWatts": 0.0,
+          "durationSeconds": 7.08578,
+          "estimatedJoules": 0.0
+        }
+      },
+      "activeResidency": {
+        "CPU 0 active residency": {
+          "samples": 7,
+          "meanPercent": 43.63857142857143,
+          "maxPercent": 53.81
+        },
+        "CPU 1 active residency": {
+          "samples": 7,
+          "meanPercent": 47.05714285714286,
+          "maxPercent": 52.44
+        },
+        "CPU 2 active residency": {
+          "samples": 7,
+          "meanPercent": 47.81142857142857,
+          "maxPercent": 53.87
+        },
+        "CPU 3 active residency": {
+          "samples": 7,
+          "meanPercent": 39.387142857142855,
+          "maxPercent": 47.62
+        },
+        "CPU 4 active residency": {
+          "samples": 7,
+          "meanPercent": 32.51714285714286,
+          "maxPercent": 38.52
+        },
+        "CPU 5 active residency": {
+          "samples": 7,
+          "meanPercent": 28.647142857142857,
+          "maxPercent": 34.54
+        },
+        "CPU 6 active residency": {
+          "samples": 7,
+          "meanPercent": 11.98857142857143,
+          "maxPercent": 17.59
+        },
+        "CPU 7 active residency": {
+          "samples": 7,
+          "meanPercent": 6.114285714285714,
+          "maxPercent": 10.9
+        },
+        "E-Cluster HW active residency": {
+          "samples": 7,
+          "meanPercent": 100.0,
+          "maxPercent": 100.0
+        },
+        "GPU HW active residency": {
+          "samples": 7,
+          "meanPercent": 8.961428571428572,
+          "maxPercent": 12.59
+        },
+        "P-Cluster HW active residency": {
+          "samples": 7,
+          "meanPercent": 0.0,
+          "maxPercent": 0.0
+        }
+      },
+      "notes": [
+        "SoC estimates, not app-attributed power; compare workload against idle on the SAME device.",
+        "Missing counters are unavailable, not zero. ANE power is not ANE utilization.",
+        "meanWatts is the arithmetic sample mean; estimatedJoules integrates the reported intervals."
+      ],
+      "gpuSamplerPower": {
+        "samples": 7,
+        "meanWatts": 0.08385714285714285,
+        "maxWatts": 0.111,
+        "scope": "GPU usage section; separate from processor GPU Power"
+      },
+      "window": {
+        "startEpochSeconds": 1791981502.745461,
+        "endEpochSeconds": 1791981512.7505941,
+        "boundaryMarginSeconds": 1,
+        "wallSeconds": 10.005133152008057,
+        "sampledSeconds": 7.08578
+      },
+      "cpuGpuAneEstimatedJoules": 19.603391390000002,
+      "cpuGpuAneMeanWatts": 2.766571428571429
+    },
+    "coreml-gpu": {
+      "sampleCount": 36,
+      "channels": {
+        "CPU": {
+          "available": true,
+          "samples": 36,
+          "meanWatts": 4.919416666666667,
+          "maxWatts": 7.106,
+          "durationSeconds": 36.43727,
+          "estimatedJoules": 179.25511038
+        },
+        "GPU": {
+          "available": true,
+          "samples": 36,
+          "meanWatts": 4.007666666666666,
+          "maxWatts": 9.466,
+          "durationSeconds": 36.43727,
+          "estimatedJoules": 146.0163413
+        },
+        "ANE": {
+          "available": true,
+          "samples": 36,
+          "meanWatts": 0.0,
+          "maxWatts": 0.0,
+          "durationSeconds": 36.43727,
+          "estimatedJoules": 0.0
+        }
+      },
+      "activeResidency": {
+        "CPU 0 active residency": {
+          "samples": 36,
+          "meanPercent": 60.38333333333333,
+          "maxPercent": 99.73
+        },
+        "CPU 1 active residency": {
+          "samples": 36,
+          "meanPercent": 60.37111111111111,
+          "maxPercent": 99.73
+        },
+        "CPU 2 active residency": {
+          "samples": 36,
+          "meanPercent": 60.24777777777778,
+          "maxPercent": 99.75
+        },
+        "CPU 3 active residency": {
+          "samples": 36,
+          "meanPercent": 55.18222222222222,
+          "maxPercent": 99.63
+        },
+        "CPU 4 active residency": {
+          "samples": 36,
+          "meanPercent": 52.14277777777778,
+          "maxPercent": 99.41
+        },
+        "CPU 5 active residency": {
+          "samples": 36,
+          "meanPercent": 48.6825,
+          "maxPercent": 98.9
+        },
+        "CPU 6 active residency": {
+          "samples": 36,
+          "meanPercent": 36.7,
+          "maxPercent": 87.52
+        },
+        "CPU 7 active residency": {
+          "samples": 36,
+          "meanPercent": 26.843055555555555,
+          "maxPercent": 51.65
+        },
+        "E-Cluster HW active residency": {
+          "samples": 36,
+          "meanPercent": 99.995,
+          "maxPercent": 100.0
+        },
+        "GPU HW active residency": {
+          "samples": 36,
+          "meanPercent": 67.59305555555555,
+          "maxPercent": 98.63
+        },
+        "P-Cluster HW active residency": {
+          "samples": 36,
+          "meanPercent": 61.63055555555555,
+          "maxPercent": 99.97
+        }
+      },
+      "notes": [
+        "SoC estimates, not app-attributed power; compare workload against idle on the SAME device.",
+        "Missing counters are unavailable, not zero. ANE power is not ANE utilization.",
+        "meanWatts is the arithmetic sample mean; estimatedJoules integrates the reported intervals."
+      ],
+      "gpuSamplerPower": {
+        "samples": 36,
+        "meanWatts": 4.007611111111111,
+        "maxWatts": 9.517,
+        "scope": "GPU usage section; separate from processor GPU Power"
+      },
+      "window": {
+        "startEpochSeconds": 1791981512.750988,
+        "endEpochSeconds": 1791981551.852332,
+        "boundaryMarginSeconds": 1,
+        "wallSeconds": 39.10134410858154,
+        "sampledSeconds": 36.43727
+      },
+      "cpuGpuAneEstimatedJoules": 325.27145168,
+      "cpuGpuAneMeanWatts": 8.927083333333332
+    },
+    "coreml-ane": {
+      "sampleCount": 20,
+      "channels": {
+        "CPU": {
+          "available": true,
+          "samples": 20,
+          "meanWatts": 3.3816,
+          "maxWatts": 6.865,
+          "durationSeconds": 20.24987,
+          "estimatedJoules": 68.47838685
+        },
+        "GPU": {
+          "available": true,
+          "samples": 20,
+          "meanWatts": 0.15165,
+          "maxWatts": 0.252,
+          "durationSeconds": 20.24987,
+          "estimatedJoules": 3.07067271
+        },
+        "ANE": {
+          "available": true,
+          "samples": 20,
+          "meanWatts": 3.20725,
+          "maxWatts": 3.944,
+          "durationSeconds": 20.24987,
+          "estimatedJoules": 64.94735094
+        }
+      },
+      "activeResidency": {
+        "CPU 0 active residency": {
+          "samples": 20,
+          "meanPercent": 47.35,
+          "maxPercent": 70.11
+        },
+        "CPU 1 active residency": {
+          "samples": 20,
+          "meanPercent": 48.7385,
+          "maxPercent": 71.05
+        },
+        "CPU 2 active residency": {
+          "samples": 20,
+          "meanPercent": 51.328,
+          "maxPercent": 72.58
+        },
+        "CPU 3 active residency": {
+          "samples": 20,
+          "meanPercent": 45.44,
+          "maxPercent": 76.87
+        },
+        "CPU 4 active residency": {
+          "samples": 20,
+          "meanPercent": 37.8435,
+          "maxPercent": 61.61
+        },
+        "CPU 5 active residency": {
+          "samples": 20,
+          "meanPercent": 30.887,
+          "maxPercent": 42.8
+        },
+        "CPU 6 active residency": {
+          "samples": 20,
+          "meanPercent": 18.807,
+          "maxPercent": 50.33
+        },
+        "CPU 7 active residency": {
+          "samples": 20,
+          "meanPercent": 12.0695,
+          "maxPercent": 44.2
+        },
+        "E-Cluster HW active residency": {
+          "samples": 20,
+          "meanPercent": 100.0,
+          "maxPercent": 100.0
+        },
+        "GPU HW active residency": {
+          "samples": 20,
+          "meanPercent": 12.2295,
+          "maxPercent": 17.55
+        },
+        "P-Cluster HW active residency": {
+          "samples": 20,
+          "meanPercent": 68.0915,
+          "maxPercent": 99.79
+        }
+      },
+      "notes": [
+        "SoC estimates, not app-attributed power; compare workload against idle on the SAME device.",
+        "Missing counters are unavailable, not zero. ANE power is not ANE utilization.",
+        "meanWatts is the arithmetic sample mean; estimatedJoules integrates the reported intervals."
+      ],
+      "gpuSamplerPower": {
+        "samples": 20,
+        "meanWatts": 0.15125,
+        "maxWatts": 0.245,
+        "scope": "GPU usage section; separate from processor GPU Power"
+      },
+      "window": {
+        "startEpochSeconds": 1791981551.867438,
+        "endEpochSeconds": 1791981574.491873,
+        "boundaryMarginSeconds": 1,
+        "wallSeconds": 22.62443494796753,
+        "sampledSeconds": 20.24987
+      },
+      "cpuGpuAneEstimatedJoules": 136.49641050000002,
+      "cpuGpuAneMeanWatts": 6.7405
+    },
+    "llama": {
+      "sampleCount": 31,
+      "channels": {
+        "CPU": {
+          "available": true,
+          "samples": 31,
+          "meanWatts": 2.0542903225806453,
+          "maxWatts": 3.654,
+          "durationSeconds": 31.42108,
+          "estimatedJoules": 64.54936897
+        },
+        "GPU": {
+          "available": true,
+          "samples": 31,
+          "meanWatts": 3.6333548387096775,
+          "maxWatts": 9.992,
+          "durationSeconds": 31.42108,
+          "estimatedJoules": 114.16509312000001
+        },
+        "ANE": {
+          "available": true,
+          "samples": 31,
+          "meanWatts": 0.0,
+          "maxWatts": 0.0,
+          "durationSeconds": 31.42108,
+          "estimatedJoules": 0.0
+        }
+      },
+      "activeResidency": {
+        "CPU 0 active residency": {
+          "samples": 31,
+          "meanPercent": 41.086129032258064,
+          "maxPercent": 56.93
+        },
+        "CPU 1 active residency": {
+          "samples": 31,
+          "meanPercent": 45.689354838709676,
+          "maxPercent": 57.28
+        },
+        "CPU 2 active residency": {
+          "samples": 31,
+          "meanPercent": 49.41,
+          "maxPercent": 64.01
+        },
+        "CPU 3 active residency": {
+          "samples": 31,
+          "meanPercent": 43.16903225806452,
+          "maxPercent": 62.01
+        },
+        "CPU 4 active residency": {
+          "samples": 31,
+          "meanPercent": 33.06516129032258,
+          "maxPercent": 37.91
+        },
+        "CPU 5 active residency": {
+          "samples": 31,
+          "meanPercent": 30.794838709677418,
+          "maxPercent": 36.08
+        },
+        "CPU 6 active residency": {
+          "samples": 31,
+          "meanPercent": 15.729354838709677,
+          "maxPercent": 27.99
+        },
+        "CPU 7 active residency": {
+          "samples": 31,
+          "meanPercent": 8.223548387096775,
+          "maxPercent": 16.94
+        },
+        "E-Cluster HW active residency": {
+          "samples": 31,
+          "meanPercent": 100.0,
+          "maxPercent": 100.0
+        },
+        "GPU HW active residency": {
+          "samples": 31,
+          "meanPercent": 97.49741935483871,
+          "maxPercent": 100.0
+        },
+        "P-Cluster HW active residency": {
+          "samples": 31,
+          "meanPercent": 44.30774193548387,
+          "maxPercent": 72.81
+        }
+      },
+      "notes": [
+        "SoC estimates, not app-attributed power; compare workload against idle on the SAME device.",
+        "Missing counters are unavailable, not zero. ANE power is not ANE utilization.",
+        "meanWatts is the arithmetic sample mean; estimatedJoules integrates the reported intervals."
+      ],
+      "gpuSamplerPower": {
+        "samples": 31,
+        "meanWatts": 3.6333225806451614,
+        "maxWatts": 9.99,
+        "scope": "GPU usage section; separate from processor GPU Power"
+      },
+      "window": {
+        "startEpochSeconds": 1791981574.5080152,
+        "endEpochSeconds": 1791981609.589396,
+        "boundaryMarginSeconds": 1,
+        "wallSeconds": 35.08138084411621,
+        "sampledSeconds": 31.42108
+      },
+      "cpuGpuAneEstimatedJoules": 178.71446209,
+      "cpuGpuAneMeanWatts": 5.687645161290323
+    }
+  },
+  "limitations": [
+    "Whole-SoC estimates including background activity, not app-attributed energy.",
+    "Short idle window (10s). Boundary margin removes at least 2s; integrated energy covers only selected samples.",
+    "CoreML fp16 vs llama Q8_0; image resize hashes differ. Not a pure same-weight runtime comparison.",
+    "Full process windows include prepare, 3x232 scalar operations, batch queries, serialization and teardown. Native uses sequence packing for batch; CoreML uses scalar public API.",
+    "Cache-present fresh processes, not erased OS/model compile caches. All three runs are serial, in order GPU, ANE, llama.",
+    "CPU process seconds and GPU HW active residency are available; ANE utilization is not exposed by this OS.",
+    "Harnesses differ (XCTest vs standalone), memory includes baseline; one pass per configuration. No statistical energy significance claim."
+  ],
+  "rawPowerSHA256": "0e344295815cf3972d8d02345aa18a1c4a4f94dd75c8e6d7a4744c2dec0b1f45",
+  "rawSampleCount": 240
+}

@@ -1,0 +1,621 @@
+{
+  "schema": "cc-post-merge-capture/1",
+  "date": "2026-10-14",
+  "baseCommit": "3b70228968c0e7892ab5f589feeb030552374eb9",
+  "hardware": "Apple M3 24GiB",
+  "excludedHardware": "M4 32GB is unavailable and excluded by user instruction; it is not a prerequisite.",
+  "build": "Xcode Release arm64; hostless test bundle compiling actual AppCoordinator and TriageWiring",
+  "powerSource": "AC attached, battery 80%, not charging, lowpowermode 0",
+  "measurement": {
+    "captureCountPerCondition": 10,
+    "conditions": {
+      "with_triage": {
+        "afterTriageMemory": {
+          "lifetimePeakPhysicalMB": 3939.242928,
+          "lifetimePeakRSSMB": 2943.729664,
+          "physicalMB": 3681.8666
+        },
+        "captureP90Under2000Ms": true,
+        "capturePhysicalPeakMB": 3936.048048,
+        "cpuSeconds": 23.084929,
+        "indexed": 10,
+        "mainActorWakeInterval": {
+          "count": 1132,
+          "maxMs": 23.361,
+          "p50Ms": 17.636292,
+          "p90Ms": 20.086708,
+          "p95Ms": 20.109375
+        },
+        "pressToRecordingReplay": {
+          "count": 10,
+          "maxMs": 0.16600009985268116,
+          "p50Ms": 0.10312488302588463,
+          "p90Ms": 0.13487483374774456,
+          "p95Ms": 0.16600009985268116
+        },
+        "releaseToSaved": {
+          "count": 10,
+          "maxMs": 1760.2054581511766,
+          "p50Ms": 1640.5562083236873,
+          "p90Ms": 1757.5139582622796,
+          "p95Ms": 1760.2054581511766,
+          "valuesMs": [
+            1720.4637085087597,
+            1640.5562083236873,
+            1760.2054581511766,
+            1723.3078749850392,
+            1503.0772916506976,
+            1757.5139582622796,
+            1628.7897499278188,
+            1508.186750113964,
+            1683.3712083753198,
+            1623.1490832287818
+          ]
+        },
+        "saved": 10,
+        "triageBusyAtPressCount": 9,
+        "wallSeconds": 28.493837250000002,
+        "processCPUPercentOfOneCore": 81.0172697957696
+      },
+      "without_triage": {
+        "afterTriageMemory": {
+          "lifetimePeakPhysicalMB": 3867.939688,
+          "lifetimePeakRSSMB": 2943.729664,
+          "physicalMB": 3680.473984
+        },
+        "captureP90Under2000Ms": true,
+        "capturePhysicalPeakMB": 3726.529168,
+        "cpuSeconds": 20.57847,
+        "indexed": 10,
+        "mainActorWakeInterval": {
+          "count": 1022,
+          "maxMs": 22.300917,
+          "p50Ms": 17.801125,
+          "p90Ms": 20.072833,
+          "p95Ms": 20.087334
+        },
+        "pressToRecordingReplay": {
+          "count": 10,
+          "maxMs": 0.21949992515146732,
+          "p50Ms": 0.08383323438465595,
+          "p90Ms": 0.16941665671765804,
+          "p95Ms": 0.21949992515146732
+        },
+        "releaseToSaved": {
+          "count": 10,
+          "maxMs": 1556.3558749854565,
+          "p50Ms": 1434.1320416424423,
+          "p90Ms": 1544.1205415409058,
+          "p95Ms": 1556.3558749854565,
+          "valuesMs": [
+            1556.3558749854565,
+            1544.1205415409058,
+            1522.1222499385476,
+            1505.00633334741,
+            1400.52262484096,
+            1416.9523334130645,
+            1434.1320416424423,
+            1369.7386251296848,
+            1389.7130833938718,
+            1461.9228751398623
+          ]
+        },
+        "saved": 10,
+        "triageBusyAtPressCount": 0,
+        "wallSeconds": 30.495249583,
+        "processCPUPercentOfOneCore": 67.48090368629661
+      }
+    },
+    "hardwareMemoryBytes": 25769803776,
+    "key": "embedding/50bdcd7c2dd0ae8a16a3a720817bce2b5299ed4439281fadc8db88e9690c123e",
+    "lowPower": false,
+    "memory": {
+      "afterEmbeddingUnload": {
+        "lifetimePeakPhysicalMB": 3939.242928,
+        "lifetimePeakRSSMB": 2943.729664,
+        "physicalMB": 1151.078144
+      },
+      "afterIntentUnload": {
+        "lifetimePeakPhysicalMB": 3939.242928,
+        "lifetimePeakRSSMB": 2943.729664,
+        "physicalMB": 2553.041744
+      },
+      "embedding": {
+        "lifetimePeakPhysicalMB": 345.491592,
+        "lifetimePeakRSSMB": 1802.633216,
+        "physicalMB": 197.937408
+      },
+      "start": {
+        "lifetimePeakPhysicalMB": 12.01024,
+        "lifetimePeakRSSMB": 41.648128,
+        "physicalMB": 12.01024
+      },
+      "threeModels": {
+        "lifetimePeakPhysicalMB": 3256.12776,
+        "lifetimePeakRSSMB": 2943.729664,
+        "physicalMB": 3256.12776
+      },
+      "warm": {
+        "lifetimePeakPhysicalMB": 3686.683136,
+        "lifetimePeakRSSMB": 2943.729664,
+        "physicalMB": 3589.051
+      },
+      "whisper": {
+        "lifetimePeakPhysicalMB": 227.656952,
+        "lifetimePeakRSSMB": 1523.089408,
+        "physicalMB": 97.699808
+      }
+    },
+    "modelLoads": {
+      "embeddingMs": 4716.9275,
+      "firstFixtureSTTMs": 1551.4738750000001,
+      "intentMs": 2134.25175,
+      "whisperMs": 5636.785875
+    },
+    "os": "バージョン27.0.1（ビルド26A434）",
+    "schemaVersion": 1,
+    "scope": "Release test bundle compiles actual AppCoordinator/TriageWiring; real Whisper/d1/CoreML/SQLite; fixture key/recorder/context replay; no real hotkey/microphone/screen/toast, no power sampling",
+    "thermalState": 1
+  },
+  "phases": [
+    {
+      "phase": "started",
+      "epochSeconds": 1791981227.517089
+    },
+    {
+      "phase": "ready",
+      "epochSeconds": 1791981242.759512
+    },
+    {
+      "phase": "without_triage:start",
+      "epochSeconds": 1791981242.7599201
+    },
+    {
+      "phase": "with_triage:start",
+      "epochSeconds": 1791981273.262795
+    },
+    {
+      "phase": "capture-complete",
+      "epochSeconds": 1791981301.768394
+    },
+    {
+      "phase": "finished",
+      "epochSeconds": 1791981301.8212218
+    }
+  ],
+  "rawSHA256": {
+    "capture": "2c68eb5de3224d0b1d4e09f8f24b3f38e8af15aa7b5b2079818a2dad9c6c0b5c",
+    "powermetrics": "f85a51fdebb6e67414deea164f474683f51fc0d3fb584fafd849906709b53186"
+  },
+  "power": {
+    "sampler": "Apple powermetrics cpu_power,gpu_power,ane_power at 1000ms, 180 samples; workload unprivileged",
+    "windows": {
+      "idleBeforeTest": {
+        "sampleCount": 27,
+        "channels": {
+          "CPU": {
+            "available": true,
+            "samples": 27,
+            "meanWatts": 3.9774814814814814,
+            "maxWatts": 12.388,
+            "durationSeconds": 27.30079,
+            "estimatedJoules": 108.51011773
+          },
+          "GPU": {
+            "available": true,
+            "samples": 27,
+            "meanWatts": 0.11762962962962963,
+            "maxWatts": 0.493,
+            "durationSeconds": 27.30079,
+            "estimatedJoules": 3.20903346
+          },
+          "ANE": {
+            "available": true,
+            "samples": 27,
+            "meanWatts": 0.0,
+            "maxWatts": 0.0,
+            "durationSeconds": 27.30079,
+            "estimatedJoules": 0.0
+          }
+        },
+        "activeResidency": {
+          "CPU 0 active residency": {
+            "samples": 27,
+            "meanPercent": 46.41481481481482,
+            "maxPercent": 83.73
+          },
+          "CPU 1 active residency": {
+            "samples": 27,
+            "meanPercent": 45.7262962962963,
+            "maxPercent": 82.7
+          },
+          "CPU 2 active residency": {
+            "samples": 27,
+            "meanPercent": 45.057037037037034,
+            "maxPercent": 80.24
+          },
+          "CPU 3 active residency": {
+            "samples": 27,
+            "meanPercent": 41.26814814814815,
+            "maxPercent": 75.8
+          },
+          "CPU 4 active residency": {
+            "samples": 27,
+            "meanPercent": 42.99629629629629,
+            "maxPercent": 84.32
+          },
+          "CPU 5 active residency": {
+            "samples": 27,
+            "meanPercent": 40.2437037037037,
+            "maxPercent": 84.26
+          },
+          "CPU 6 active residency": {
+            "samples": 27,
+            "meanPercent": 25.444444444444443,
+            "maxPercent": 80.36
+          },
+          "CPU 7 active residency": {
+            "samples": 27,
+            "meanPercent": 18.557037037037038,
+            "maxPercent": 78.5
+          },
+          "E-Cluster HW active residency": {
+            "samples": 27,
+            "meanPercent": 100.0,
+            "maxPercent": 100.0
+          },
+          "GPU HW active residency": {
+            "samples": 27,
+            "meanPercent": 13.6,
+            "maxPercent": 41.4
+          },
+          "P-Cluster HW active residency": {
+            "samples": 27,
+            "meanPercent": 23.376296296296296,
+            "maxPercent": 94.0
+          }
+        },
+        "notes": [
+          "SoC estimates, not app-attributed power; compare workload against idle on the SAME device.",
+          "Missing counters are unavailable, not zero. ANE power is not ANE utilization.",
+          "meanWatts is the arithmetic sample mean; estimatedJoules integrates the reported intervals."
+        ],
+        "gpuSamplerPower": {
+          "samples": 27,
+          "meanWatts": 0.11766666666666667,
+          "maxWatts": 0.493,
+          "scope": "GPU usage section; separate from processor GPU Power"
+        },
+        "window": {
+          "startEpochSeconds": 1791981195.517089,
+          "endEpochSeconds": 1791981225.517089,
+          "boundaryMarginSeconds": 1,
+          "wallSeconds": 30.0,
+          "sampledSeconds": 27.30079
+        }
+      },
+      "modelPrepareAndWarm": {
+        "sampleCount": 12,
+        "channels": {
+          "CPU": {
+            "available": true,
+            "samples": 12,
+            "meanWatts": 6.566583333333334,
+            "maxWatts": 10.464,
+            "durationSeconds": 12.13997,
+            "estimatedJoules": 79.70401437
+          },
+          "GPU": {
+            "available": true,
+            "samples": 12,
+            "meanWatts": 0.03866666666666667,
+            "maxWatts": 0.082,
+            "durationSeconds": 12.13997,
+            "estimatedJoules": 0.46927645999999995
+          },
+          "ANE": {
+            "available": true,
+            "samples": 12,
+            "meanWatts": 0.4041666666666667,
+            "maxWatts": 1.578,
+            "durationSeconds": 12.13997,
+            "estimatedJoules": 4.91118469
+          }
+        },
+        "activeResidency": {
+          "CPU 0 active residency": {
+            "samples": 12,
+            "meanPercent": 53.1725,
+            "maxPercent": 70.71
+          },
+          "CPU 1 active residency": {
+            "samples": 12,
+            "meanPercent": 52.25833333333333,
+            "maxPercent": 67.26
+          },
+          "CPU 2 active residency": {
+            "samples": 12,
+            "meanPercent": 55.04083333333333,
+            "maxPercent": 67.71
+          },
+          "CPU 3 active residency": {
+            "samples": 12,
+            "meanPercent": 49.1475,
+            "maxPercent": 68.55
+          },
+          "CPU 4 active residency": {
+            "samples": 12,
+            "meanPercent": 70.25916666666666,
+            "maxPercent": 99.02
+          },
+          "CPU 5 active residency": {
+            "samples": 12,
+            "meanPercent": 66.6225,
+            "maxPercent": 98.62
+          },
+          "CPU 6 active residency": {
+            "samples": 12,
+            "meanPercent": 55.28666666666667,
+            "maxPercent": 86.87
+          },
+          "CPU 7 active residency": {
+            "samples": 12,
+            "meanPercent": 38.66166666666667,
+            "maxPercent": 61.07
+          },
+          "E-Cluster HW active residency": {
+            "samples": 12,
+            "meanPercent": 99.89,
+            "maxPercent": 100.0
+          },
+          "GPU HW active residency": {
+            "samples": 12,
+            "meanPercent": 5.8675,
+            "maxPercent": 10.79
+          },
+          "P-Cluster HW active residency": {
+            "samples": 12,
+            "meanPercent": 95.0525,
+            "maxPercent": 99.87
+          }
+        },
+        "notes": [
+          "SoC estimates, not app-attributed power; compare workload against idle on the SAME device.",
+          "Missing counters are unavailable, not zero. ANE power is not ANE utilization.",
+          "meanWatts is the arithmetic sample mean; estimatedJoules integrates the reported intervals."
+        ],
+        "gpuSamplerPower": {
+          "samples": 12,
+          "meanWatts": 0.041416666666666664,
+          "maxWatts": 0.088,
+          "scope": "GPU usage section; separate from processor GPU Power"
+        },
+        "window": {
+          "startEpochSeconds": 1791981227.517089,
+          "endEpochSeconds": 1791981242.759512,
+          "boundaryMarginSeconds": 1,
+          "wallSeconds": 15.242423057556152,
+          "sampledSeconds": 12.13997
+        }
+      },
+      "without_triage": {
+        "sampleCount": 28,
+        "channels": {
+          "CPU": {
+            "available": true,
+            "samples": 28,
+            "meanWatts": 6.19775,
+            "maxWatts": 10.788,
+            "durationSeconds": 28.33714,
+            "estimatedJoules": 175.59552744
+          },
+          "GPU": {
+            "available": true,
+            "samples": 28,
+            "meanWatts": 1.681142857142857,
+            "maxWatts": 4.749,
+            "durationSeconds": 28.33714,
+            "estimatedJoules": 47.67579852
+          },
+          "ANE": {
+            "available": true,
+            "samples": 28,
+            "meanWatts": 1.134642857142857,
+            "maxWatts": 2.217,
+            "durationSeconds": 28.33714,
+            "estimatedJoules": 32.15915284
+          }
+        },
+        "activeResidency": {
+          "CPU 0 active residency": {
+            "samples": 28,
+            "meanPercent": 46.61678571428571,
+            "maxPercent": 62.28
+          },
+          "CPU 1 active residency": {
+            "samples": 28,
+            "meanPercent": 47.287142857142854,
+            "maxPercent": 60.92
+          },
+          "CPU 2 active residency": {
+            "samples": 28,
+            "meanPercent": 50.86964285714286,
+            "maxPercent": 64.68
+          },
+          "CPU 3 active residency": {
+            "samples": 28,
+            "meanPercent": 48.31,
+            "maxPercent": 63.94
+          },
+          "CPU 4 active residency": {
+            "samples": 28,
+            "meanPercent": 48.82,
+            "maxPercent": 74.73
+          },
+          "CPU 5 active residency": {
+            "samples": 28,
+            "meanPercent": 44.763214285714284,
+            "maxPercent": 72.03
+          },
+          "CPU 6 active residency": {
+            "samples": 28,
+            "meanPercent": 33.16535714285714,
+            "maxPercent": 66.34
+          },
+          "CPU 7 active residency": {
+            "samples": 28,
+            "meanPercent": 24.626428571428573,
+            "maxPercent": 56.56
+          },
+          "E-Cluster HW active residency": {
+            "samples": 28,
+            "meanPercent": 99.9775,
+            "maxPercent": 100.0
+          },
+          "GPU HW active residency": {
+            "samples": 28,
+            "meanPercent": 20.059642857142858,
+            "maxPercent": 47.54
+          },
+          "P-Cluster HW active residency": {
+            "samples": 28,
+            "meanPercent": 71.60464285714286,
+            "maxPercent": 100.0
+          }
+        },
+        "notes": [
+          "SoC estimates, not app-attributed power; compare workload against idle on the SAME device.",
+          "Missing counters are unavailable, not zero. ANE power is not ANE utilization.",
+          "meanWatts is the arithmetic sample mean; estimatedJoules integrates the reported intervals."
+        ],
+        "gpuSamplerPower": {
+          "samples": 28,
+          "meanWatts": 1.6810714285714285,
+          "maxWatts": 4.75,
+          "scope": "GPU usage section; separate from processor GPU Power"
+        },
+        "window": {
+          "startEpochSeconds": 1791981242.7599201,
+          "endEpochSeconds": 1791981273.262795,
+          "boundaryMarginSeconds": 1,
+          "wallSeconds": 30.502874851226807,
+          "sampledSeconds": 28.33714
+        }
+      },
+      "with_triage": {
+        "sampleCount": 25,
+        "channels": {
+          "CPU": {
+            "available": true,
+            "samples": 25,
+            "meanWatts": 6.1054,
+            "maxWatts": 8.804,
+            "durationSeconds": 25.29036,
+            "estimatedJoules": 154.4069314
+          },
+          "GPU": {
+            "available": true,
+            "samples": 25,
+            "meanWatts": 1.70052,
+            "maxWatts": 4.721,
+            "durationSeconds": 25.29036,
+            "estimatedJoules": 42.98988068
+          },
+          "ANE": {
+            "available": true,
+            "samples": 25,
+            "meanWatts": 1.2382,
+            "maxWatts": 3.594,
+            "durationSeconds": 25.29036,
+            "estimatedJoules": 31.3226404
+          }
+        },
+        "activeResidency": {
+          "CPU 0 active residency": {
+            "samples": 25,
+            "meanPercent": 48.4956,
+            "maxPercent": 69.48
+          },
+          "CPU 1 active residency": {
+            "samples": 25,
+            "meanPercent": 48.5496,
+            "maxPercent": 67.64
+          },
+          "CPU 2 active residency": {
+            "samples": 25,
+            "meanPercent": 46.6028,
+            "maxPercent": 68.87
+          },
+          "CPU 3 active residency": {
+            "samples": 25,
+            "meanPercent": 45.760799999999996,
+            "maxPercent": 68.89
+          },
+          "CPU 4 active residency": {
+            "samples": 25,
+            "meanPercent": 50.708,
+            "maxPercent": 68.13
+          },
+          "CPU 5 active residency": {
+            "samples": 25,
+            "meanPercent": 43.49,
+            "maxPercent": 57.37
+          },
+          "CPU 6 active residency": {
+            "samples": 25,
+            "meanPercent": 35.2076,
+            "maxPercent": 52.46
+          },
+          "CPU 7 active residency": {
+            "samples": 25,
+            "meanPercent": 27.342,
+            "maxPercent": 42.39
+          },
+          "E-Cluster HW active residency": {
+            "samples": 25,
+            "meanPercent": 99.9992,
+            "maxPercent": 100.0
+          },
+          "GPU HW active residency": {
+            "samples": 25,
+            "meanPercent": 19.9076,
+            "maxPercent": 49.08
+          },
+          "P-Cluster HW active residency": {
+            "samples": 25,
+            "meanPercent": 79.3592,
+            "maxPercent": 100.0
+          }
+        },
+        "notes": [
+          "SoC estimates, not app-attributed power; compare workload against idle on the SAME device.",
+          "Missing counters are unavailable, not zero. ANE power is not ANE utilization.",
+          "meanWatts is the arithmetic sample mean; estimatedJoules integrates the reported intervals."
+        ],
+        "gpuSamplerPower": {
+          "samples": 25,
+          "meanWatts": 1.70064,
+          "maxWatts": 4.72,
+          "scope": "GPU usage section; separate from processor GPU Power"
+        },
+        "window": {
+          "startEpochSeconds": 1791981273.262795,
+          "endEpochSeconds": 1791981301.768394,
+          "boundaryMarginSeconds": 1,
+          "wallSeconds": 28.50559902191162,
+          "sampledSeconds": 25.29036
+        }
+      }
+    }
+  },
+  "limitations": [
+    "20 captures from authored audio/screenshot fixtures; real hotkey, microphone, ScreenCaptureKit and toast were not exercised.",
+    "Without-triage condition runs backfill after captures; with-triage runs it concurrently. Full power windows include backfill and final search in both conditions.",
+    "Model caches already exist. No first-download or fresh OS compile-cache claim.",
+    "One observed earlier replay pass had p90 2088.91ms without triage and 2538.44ms with triage; background load/cache differed and its raw JSON was overwritten by this instrumented run. This run alone does not establish stable p90 <=2s.",
+    "MainActor 16ms wake interval measures scheduler delay, not graphical UI frame time.",
+    "ThermalState 1 is the final snapshot (fair); process CPU ratio counts CPU seconds only, excluding GPU/ANE execution.",
+    "Power is whole-SoC estimate including background activity. ANE utilization is unavailable; ANE power is not utilization.",
+    "Battery and low-power policy injection was tested in worker PoC; real battery/low-power state changes have not been tested."
+  ]
+}

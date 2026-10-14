@@ -108,7 +108,9 @@ targets:
       - package: ContextCaptureKit
         product: CCStore        # 世代索引の実 SQLite 結合テスト
       - package: ContextCaptureKit
-        product: CCEmbedding    # TriageAssembly（CoreMLEmbedder の適合。テストでは読み込まない）
+        product: CCIntent       # opt-in Release capture benchmark の実モデル
+      - package: ContextCaptureKit
+        product: CCEmbedding    # TriageAssembly と opt-in 実モデル計測
       - package: ContextCaptureKit
         product: CCGuard        # SecretMasker
     settings:

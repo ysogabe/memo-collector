@@ -89,7 +89,7 @@ OCR は後半の別 variant。現行 scanner は本文を捨てるため、新�
 - 融合入力は DigUp の公開 API にないため、専用 spike で既存 interleaved 列を llama に通す。参照との token/pixel/vector parity が取れるまで、画像単独の値を融合性能として報告しない。音声は現行 embedding では非対象で別評価にする。
 - cold を初回特殊化/同じバイナリの再起動に分け、warm、single/batch、idle-after-unload、STT/triageとの競合を測る。アプリ ANE、cc-mcp CPU/GPU、llama Metal を別行にする。
 - query/document/image/fused ごとの P50/P95、load/compile、index時間、常駐/ピーク RSS **と phys_footprint**、GPU/ANE・MLXの値、電力を採れる範囲で記録。総プロセスの footprint と startup/IPC も含める。
-- M3 24GB/M4 32GB で再現可能な手順を用意する。存在しない実機の値は作らない。回数を固定し、計測中の他負荷と cache 状態を記録する。
+- M3 24GBで再現可能な手順を用意する。M4 32GBは2026-10-14のユーザー指定により対象外とし、利用を前提にしない。回数を固定し、計測中の他負荷と cache 状態を記録する。
 
 採用条件は #11 の品質を維持し、製品上の測定対象（初回利用・検索・STT競合・メモリ等）で改善があること。旧 Core ML の過去の「約5ms」「融合0.59〜0.94秒」や DigUp コメントの値との直接比較はしない。採用するなら #9 の新世代として索引し直す。
 
@@ -123,8 +123,10 @@ OCR は後半の別 variant。現行 scanner は本文を捨てるため、新�
 | #11 最小版 | 評価runner/合成baseline / [PR #13](https://github.com/ysogabe/memo-collector/pull/13) | #7 の前に指標を固定 |
 | #7 | `spikes/search` / [PR #14](https://github.com/ysogabe/memo-collector/pull/14) | nDCGと負例の採用条件未達で融合は保留 |
 | #9 | ADR-0002 / [PR #15](https://github.com/ysogabe/memo-collector/pull/15) | 製品へ非破壊migration/shadow世代/CASを実装。全QA成功 |
-| #8 | `spikes/llama` / ADR-0003 / [PR #16](https://github.com/ysogabe/memo-collector/pull/16) | M3実測、Core ML維持。電力/利用率/M4は未測定 |
-| #10 | `spikes/worker` / ADR-0004 / [PR #17](https://github.com/ysogabe/memo-collector/pull/17) | 実helper障害/E2E/永続job PoC。製品導入は保留、M1/UI/batteryは未測定 |
+| #8 | `spikes/llama` / ADR-0003 / [PR #16](https://github.com/ysogabe/memo-collector/pull/16) | M3のRelease/SoC電力/GPU residencyを追加、Core ML維持。ANE利用率はOS未提供、M4は対象外 |
+| #10 | `spikes/worker` / ADR-0004 / [PR #17](https://github.com/ysogabe/memo-collector/pull/17) | 実helper障害/永続jobとactual coordinatorの3モデルfixture E2Eを測定。製品導入は保留、実hotkey/UI/batteryは未測定 |
 | #11 後半 | [回帰CI結果](../research/search-regression-ci.md) / `scripts/search-quality.sh` / `scripts/search-model-evaluation.sh` | 品質CI + 実モデル専用job、両コマンドをローカル実行 |
 
 全PRはレビュー前で未merge。#9以外の製品方式変更は採用していない。旧vectorのprovenanceを推測してactive化せず、初回もshadow再構築する保存契約で確定した（ADR-0002）。開始時に想定したtable/API名との差は実コードを正とする。
+
+追加測定: [main統合後のRelease/電力/actual coordinator結果](../research/post-merge-runtime-validation.md)。M1はmilestone 1でありCPU名ではない。
