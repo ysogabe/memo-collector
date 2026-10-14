@@ -37,6 +37,37 @@ Core MLの文書入力は製品の `runIndex` と同じ注釈＋ウインドウ�
 
 ## 回帰評価の拡張
 
-指標の単体テストはモデル不要。品質のgolden baselineとCI判定、実モデルの専用実行、合成スクリーンショットの追加は後続PRで拡張する。ベクトルcacheだけのCIは推論ランタイムの回帰を保証しない。モデル切替は別cache/索引世代で評価する。
+品質 CI と実モデル評価は以下のコマンドで実行する。固定ベクトルの CI は推論ランタイムの回帰を保証しない。モデル切替は別 cache/索引世代で評価する。Vision OCR、画像主体の品質と実利用分布は今回の text corpus の保証範囲外。
 
 #7 の `search-ja-v2` は同じ合成48記録に、日本語の3文字以上の部分一致と全角識別子のクエリを追加し、ノイズ文例を明示的な誤字にした176クエリ。比較はすべてv2の同じquery hashで再実行する。`baseline-quality.json` は #11 前半のv1に固定された記録で、v2との数値差を検索アルゴリズムの差と見なさない。
+
+## 品質回帰 CI と実モデル job (#11 後半)
+
+```sh
+scripts/search-quality.sh
+CC_MODELS_DIR=/path/to/prepared/models scripts/search-model-evaluation.sh
+```
+
+通常の [search-quality.yml](../../.github/workflows/search-quality.yml) は固定 256d Core ML ベクトルを temporary の **実 SQLiteRecordStore** へ signed CAS で挿入し、世代をactivateして現在の vDSP 検索を実行する。native FTS5 / 短語・識別子fallback / RRF / gateも毎回実行する。保存済みランキング/集計を正解として再出力するだけの CI ではない。`CC_SEARCH_CONTRACT_ONLY=1` は Runner のモデル executable を除外し、MLX / Core ML / Metal を buildしない。Kit の pinned dependency manifestにはSwift6.4が必要なので、[GitHub公式のXcode27 preview runner](https://github.com/actions/runner-images/issues/14404)を使用する。
+
+`frozen-vectors.json` は合成v2の48記録・176queryだけから生成したもの。元cacheのcorpus/query hash、モデルpipeline/key、次元、coverage、有限値、L2を検証する。manifestのSHA256とgeneratorの完全再現も確認。モデル重み、ユーザーDB、実音声/実スクリーンショットは含まない。検索 corpusとqueryの利用許諾はCC0。
+
+`golden-quality.json` は同じ実検索から固定した **v2品質 baseline**。旧v1の `baseline-quality.json` と区別する。深さ30、RRF k60 / 候補50 / gate0.65（#7のdevで固定）を使用する。CIでは再調整しない。各modeのALL/dev/holdout/tagごとにRecall/HitRate/nDCG@1/3/10・MRRを比較し、低下 **2pp超** を失敗とする。正解なしの空結果率低下/誤ヒット率増加は許容しない。query/正例/負例の件数変化、欠損mode/cohort/metric、NaNも失敗。
+
+閾値は #7 の提案を品質 gate の初期値としたもので、外部データで統計的有意性を検証した値ではない。小さなtagでは1件の変化でも大きな差になり、原因をレビューする。PoC自身のbaselineを維持することは、そのPoCを製品採用することを意味しない。#7の融合の採用保留は継続する。
+
+Swiftのscorer/validator/keyword/融合/実storeテストに加え、Pythonは故意のRecall低下、negative false-hit増加、件数・欠損・NaNを失敗として検証する。index時間はレポートmetadataに残すが品質gateでは速度を比較しない。通常jobはMCP serialization/画像guard/UI検索を通らない。`baseline_native_vector` の全176順位とMCP vectorの一致は #7 の実モデル測定で確認済み。
+
+**モデル更新時は実モデル job を実行する**。`search-model-evaluation.sh` は必ず `--refresh --live-queries --poc` を指定し、実CoreML query/doc生成、実MCP vector/keyword、同じPoC、索引・queryレイテンシを報告する。MCP2経路を含む7modeの`live-model-baseline.json`と比較し、通常jobの5mode baselineとは区別する。今回の集計は`live-model-measurement.json`に保存した。モデル未準備は失敗。通常CIが通っても実モデルの品質確認を代用しない。負荷を重ねず M3/M4 で計測する。GitHubの`workflow_dispatch → real_models=true`は、モデルとSwift6.4/Metalを用意した`self-hosted,macOS,ARM64,cc-search-models` runnerを要求する。runner環境の`CC_MODELS_DIR`が必須で、runner登録/モデル配置は自動で行わない。今回このjobのコマンドはローカルM3で実行し、hosted quality jobの実行と区別する。
+
+baselineを変更する場合は理由・モデル/pipeline・分割・差分をレビューする。通常QAコマンドはbaselineを書き換えない。更新コマンドは明示的:
+
+```sh
+# 固定ベクトルを更新する場合だけ。合成cacheを指定する。
+python3 evals/search/freeze-vectors.py /tmp/cc-live-search/coreml-vectors.json
+python3 evals/search/generate.py
+# 新契約runnerの出力から、理由を添えて品質baselineを更新。
+python3 evals/search/freeze-quality.py /tmp/cc-search-quality/contract.json evals/search/golden-quality.json
+```
+
+fixture/モデルを変更する場合は `freeze-vectors.py` のpipelineの固定revisionも変更し、keyを推測して合わせない。別pipelineの評価は旧baselineを保持して品質差分を読む。

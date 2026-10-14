@@ -2,7 +2,7 @@
 
 作成: 2026-10-14。基準 commit: memo-collector `32b1bdef2190e310f39f73136043acaa8ab0054c`。
 
-根拠は [DigUp 比較調査](../research/digup-comparison.md)、方針は [ADR-0001（提案）](../adr/0001-digup-search-adoption.md)。この文書のファイル名/API/閾値は実装候補であり、現時点で存在する新機能ではない。
+根拠は [DigUp 比較調査](../research/digup-comparison.md)、方針は [ADR-0001（提案）](../adr/0001-digup-search-adoption.md)。本文は開始時の実装計画で、候補APIを含む。現在の実施状況と確定した保存契約は末尾の成果物・各ADRを参照する。
 
 ## 推奨順序
 
@@ -113,3 +113,18 @@ OCR は後半の別 variant。現行 scanner は本文を捨てるため、新�
 - docs の変更はリンク/パス/commitとdiffを確認。コード実装では関連 Swift tests、DB migration/障害注入を実施し、製品接続時に `scripts/check.sh` と実機 M1/MCP を確認する。
 - runtime/品質の実モデルジョブは未準備を skip成功として扱わず、必要な fixture と model の欠如を失敗とする。機械依存の速度閾値は通常 CI と別に判定する。
 - 進捗は各実装 PR と評価レポートで追跡する。本計画そのものを PoC や製品実装の完了証拠として扱わない。
+
+
+## 実施状況（2026-10-14）
+
+| 段階 | 成果物 / PR | 判断 |
+|---|---|---|
+| #6 | 調査 / ADR-0001 / [PR #12](https://github.com/ysogabe/memo-collector/pull/12) | 上流実装をcommit固定で分析 |
+| #11 最小版 | 評価runner/合成baseline / [PR #13](https://github.com/ysogabe/memo-collector/pull/13) | #7 の前に指標を固定 |
+| #7 | `spikes/search` / [PR #14](https://github.com/ysogabe/memo-collector/pull/14) | nDCGと負例の採用条件未達で融合は保留 |
+| #9 | ADR-0002 / [PR #15](https://github.com/ysogabe/memo-collector/pull/15) | 製品へ非破壊migration/shadow世代/CASを実装。全QA成功 |
+| #8 | `spikes/llama` / ADR-0003 / [PR #16](https://github.com/ysogabe/memo-collector/pull/16) | M3実測、Core ML維持。電力/利用率/M4は未測定 |
+| #10 | `spikes/worker` / ADR-0004 / [PR #17](https://github.com/ysogabe/memo-collector/pull/17) | 実helper障害/E2E/永続job PoC。製品導入は保留、M1/UI/batteryは未測定 |
+| #11 後半 | [回帰CI結果](../research/search-regression-ci.md) / `scripts/search-quality.sh` / `scripts/search-model-evaluation.sh` | 品質CI + 実モデル専用job、両コマンドをローカル実行 |
+
+全PRはレビュー前で未merge。#9以外の製品方式変更は採用していない。旧vectorのprovenanceを推測してactive化せず、初回もshadow再構築する保存契約で確定した（ADR-0002）。開始時に想定したtable/API名との差は実コードを正とする。

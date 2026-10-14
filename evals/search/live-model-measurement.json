@@ -1,0 +1,616 @@
+{
+  "corpusID": "search-ja-v2",
+  "hardware": "Apple M3 / 24 GiB / Swift 6.4 Debug",
+  "measuredAt": "2026-10-14",
+  "metadata": {
+    "baseline_contract": "actual MCPToolHandlers.search_captures with actual SQLiteRecordStore",
+    "cold_latency": "first-pass percentile is separate; model load/first prepare recorded separately",
+    "compute_units": "cpuAndGPU",
+    "corpus_sha256": "13fc0ee5f4e6f1db2cc40bf29d069e31446ca76325d672b69b6140948dfa7afc",
+    "database_bytes": "4096",
+    "document_inputs": "annotation + window title; image only when fixture screen is present; no app/url metadata added",
+    "index_vector_compute_units": "cpuAndGPU",
+    "model_signature": "embedding/50bdcd7c2dd0ae8a16a3a720817bce2b5299ed4439281fadc8db88e9690c123e",
+    "mrr_depth": "30",
+    "os": "Version 27.0.1 (Build 26A434)",
+    "physical_memory_bytes": "25769803776",
+    "poc_capacity_10000_bytes": "11948032",
+    "poc_capacity_10000_index_ms": "517.308667",
+    "poc_capacity_10000_p50_ms": "6.723542",
+    "poc_capacity_10000_p95_ms": "191.155167",
+    "poc_capacity_1000_bytes": "1216512",
+    "poc_capacity_1000_index_ms": "53.229666",
+    "poc_capacity_1000_p50_ms": "0.790458",
+    "poc_capacity_1000_p95_ms": "19.852125",
+    "poc_capacity_scope": "repeated authored synthetic text; keyword retrieval only; shared projection + BOTH word/trigram FTS indexes; no quality claims",
+    "poc_database_bytes": "122880",
+    "poc_index_milliseconds": "5.171417",
+    "poc_limits": "48-record synthetic text-only set; no new product index; no raw OCR persisted",
+    "poc_sqlite_version": "3.54.0",
+    "poc_threshold": "0.65",
+    "poc_tuning_grid": "0.20:0.86484375,0.25:0.86484375,0.30:0.86484375,0.35:0.86484375,0.40:0.86484375,0.45:0.86484375,0.50:0.86484375,0.55:0.86484375,0.60:0.86484375,0.65:0.93703125,0.70:0.92359375,0.75:0.903125,0.80:0.8314583333333332",
+    "preparation_milliseconds": "15967.034917",
+    "processor_count": "8",
+    "queries_sha256": "83b74ef6dd91e5a9208f8c5a9343b04739a3dda92340ba42a277e0a4cd51ee8c",
+    "query_source": "live CoreMLEmbedder; latency includes query inference + MCP + store",
+    "retrieval_depth": "30",
+    "store_index_milliseconds": "126.069375"
+  },
+  "modes": {
+    "baseline_mcp_keyword": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 22.434708,
+          "hitRate": {
+            "1": 0.7625,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7729166666666666,
+          "ndcg": {
+            "1": 0.38750000000000046,
+            "10": 0.656153506879693,
+            "3": 0.6517055081510297
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 14.286459,
+          "p95Milliseconds": 22.108458,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.45833333333333337,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 22.968208,
+          "hitRate": {
+            "1": 0.75,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7666666666666666,
+          "ndcg": {
+            "1": 0.3749999999999997,
+            "10": 0.6515401287993374,
+            "3": 0.6470921300706739
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 14.395708,
+          "p95Milliseconds": 23.873916,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4458333333333333,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 21.732291,
+          "hitRate": {
+            "1": 0.775,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7791666666666666,
+          "ndcg": {
+            "1": 0.39999999999999974,
+            "10": 0.660766884960051,
+            "3": 0.6563188862313875
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 14.177,
+          "p95Milliseconds": 21.650666,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4708333333333333,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        }
+      }
+    },
+    "baseline_mcp_vector": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 70.61275,
+          "hitRate": {
+            "1": 0.95,
+            "10": 1,
+            "3": 0.99375
+          },
+          "mrr": 0.9713541666666666,
+          "ndcg": {
+            "1": 0.608333333333333,
+            "10": 0.8621500168159365,
+            "3": 0.8492366002636844
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 47.51625,
+          "p95Milliseconds": 67.208583,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.5583333333333333,
+            "10": 0.9875,
+            "3": 0.953125
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 83.39225,
+          "hitRate": {
+            "1": 0.975,
+            "10": 1,
+            "3": 0.9875
+          },
+          "mrr": 0.984375,
+          "ndcg": {
+            "1": 0.6250000000000002,
+            "10": 0.8680147730346022,
+            "3": 0.8502409775248158
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 46.550208,
+          "p95Milliseconds": 83.018208,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5708333333333334,
+            "10": 0.99375,
+            "3": 0.95
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 64.981459,
+          "hitRate": {
+            "1": 0.925,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9583333333333333,
+          "ndcg": {
+            "1": 0.591666666666667,
+            "10": 0.8562852605972733,
+            "3": 0.8482322230025551
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 49.882708,
+          "p95Milliseconds": 65.796375,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5458333333333334,
+            "10": 0.98125,
+            "3": 0.95625
+          }
+        }
+      }
+    },
+    "baseline_native_vector": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 13.272375,
+          "hitRate": {
+            "1": 0.95,
+            "10": 1,
+            "3": 0.99375
+          },
+          "mrr": 0.9713541666666666,
+          "ndcg": {
+            "1": 0.608333333333333,
+            "10": 0.8621500168159365,
+            "3": 0.8492366002636844
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 12.16225,
+          "p95Milliseconds": 13.39075,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.5583333333333333,
+            "10": 0.9875,
+            "3": 0.953125
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 13.368,
+          "hitRate": {
+            "1": 0.975,
+            "10": 1,
+            "3": 0.9875
+          },
+          "mrr": 0.984375,
+          "ndcg": {
+            "1": 0.6250000000000002,
+            "10": 0.8680147730346022,
+            "3": 0.8502409775248158
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 12.163292,
+          "p95Milliseconds": 13.910875,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5708333333333334,
+            "10": 0.99375,
+            "3": 0.95
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 13.219208,
+          "hitRate": {
+            "1": 0.925,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9583333333333333,
+          "ndcg": {
+            "1": 0.591666666666667,
+            "10": 0.8562852605972733,
+            "3": 0.8482322230025551
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 12.161666,
+          "p95Milliseconds": 12.8585,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5458333333333334,
+            "10": 0.98125,
+            "3": 0.95625
+          }
+        }
+      }
+    },
+    "poc_gated_rrf": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 19.878667,
+          "hitRate": {
+            "1": 0.95625,
+            "10": 1,
+            "3": 0.99375
+          },
+          "mrr": 0.9744791666666666,
+          "ndcg": {
+            "1": 0.5062499999999999,
+            "10": 0.8269003533789109,
+            "3": 0.8108232879159123
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0.8125,
+          "noAnswerFalseHitRate": 0.1875,
+          "p50Milliseconds": 13.419458,
+          "p95Milliseconds": 20.122833,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.5552083333333333,
+            "10": 0.978125,
+            "3": 0.94375
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 20.117084,
+          "hitRate": {
+            "1": 0.95,
+            "10": 1,
+            "3": 0.9875
+          },
+          "mrr": 0.971875,
+          "ndcg": {
+            "1": 0.4916666666666668,
+            "10": 0.8217309594904652,
+            "3": 0.7995091652520154
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0.875,
+          "noAnswerFalseHitRate": 0.125,
+          "p50Milliseconds": 13.521833,
+          "p95Milliseconds": 20.678333,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5458333333333334,
+            "10": 0.9875,
+            "3": 0.9375
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 19.625125,
+          "hitRate": {
+            "1": 0.9625,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9770833333333334,
+          "ndcg": {
+            "1": 0.5208333333333335,
+            "10": 0.8320697472673597,
+            "3": 0.8221374105798127
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0.75,
+          "noAnswerFalseHitRate": 0.25,
+          "p50Milliseconds": 13.369917,
+          "p95Milliseconds": 19.8735,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5645833333333334,
+            "10": 0.96875,
+            "3": 0.95
+          }
+        }
+      }
+    },
+    "poc_rrf": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 19.511916,
+          "hitRate": {
+            "1": 0.96875,
+            "10": 1,
+            "3": 0.99375
+          },
+          "mrr": 0.9807291666666667,
+          "ndcg": {
+            "1": 0.5229166666666665,
+            "10": 0.8349293199971696,
+            "3": 0.817567904716254
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 13.369208,
+          "p95Milliseconds": 19.497292,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.5677083333333333,
+            "10": 0.9875,
+            "3": 0.946875
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 19.509375,
+          "hitRate": {
+            "1": 0.975,
+            "10": 1,
+            "3": 0.9875
+          },
+          "mrr": 0.984375,
+          "ndcg": {
+            "1": 0.5166666666666668,
+            "10": 0.8326790378535298,
+            "3": 0.81045724361508
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 13.369208,
+          "p95Milliseconds": 19.472042,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5708333333333334,
+            "10": 0.99375,
+            "3": 0.94375
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 19.657625,
+          "hitRate": {
+            "1": 0.9625,
+            "10": 1,
+            "3": 1
+          },
+          "mrr": 0.9770833333333334,
+          "ndcg": {
+            "1": 0.5291666666666669,
+            "10": 0.8371796021408127,
+            "3": 0.8246785658174313
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 0,
+          "noAnswerFalseHitRate": 1,
+          "p50Milliseconds": 13.367458,
+          "p95Milliseconds": 19.5235,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.5645833333333334,
+            "10": 0.98125,
+            "3": 0.95
+          }
+        }
+      }
+    },
+    "poc_trigram_short_exact": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 0.656916,
+          "hitRate": {
+            "1": 0.7625,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7729166666666666,
+          "ndcg": {
+            "1": 0.38750000000000046,
+            "10": 0.656153506879693,
+            "3": 0.6517055081510297
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.139333,
+          "p95Milliseconds": 0.542083,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.45833333333333337,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 0.6785,
+          "hitRate": {
+            "1": 0.75,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7666666666666666,
+          "ndcg": {
+            "1": 0.3749999999999997,
+            "10": 0.6515401287993374,
+            "3": 0.6470921300706739
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.140375,
+          "p95Milliseconds": 0.554667,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4458333333333333,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 0.647291,
+          "hitRate": {
+            "1": 0.775,
+            "10": 0.7875,
+            "3": 0.7875
+          },
+          "mrr": 0.7791666666666666,
+          "ndcg": {
+            "1": 0.39999999999999974,
+            "10": 0.660766884960051,
+            "3": 0.6563188862313875
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.13825,
+          "p95Milliseconds": 0.532917,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4708333333333333,
+            "10": 0.78125,
+            "3": 0.775
+          }
+        }
+      }
+    },
+    "poc_unicode61": {
+      "summaries": {
+        "ALL": {
+          "answerableCount": 160,
+          "firstPassP95Milliseconds": 0.66175,
+          "hitRate": {
+            "1": 0.66875,
+            "10": 0.69375,
+            "3": 0.69375
+          },
+          "mrr": 0.6791666666666666,
+          "ndcg": {
+            "1": 0.3562500000000003,
+            "10": 0.5814621711618335,
+            "3": 0.57701417243317
+          },
+          "noAnswerCount": 16,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.146166,
+          "p95Milliseconds": 0.529958,
+          "queryCount": 176,
+          "recall": {
+            "1": 0.41145833333333337,
+            "10": 0.6875,
+            "3": 0.68125
+          }
+        },
+        "split:dev": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 0.664417,
+          "hitRate": {
+            "1": 0.6625,
+            "10": 0.7,
+            "3": 0.7
+          },
+          "mrr": 0.6791666666666666,
+          "ndcg": {
+            "1": 0.3458333333333331,
+            "10": 0.581828215462668,
+            "3": 0.5773802167340045
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.146166,
+          "p95Milliseconds": 0.551333,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4020833333333333,
+            "10": 0.69375,
+            "3": 0.6875
+          }
+        },
+        "split:holdout": {
+          "answerableCount": 80,
+          "firstPassP95Milliseconds": 0.648916,
+          "hitRate": {
+            "1": 0.675,
+            "10": 0.6875,
+            "3": 0.6875
+          },
+          "mrr": 0.6791666666666666,
+          "ndcg": {
+            "1": 0.3666666666666665,
+            "10": 0.5810961268610002,
+            "3": 0.5766481281323368
+          },
+          "noAnswerCount": 8,
+          "noAnswerEmptyRate": 1,
+          "noAnswerFalseHitRate": 0,
+          "p50Milliseconds": 0.146042,
+          "p95Milliseconds": 0.528125,
+          "queryCount": 88,
+          "recall": {
+            "1": 0.4208333333333333,
+            "10": 0.68125,
+            "3": 0.675
+          }
+        }
+      }
+    }
+  },
+  "schemaVersion": 1
+}

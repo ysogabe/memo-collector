@@ -66,5 +66,7 @@ manifest={'schemaVersion':1,'corpusID':'search-ja-v2','seed':0,'provenance':'Aut
           'license':'CC0-1.0','generator':'generate.py','records':len(records),'queries':len(queries),
           'files':{name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in ['records.json','queries.json']},
           'splitPolicy':'Topic groups, their records and all paraphrases belong to exactly one dev/holdout split.'}
+if (ROOT/'frozen-vectors.json').exists():
+    manifest['files']['frozen-vectors.json']=hashlib.sha256((ROOT/'frozen-vectors.json').read_bytes()).hexdigest()
 dump(ROOT/'manifest.json',manifest)
 print(f'{len(records)} records, {len(queries)} queries')
