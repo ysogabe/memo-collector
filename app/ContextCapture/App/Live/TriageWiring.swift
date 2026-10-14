@@ -100,7 +100,11 @@ enum RecordEdits {
     /// 意図を手で変える。`TriageResult.manual`（model == "user"）にするので、以後の自動推定は上書きしない。
     /// 日時言及は自動推定の値を引き継ぐ（無ければ false）。
     static func setManualIntent(_ intent: Intent?, on r: inout ContextRecord) {
-        r.triage = TriageResult.manual(intent: intent, mentionsDatetime: r.triage?.mentionsDatetime ?? false)
+        let previous = r.triage
+        r.triage = TriageResult.manual(intent: intent, mentionsDatetime: previous?.mentionsDatetime ?? false)
+        // Preserve the prediction being labeled so eval-intent can compare it to the user's truth.
+        r.triage?.intentProbabilities = previous?.intentProbabilities
+        r.triage?.datetimeProbability = previous?.datetimeProbability
     }
 
     static func setAnnotation(_ text: String, on r: inout ContextRecord) {

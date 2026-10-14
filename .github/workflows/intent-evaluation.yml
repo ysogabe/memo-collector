@@ -1,0 +1,29 @@
+name: Intent evaluation contracts
+on:
+  pull_request:
+    paths: ['Packages/ContextCaptureKit/**', 'scripts/tests/test_intent_evaluation_cli.py', '.github/workflows/intent-evaluation.yml']
+  push:
+    branches: [main]
+    paths: ['Packages/ContextCaptureKit/**', 'scripts/tests/test_intent_evaluation_cli.py', '.github/workflows/intent-evaluation.yml']
+permissions:
+  contents: read
+concurrency:
+  group: intent-evaluation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contracts:
+    runs-on: xcode-27
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Metal compiler component for MLX build
+        run: xcodebuild -downloadComponent MetalToolchain
+      - name: Pure metrics, readonly DB, question validation
+        env:
+          CC_CHECK_SKIP_APP: '1'
+          CC_TEST_FILTER: 'IntentEvaluationTests|ReadOnlyIntentDatasetTests|IntentQuestionCandidateTests'
+        run: scripts/check.sh
+      - name: CLI contracts (no models or user data)
+        run: |
+          bin=$(swift build --package-path Packages/ContextCaptureKit --show-bin-path)
+          CC_INTENT_EVAL_BINARY="$bin/cc-models" python3 -m unittest discover -s scripts/tests -p test_intent_evaluation_cli.py -v

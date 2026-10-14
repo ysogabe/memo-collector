@@ -66,7 +66,7 @@ let package = Package(
         // MCP ツール実装（ストアを読む・状態更新のみ）。
         .target(name: "CCMCP", dependencies: ["CCCore", "CCStore", "CCEmbedding", mcp]),
         // CLI: モデル準備（`cc-models prepare all`）。
-        .executableTarget(name: "cc-models", dependencies: ["CCCore", "CCModels", "CCStore", argumentParser]),
+        .executableTarget(name: "cc-models", dependencies: ["CCCore", "CCModels", "CCStore", "CCIntent", "CCTriage", argumentParser]),
         // CLI: stdio MCP サーバー（Claude Code / Hermes から起動される）。
         .executableTarget(name: "cc-mcp", dependencies: ["CCCore", "CCMCP", "CCStore", "CCEmbedding", mcp, argumentParser]),
 

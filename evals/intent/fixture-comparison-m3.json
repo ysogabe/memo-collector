@@ -1,0 +1,700 @@
+{
+  "datasetKind" : "synthetic",
+  "evaluations" : [
+    {
+      "development" : [
+
+      ],
+      "evaluated" : 0,
+      "holdout" : [
+
+      ],
+      "missingStoredProbabilities" : 30,
+      "name" : "stored",
+      "probabilitySource" : "stored; original question\/model provenance may be unknown"
+    },
+    {
+      "development" : [
+        {
+          "accuracy" : 0.8636363636363636,
+          "classified" : 22,
+          "confusion" : {
+            "code" : {
+              "code" : 4,
+              "research" : 2
+            },
+            "note" : {
+              "note" : 3
+            },
+            "research" : {
+              "research" : 3,
+              "unclassified" : 1
+            },
+            "schedule" : {
+              "schedule" : 3
+            },
+            "todo" : {
+              "research" : 1,
+              "todo" : 6,
+              "unclassified" : 1
+            }
+          },
+          "correct" : 19,
+          "coverage" : 0.9166666666666666,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.5
+        },
+        {
+          "accuracy" : 0.85,
+          "classified" : 20,
+          "confusion" : {
+            "code" : {
+              "code" : 4,
+              "research" : 2
+            },
+            "note" : {
+              "note" : 2,
+              "unclassified" : 1
+            },
+            "research" : {
+              "research" : 3,
+              "unclassified" : 1
+            },
+            "schedule" : {
+              "schedule" : 3
+            },
+            "todo" : {
+              "research" : 1,
+              "todo" : 5,
+              "unclassified" : 2
+            }
+          },
+          "correct" : 17,
+          "coverage" : 0.8333333333333334,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.6
+        },
+        {
+          "accuracy" : 0.8421052631578947,
+          "classified" : 19,
+          "confusion" : {
+            "code" : {
+              "code" : 3,
+              "research" : 2,
+              "unclassified" : 1
+            },
+            "note" : {
+              "note" : 2,
+              "unclassified" : 1
+            },
+            "research" : {
+              "research" : 3,
+              "unclassified" : 1
+            },
+            "schedule" : {
+              "schedule" : 3
+            },
+            "todo" : {
+              "research" : 1,
+              "todo" : 5,
+              "unclassified" : 2
+            }
+          },
+          "correct" : 16,
+          "coverage" : 0.7916666666666666,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.7
+        },
+        {
+          "accuracy" : 0.9333333333333333,
+          "classified" : 15,
+          "confusion" : {
+            "code" : {
+              "code" : 2,
+              "research" : 1,
+              "unclassified" : 3
+            },
+            "note" : {
+              "note" : 2,
+              "unclassified" : 1
+            },
+            "research" : {
+              "research" : 3,
+              "unclassified" : 1
+            },
+            "schedule" : {
+              "schedule" : 3
+            },
+            "todo" : {
+              "todo" : 4,
+              "unclassified" : 4
+            }
+          },
+          "correct" : 14,
+          "coverage" : 0.625,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.8
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 10,
+          "confusion" : {
+            "code" : {
+              "code" : 2,
+              "unclassified" : 4
+            },
+            "note" : {
+              "note" : 1,
+              "unclassified" : 2
+            },
+            "research" : {
+              "research" : 3,
+              "unclassified" : 1
+            },
+            "schedule" : {
+              "schedule" : 2,
+              "unclassified" : 1
+            },
+            "todo" : {
+              "todo" : 2,
+              "unclassified" : 6
+            }
+          },
+          "correct" : 10,
+          "coverage" : 0.4166666666666667,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.9
+        }
+      ],
+      "evaluated" : 30,
+      "holdout" : [
+        {
+          "accuracy" : 1,
+          "classified" : 6,
+          "confusion" : {
+            "code" : {
+              "code" : 1
+            },
+            "note" : {
+              "note" : 2
+            },
+            "research" : {
+              "research" : 2
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 6,
+          "coverage" : 1,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.5
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 6,
+          "confusion" : {
+            "code" : {
+              "code" : 1
+            },
+            "note" : {
+              "note" : 2
+            },
+            "research" : {
+              "research" : 2
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 6,
+          "coverage" : 1,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.6
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 5,
+          "confusion" : {
+            "code" : {
+              "code" : 1
+            },
+            "note" : {
+              "note" : 1,
+              "unclassified" : 1
+            },
+            "research" : {
+              "research" : 2
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 5,
+          "coverage" : 0.8333333333333334,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.7
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 4,
+          "confusion" : {
+            "code" : {
+              "code" : 1
+            },
+            "note" : {
+              "unclassified" : 2
+            },
+            "research" : {
+              "research" : 2
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 4,
+          "coverage" : 0.6666666666666666,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.8
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 4,
+          "confusion" : {
+            "code" : {
+              "code" : 1
+            },
+            "note" : {
+              "unclassified" : 2
+            },
+            "research" : {
+              "research" : 2
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 4,
+          "coverage" : 0.6666666666666666,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.9
+        }
+      ],
+      "missingStoredProbabilities" : 0,
+      "name" : "product",
+      "probabilitySource" : "recomputed",
+      "questionSHA256" : "615d5c0d612ba9332553843e2fd50651de29e7abc944b0d34dbe8292021d66ec"
+    },
+    {
+      "development" : [
+        {
+          "accuracy" : 0.8695652173913043,
+          "classified" : 23,
+          "confusion" : {
+            "code" : {
+              "code" : 3,
+              "note" : 1,
+              "todo" : 1,
+              "unclassified" : 1
+            },
+            "note" : {
+              "note" : 3
+            },
+            "research" : {
+              "research" : 3,
+              "todo" : 1
+            },
+            "schedule" : {
+              "schedule" : 3
+            },
+            "todo" : {
+              "todo" : 8
+            }
+          },
+          "correct" : 20,
+          "coverage" : 0.9583333333333334,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.5
+        },
+        {
+          "accuracy" : 0.9047619047619048,
+          "classified" : 21,
+          "confusion" : {
+            "code" : {
+              "code" : 3,
+              "note" : 1,
+              "todo" : 1,
+              "unclassified" : 1
+            },
+            "note" : {
+              "note" : 3
+            },
+            "research" : {
+              "research" : 3,
+              "unclassified" : 1
+            },
+            "schedule" : {
+              "schedule" : 3
+            },
+            "todo" : {
+              "todo" : 7,
+              "unclassified" : 1
+            }
+          },
+          "correct" : 19,
+          "coverage" : 0.875,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.6
+        },
+        {
+          "accuracy" : 0.95,
+          "classified" : 20,
+          "confusion" : {
+            "code" : {
+              "code" : 3,
+              "note" : 1,
+              "unclassified" : 2
+            },
+            "note" : {
+              "note" : 3
+            },
+            "research" : {
+              "research" : 3,
+              "unclassified" : 1
+            },
+            "schedule" : {
+              "schedule" : 3
+            },
+            "todo" : {
+              "todo" : 7,
+              "unclassified" : 1
+            }
+          },
+          "correct" : 19,
+          "coverage" : 0.8333333333333334,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.7
+        },
+        {
+          "accuracy" : 0.9411764705882353,
+          "classified" : 17,
+          "confusion" : {
+            "code" : {
+              "code" : 3,
+              "note" : 1,
+              "unclassified" : 2
+            },
+            "note" : {
+              "note" : 3
+            },
+            "research" : {
+              "research" : 1,
+              "unclassified" : 3
+            },
+            "schedule" : {
+              "schedule" : 3
+            },
+            "todo" : {
+              "todo" : 6,
+              "unclassified" : 2
+            }
+          },
+          "correct" : 16,
+          "coverage" : 0.7083333333333334,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.8
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 10,
+          "confusion" : {
+            "code" : {
+              "code" : 3,
+              "unclassified" : 3
+            },
+            "note" : {
+              "note" : 2,
+              "unclassified" : 1
+            },
+            "research" : {
+              "research" : 1,
+              "unclassified" : 3
+            },
+            "schedule" : {
+              "schedule" : 1,
+              "unclassified" : 2
+            },
+            "todo" : {
+              "todo" : 3,
+              "unclassified" : 5
+            }
+          },
+          "correct" : 10,
+          "coverage" : 0.4166666666666667,
+          "goldCounts" : {
+            "code" : 6,
+            "note" : 3,
+            "research" : 4,
+            "schedule" : 3,
+            "todo" : 8
+          },
+          "samples" : 24,
+          "threshold" : 0.9
+        }
+      ],
+      "evaluated" : 30,
+      "holdout" : [
+        {
+          "accuracy" : 1,
+          "classified" : 6,
+          "confusion" : {
+            "code" : {
+              "code" : 1
+            },
+            "note" : {
+              "note" : 2
+            },
+            "research" : {
+              "research" : 2
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 6,
+          "coverage" : 1,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.5
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 5,
+          "confusion" : {
+            "code" : {
+              "unclassified" : 1
+            },
+            "note" : {
+              "note" : 2
+            },
+            "research" : {
+              "research" : 2
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 5,
+          "coverage" : 0.8333333333333334,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.6
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 5,
+          "confusion" : {
+            "code" : {
+              "unclassified" : 1
+            },
+            "note" : {
+              "note" : 2
+            },
+            "research" : {
+              "research" : 2
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 5,
+          "coverage" : 0.8333333333333334,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.7
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 4,
+          "confusion" : {
+            "code" : {
+              "unclassified" : 1
+            },
+            "note" : {
+              "note" : 2
+            },
+            "research" : {
+              "research" : 1,
+              "unclassified" : 1
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 4,
+          "coverage" : 0.6666666666666666,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.8
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 3,
+          "confusion" : {
+            "code" : {
+              "unclassified" : 1
+            },
+            "note" : {
+              "note" : 1,
+              "unclassified" : 1
+            },
+            "research" : {
+              "research" : 1,
+              "unclassified" : 1
+            },
+            "schedule" : {
+              "schedule" : 1
+            }
+          },
+          "correct" : 3,
+          "coverage" : 0.5,
+          "goldCounts" : {
+            "code" : 1,
+            "note" : 2,
+            "research" : 2,
+            "schedule" : 1
+          },
+          "samples" : 6,
+          "threshold" : 0.9
+        }
+      ],
+      "missingStoredProbabilities" : 0,
+      "name" : "japanese-description-v1",
+      "probabilitySource" : "recomputed",
+      "questionSHA256" : "df41ef59b432c17bab2397be3f94004cf5c63faa582dc363261a461f83dbbdf3"
+    }
+  ],
+  "labelCountSufficient" : false,
+  "labeledRecords" : 30,
+  "modelConfigSHA256" : "6dd813ace4df523c552090c96594194ea4576997877f8d29d83c1a79fd68592b",
+  "modelIdentifier" : "LiquidAI\/d1-3B@051bcc4+mlx-q8",
+  "modelWeightsSHA256" : "ca84ed9cea3b235affc90405788783e0a157314b18726a0dbb73190d684fda7c",
+  "preprocessingMaxCharacters" : 600,
+  "schemaVersion" : 1,
+  "split" : "input order: first 80% development, last 20% holdout; DB order captured_at\/id; fewer than 5: development only",
+  "status" : "evaluation_only; adoption\/reprocessing requires reviewed evidence",
+  "totalRecords" : 30
+}
