@@ -19,7 +19,12 @@ extension TriageQueue: TriageQueuing {
     }
 
     func setCapturing(_ capturing: Bool) async {
-        if capturing { pause() } else { resume() }
+        if capturing {
+            // A new capture during the post-save quiet period starts a fresh safety deadline.
+            // Both calls are synchronous on this actor; a resumed worker sees paused == true.
+            resume()
+            pause()
+        } else { resume() }
     }
 }
 

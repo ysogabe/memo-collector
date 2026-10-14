@@ -1,3 +1,5 @@
+import CCCore
+import CCTriage
 import Foundation
 import XCTest
 
@@ -74,6 +76,31 @@ final class CaptureQuietPeriodTests: XCTestCase {
         await gate.releaseAll(); await stale?.value; await wiring.waitForCaptureQuietPeriod()
         XCTAssertEqual(q.states.get(), [true, false])
     }
+    func testNewCaptureDuringQuietPeriodRenewsPauseSafetyDeadline() async throws {
+        let store = TestStore(), gate = ManualSleep()
+        defer { try? FileManager.default.removeItem(at: store.root) }
+        let queue = TriageQueue(store: store, classifier: FakeClassifier(), scanner: FakeScanner(),
+                                embedder: FakePreparableEmbedder(signature: "timer"), screenshots: FakeScreenshotLoader(),
+                                configuration: .init(maxPauseDuration: .seconds(1)))
+        let wiring = TriageWiring(queue: queue, postCaptureQuietPeriod: .milliseconds(750), quietSleep: { await gate.sleep($0) })
+        wiring.captureActivityChanged(true)
+        await wiring.waitForCaptureActivityForwarded()
+        try await Task.sleep(for: .milliseconds(600))
+        wiring.captureActivityChanged(false)
+        await gate.waitForRequests(1)
+        wiring.captureActivityChanged(true)
+        await wiring.waitForCaptureActivityForwarded()
+        try await Task.sleep(for: .milliseconds(650))
+        let paused = await queue.isPaused, autoResumes = await queue.autoResumeCount
+        XCTAssertTrue(paused)
+        XCTAssertEqual(autoResumes, 0, "previous capture's deadline must not resume a new capture")
+        wiring.captureActivityChanged(false)
+        await gate.waitForRequests(2)
+        await gate.releaseAll(); await wiring.waitForCaptureQuietPeriod()
+        let endedPaused = await queue.isPaused
+        XCTAssertFalse(endedPaused)
+    }
+
     func testReleasedWiringDoesNotLeaveLiveQueuePaused() async {
         let q = Queue(), gate = ManualSleep()
         var wiring: TriageWiring? = TriageWiring(queue: q, postCaptureQuietPeriod: .milliseconds(750), quietSleep: { await gate.sleep($0) })
