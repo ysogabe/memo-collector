@@ -1,0 +1,227 @@
+{
+  "hardware": {
+    "chip": "Apple M3",
+    "memoryGiB": 24,
+    "power": "AC"
+  },
+  "appSource": "00e95ef315c530105156cebba5933eaa5f0f711b",
+  "mainSourceEquivalent": "261d608",
+  "method": "press/release OS event -> recorder.start completion / save before toast emission; visual HUD/toast confirmed separately by user",
+  "userConfirmed": {
+    "savedCaptures": 20,
+    "notificationsAndOperation": "no anomalies"
+  },
+  "summary": {
+    "captures": 20,
+    "pressToRecordingMs": {
+      "n": 20,
+      "p50": 62.0,
+      "p90": 81.0,
+      "max": 141.0
+    },
+    "releaseToSavedMs": {
+      "n": 20,
+      "p50": 1435.0,
+      "p90": 1525.0,
+      "max": 2757.0
+    },
+    "audioSeconds": {
+      "n": 20,
+      "p50": 2.7,
+      "p90": 3.1,
+      "max": 3.2
+    },
+    "failures": 0,
+    "paused": 20,
+    "resumed": 18,
+    "savedWithoutScreenshot": 0,
+    "recordDurationRange": [
+      2.2,
+      3.2
+    ],
+    "gates": {
+      "savedAtLeast20": true,
+      "pressToRecordingMaxAtMost150ms": true,
+      "releaseToSavedP90AtMost2000ms": true,
+      "captureFailuresZero": true,
+      "allScreenshotsSaved": true
+    }
+  },
+  "samples": [
+    {
+      "sequence": 1,
+      "pressToRecordingMs": 64.0,
+      "releaseToSavedMs": 2757.0,
+      "sttMs": 2722.0,
+      "audioSeconds": 3.1,
+      "sttBreakdown": "wait 0ms pipeline 2721ms mel 15ms enc 2457ms dec 247ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 2587ms logprob -0.01 cr 0.97"
+    },
+    {
+      "sequence": 2,
+      "pressToRecordingMs": 75.0,
+      "releaseToSavedMs": 1577.0,
+      "sttMs": 1535.0,
+      "audioSeconds": 3.1,
+      "sttBreakdown": "wait 0ms pipeline 1533ms mel 13ms enc 1356ms dec 161ms fallback 0 (0ms) temp 0.0 loops 14 windows 1 first 1388ms logprob -0.04 cr 0.98"
+    },
+    {
+      "sequence": 3,
+      "pressToRecordingMs": 44.0,
+      "releaseToSavedMs": 1455.0,
+      "sttMs": 1416.0,
+      "audioSeconds": 3.2,
+      "sttBreakdown": "wait 0ms pipeline 1416ms mel 23ms enc 1237ms dec 153ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1281ms logprob -0.02 cr 0.97"
+    },
+    {
+      "sequence": 4,
+      "pressToRecordingMs": 56.0,
+      "releaseToSavedMs": 1479.0,
+      "sttMs": 1451.0,
+      "audioSeconds": 3.1,
+      "sttBreakdown": "wait 0ms pipeline 1451ms mel 13ms enc 1283ms dec 154ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1313ms logprob -0.01 cr 0.97"
+    },
+    {
+      "sequence": 5,
+      "pressToRecordingMs": 141.0,
+      "releaseToSavedMs": 1479.0,
+      "sttMs": 1444.0,
+      "audioSeconds": 2.5,
+      "sttBreakdown": "wait 0ms pipeline 1443ms mel 12ms enc 1276ms dec 150ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1307ms logprob -0.05 cr 0.97"
+    },
+    {
+      "sequence": 6,
+      "pressToRecordingMs": 74.0,
+      "releaseToSavedMs": 1439.0,
+      "sttMs": 1411.0,
+      "audioSeconds": 2.7,
+      "sttBreakdown": "wait 0ms pipeline 1411ms mel 8ms enc 1252ms dec 148ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1279ms logprob -0.01 cr 0.97"
+    },
+    {
+      "sequence": 7,
+      "pressToRecordingMs": 62.0,
+      "releaseToSavedMs": 1469.0,
+      "sttMs": 1432.0,
+      "audioSeconds": 2.6,
+      "sttBreakdown": "wait 0ms pipeline 1429ms mel 24ms enc 1251ms dec 151ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1294ms logprob -0.01 cr 0.97"
+    },
+    {
+      "sequence": 8,
+      "pressToRecordingMs": 72.0,
+      "releaseToSavedMs": 1428.0,
+      "sttMs": 1399.0,
+      "audioSeconds": 2.8,
+      "sttBreakdown": "wait 0ms pipeline 1399ms mel 9ms enc 1231ms dec 155ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1259ms logprob -0.02 cr 0.97"
+    },
+    {
+      "sequence": 9,
+      "pressToRecordingMs": 55.0,
+      "releaseToSavedMs": 1422.0,
+      "sttMs": 1391.0,
+      "audioSeconds": 2.4,
+      "sttBreakdown": "wait 0ms pipeline 1391ms mel 15ms enc 1223ms dec 150ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1258ms logprob -0.03 cr 0.97"
+    },
+    {
+      "sequence": 10,
+      "pressToRecordingMs": 64.0,
+      "releaseToSavedMs": 1456.0,
+      "sttMs": 1425.0,
+      "audioSeconds": 2.3,
+      "sttBreakdown": "wait 0ms pipeline 1425ms mel 17ms enc 1250ms dec 151ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1290ms logprob -0.05 cr 0.97"
+    },
+    {
+      "sequence": 11,
+      "pressToRecordingMs": 38.0,
+      "releaseToSavedMs": 1392.0,
+      "sttMs": 1357.0,
+      "audioSeconds": 2.9,
+      "sttBreakdown": "wait 0ms pipeline 1356ms mel 11ms enc 1193ms dec 150ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1222ms logprob -0.06 cr 0.97"
+    },
+    {
+      "sequence": 12,
+      "pressToRecordingMs": 60.0,
+      "releaseToSavedMs": 1375.0,
+      "sttMs": 1346.0,
+      "audioSeconds": 2.7,
+      "sttBreakdown": "wait 0ms pipeline 1346ms mel 12ms enc 1178ms dec 153ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1210ms logprob -0.02 cr 0.97"
+    },
+    {
+      "sequence": 13,
+      "pressToRecordingMs": 81.0,
+      "releaseToSavedMs": 1421.0,
+      "sttMs": 1386.0,
+      "audioSeconds": 2.9,
+      "sttBreakdown": "wait 0ms pipeline 1386ms mel 11ms enc 1227ms dec 146ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1255ms logprob -0.05 cr 0.97"
+    },
+    {
+      "sequence": 14,
+      "pressToRecordingMs": 59.0,
+      "releaseToSavedMs": 1525.0,
+      "sttMs": 1425.0,
+      "audioSeconds": 2.6,
+      "sttBreakdown": "wait 0ms pipeline 1424ms mel 16ms enc 1255ms dec 150ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1291ms logprob -0.03 cr 0.97"
+    },
+    {
+      "sequence": 15,
+      "pressToRecordingMs": 79.0,
+      "releaseToSavedMs": 1435.0,
+      "sttMs": 1411.0,
+      "audioSeconds": 2.4,
+      "sttBreakdown": "wait 0ms pipeline 1410ms mel 21ms enc 1239ms dec 148ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1278ms logprob -0.04 cr 0.97"
+    },
+    {
+      "sequence": 16,
+      "pressToRecordingMs": 84.0,
+      "releaseToSavedMs": 1410.0,
+      "sttMs": 1389.0,
+      "audioSeconds": 2.8,
+      "sttBreakdown": "wait 0ms pipeline 1388ms mel 25ms enc 1211ms dec 151ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1254ms logprob -0.02 cr 0.97"
+    },
+    {
+      "sequence": 17,
+      "pressToRecordingMs": 48.0,
+      "releaseToSavedMs": 1424.0,
+      "sttMs": 1392.0,
+      "audioSeconds": 2.9,
+      "sttBreakdown": "wait 0ms pipeline 1391ms mel 12ms enc 1228ms dec 147ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1258ms logprob -0.01 cr 0.97"
+    },
+    {
+      "sequence": 18,
+      "pressToRecordingMs": 34.0,
+      "releaseToSavedMs": 1425.0,
+      "sttMs": 1392.0,
+      "audioSeconds": 2.4,
+      "sttBreakdown": "wait 0ms pipeline 1392ms mel 9ms enc 1231ms dec 150ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1259ms logprob -0.02 cr 0.97"
+    },
+    {
+      "sequence": 19,
+      "pressToRecordingMs": 62.0,
+      "releaseToSavedMs": 1436.0,
+      "sttMs": 1415.0,
+      "audioSeconds": 2.2,
+      "sttBreakdown": "wait 0ms pipeline 1414ms mel 16ms enc 1248ms dec 146ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1283ms logprob -0.02 cr 0.97"
+    },
+    {
+      "sequence": 20,
+      "pressToRecordingMs": 70.0,
+      "releaseToSavedMs": 1418.0,
+      "sttMs": 1392.0,
+      "audioSeconds": 2.2,
+      "sttBreakdown": "wait 0ms pipeline 1392ms mel 16ms enc 1218ms dec 152ms fallback 0 (0ms) temp 0.0 loops 13 windows 1 first 1255ms logprob -0.05 cr 0.97"
+    }
+  ],
+  "recordVerification": {
+    "safari": 20,
+    "urlsPresent": 20,
+    "expectedPublicLPPageIgnoringFragment": 0,
+    "nonemptyAnnotations": 20,
+    "screenshots": 20,
+    "audioAttachments": 20,
+    "triaged": 20,
+    "guardClear": 20,
+    "latestVersionActiveGenerationIndexed": 20,
+    "automaticIntentLabelsAssigned": 0,
+    "unclassified": 20,
+    "intentInferenceResultsStored": 20
+  },
+  "activePipelineKey": "embedding/50bdcd7c2dd0ae8a16a3a720817bce2b5299ed4439281fadc8db88e9690c123e"
+}

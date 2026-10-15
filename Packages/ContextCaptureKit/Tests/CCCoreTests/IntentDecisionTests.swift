@@ -9,14 +9,26 @@ final class IntentDecisionTests: XCTestCase {
     }
 
     func testExactlyThresholdIsClassified() {
-        let d = resolveIntent(probabilities: [.todo: 0.7, .note: 0.3])
+        let d = resolveIntent(probabilities: [.todo: 0.6, .note: 0.4])
         XCTAssertEqual(d.intent, .todo)
     }
 
     func testBelowThresholdIsUnclassifiedButKeepsConfidence() {
-        let d = resolveIntent(probabilities: [.research: 0.6999, .note: 0.3001])
+        let d = resolveIntent(probabilities: [.research: 0.5999, .note: 0.4001])
         XCTAssertNil(d.intent)
-        XCTAssertEqual(d.confidence, 0.6999)
+        XCTAssertEqual(d.confidence, 0.5999)
+    }
+
+    func testShortReadingNotesAtNewDefaultThreshold() {
+        // 実マイク20件の最大確率2群。60%台のtodoは採用し、50%台のnoteは未分類のまま。
+        let todo = TriageResult(probabilities: [.todo: 0.6068, .note: 0.2232, .research: 0.1441, .code: 0.0172, .schedule: 0.0087],
+                                datetimeProbability: 0.2, model: "d1")
+        XCTAssertEqual(todo.intent, .todo)
+        XCTAssertEqual(todo.intentConfidence, 0.6068)
+        let uncertain = TriageResult(probabilities: [.note: 0.5749, .todo: 0.3952, .research: 0.0174, .code: 0.0072, .schedule: 0.0053],
+                                     datetimeProbability: 0.2, model: "d1")
+        XCTAssertNil(uncertain.intent)
+        XCTAssertEqual(uncertain.intentConfidence, 0.5749)
     }
 
     func testEmptyProbabilities() {

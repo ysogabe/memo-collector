@@ -151,14 +151,14 @@
   <section class="models" aria-labelledby="models-title">
     <div class="section-head">
       <h2 id="models-title">Apple Silicon で、実装と検証を進めています</h2>
-      <p>M3・24GB での結果です。録音から保存、検索、意図の推定を実装し、現在は実利用での受け入れ確認を進めています。</p>
+      <p>M3・24GB での結果です。録音から保存、検索、意図の推定を実装しました。実マイクで20件の連続記録を確認し、MVP の受け入れを完了しました。精度や各 Mac 構成での検証は継続しています。</p>
     </div>
     <div class="table-wrap">
       <table class="spec">
         <thead><tr><th scope="col">役割</th><th scope="col">現在の実装</th><th scope="col">検証結果・状態</th></tr></thead>
         <tbody>
           <tr><td>文字起こし・保存</td><td>Whisper large-v3-turbo<br>CPU + Neural Engine を利用する構成</td><td>保存の P90 は 1.67〜1.74 秒（3 回の連続記録比較）。30 音声で文字誤り率 7.72%</td></tr>
-          <tr><td>意図の推定</td><td>LiquidAI d1-3B<br>MLX・保存後に非同期処理</td><td>ラベルの手直しに対応。実利用の手動正解データを集めて精度を評価する段階</td></tr>
+          <tr><td>意図の推定</td><td>LiquidAI d1-3B<br>MLX・保存後に非同期処理</td><td>確信度60%以上でラベルを採用。手直しに対応し、多様な実メモでの精度評価を継続</td></tr>
           <tr><td>検索</td><td>EmbeddingGemma 2・Core ML<br>注釈とスクショの索引</td><td>テキストのみの日本語評価で Recall@3 は 95.6%。索引の世代管理・再構築と品質の回帰評価を追加</td></tr>
           <tr><td>秘密情報のチェック</td><td>Apple Vision OCR とパターン検出</td><td>検出箇所の確認・画像マスク・MCP への画像受け渡し制御を実装</td></tr>
         </tbody>
@@ -176,7 +176,7 @@
       <details><summary>ディスクはどれくらい使いますか？</summary><p>変換後のモデルは合計約 5.3GB。初回は約 8GB の取得と変換があるため、一時的に約 13GB の空きが必要です。記録の容量は画面や音声の長さで変わります。スクショは HEIC（利用できない場合は PNG）、音声は既定で 7 日後に削除し、文字起こしは残します。</p></details>
       <details><summary>オンライン会議の最中にも使えますか？</summary><p>マイク入力を記録するため、会議アプリをミュートにしたまま使うことを想定しています。Context Capture は会議アプリのシステム音声を取り込みませんが、スピーカーの声や周囲の音がマイクに入れば一緒に録音されます。会議アプリごとの同時利用は実機で確認を進めています。</p></details>
       <details><summary>URL はどのブラウザで取れますか？</summary><p>Safari、Google Chrome、Arc、Microsoft Edge 向けの取得処理があります。オートメーションの許可が必要です。URL を取得できなくても、ほかの情報と注釈で記録を残します。</p></details>
-      <details><summary>日本語の聞き間違いや、意図の誤りは直せますか？</summary><p>詳細画面で注釈を書き直し、意図ラベルを付け替えられます。設定の固有名詞辞書で、製品名や社内用語も補えます。確信度が足りない記録は「未分類」になります。手動で選んだ意図は自動推定で上書きしません。</p></details>
+      <details><summary>日本語の聞き間違いや、意図の誤りは直せますか？</summary><p>詳細画面で注釈を書き直し、意図ラベルを付け替えられます。設定の固有名詞辞書で、製品名や社内用語も補えます。推定した意図の確信度が60%未満の記録は「未分類」になります。手動で選んだ意図は自動推定で上書きしません。</p></details>
       <details><summary>記録がすぐ検索に出てこないことはありますか？</summary><p>あります。保存の後に秘密情報のチェック、意図の推定、索引の更新を進めるため、連続して録音すると整理が後回しになります。モデル準備中や索引再構築中も検索状態を表示し、必要に応じて文字の一致で探せます。</p></details>
       <details><summary>Claude Code や Hermes とはどうつなぎますか？</summary><p>付属のローカル MCP サーバーをエージェントの設定に登録します。一覧、検索、詳細、追記、完了、アーカイブの 6 ツールがあります。接続方法は <a href="https://github.com/ysogabe/memo-collector/blob/main/docs/manual-tests/mcp.md">MCP の手順</a>に記載しています。</p></details>
       <details><summary>オフラインでも使えますか？</summary><p>モデルの取得・変換・初回最適化が済めば、アプリの録音から検索までローカルで動きます。接続先のエージェントがオフラインで使えるかは、その構成によります。</p></details>

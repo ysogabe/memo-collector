@@ -1,10 +1,10 @@
 # 残る実機受け入れ（#1 / #2 / #10）
 
-対象はM3 24GiB。M4 32GBは不要。自動fixtureを実hotkey/mic/screen/toastの結果へ読み替えない。以下は未実施のチェック表で、ユーザーの確認結果を記入する。既存の2026-10-11の本線確認は [MVP計画](../plans/mvp-implementation.md) に残っている。
+対象はM3 24GiB。M4 32GBは不要。自動fixtureを実hotkey/mic/screen/toastの結果へ読み替えない。以下に実施結果と追加の未確認項目を分けて記録する。Issue #1は、実操作20件の確認と60%基準の採用をもってユーザー判断で完了とする。[完了記録](../research/mvp-acceptance-20261015.md)。既存の2026-10-11の本線確認は [MVP計画](../plans/mvp-implementation.md) に残っている。
 
 ## #2 の正解を集める
 
-普段のInboxで意図を手動修正し、30〜50件を目指す。今回の修正で手動ラベルと元の推論確率を両方残す。別の手動正解JSONでもよい。[評価手順](../../evals/intent/README.md) を実行し、developmentで案を選んでholdoutで検証する。現行0.7・製品質問文・既存記録は評価後に変更する。
+普段のInboxで意図を手動修正し、30〜50件を目指す。今回の修正で手動ラベルと元の推論確率を両方残す。別の手動正解JSONでもよい。[評価手順](../../evals/intent/README.md) を実行し、developmentで案を選んでholdoutで検証する。2026-10-15にユーザー判断で既定の採用基準を0.6へ変更した。製品質問文の変更と既存記録の再処理は評価後に行う。
 
 ## #1 の本線と #10 の性能
 
@@ -12,13 +12,13 @@
 
 | 試験 | 期待結果 | 結果 |
 |---|---|---|
-| warm-up完了後、実マイクで1〜3秒のメモ20件以上 | 押下→録音開始 ≤150ms、解放→保存toast P90 ≤2秒。件数と冷間/温間を記入 | 未実施 |
-| triage中に次の実キーを押し、連続10組以上 | 新しいstepがcapture中に始まらず、全件保存。W7-5のP90とnoticeを記録 | 未実施 |
-| 1件が遅いときの sttBreakdown | wait / enc / dec / fallback を記録。注釈本文や画面は調査ログへ載せない | 未実施 |
+| warm-up完了後、実マイクで1〜3秒のメモ20件以上 | 押下→録音開始 ≤150ms、解放→保存ログ（toast直前）P90 ≤2秒、toast表示は別途目視。件数と冷間/温間を記入 | warm-up後20件、実録音2.2〜3.2秒。押下P90 81ms・最大141ms、保存P90 1525ms、通知/操作の異常なしをユーザー確認 |
+| triage中に次の実キーを押し、連続10組以上 | 新しいstepがcapture中に始まらず、全件保存。W7-5のP90とnoticeを記録 | 10組20件の保存失敗0、全件索引済み。pause notice20件。step開始時刻の厳密な非重複は今回の終了ログだけでは判定しない |
+| 1件が遅いときの sttBreakdown | wait / enc / dec / fallback を記録。注釈本文や画面は調査ログへ載せない | 最大2757msの内STT2722ms、enc2457ms/dec247ms/wait0ms/fallback0回。原因は断定しない |
 | 録音中のデバイス中断・画面権限拒否との同時発生 | 音声があれば保存し中断を通知。両方の注意を表示 | 未実施 |
 | 再試行中の取り消し | 記録/添付が消え、再試行完了でも復活しない | 未実施 |
-| needs_review画像のMCP要求、マスク後の再要求 | 未確認の生画像を返さず、マスク画像だけ返る | 未実施 |
-| Claude Codeから list_inbox / get_record / search_records | 実クライアントとのstdio・検索key整合を確認（MCP単体テストとは別） | 未実施 |
+| needs_review画像のMCP要求、マスク後の再要求 | 未確認の生画像を返さず、マスク画像だけ返る | clear/needs_reviewのMCP出力制御を確認。実アプリのマスク操作後は未確認 |
+| Claude Codeから list_inbox / get_capture / search_captures | 実クライアントとのstdio・検索key整合を確認（MCP単体テストとは別） | 著作サンプルで一覧3件/詳細1件/keyword検索1件を取得。索引投入後のvectorヒットは未確認 |
 
 権限の変更や電源モードの変更はユーザーが行い、終わったら元の状態へ戻す。実音声・画面・DBをGitへ入れない。プロファイルを採る場合は数値の集計だけを残す。
 
@@ -28,7 +28,7 @@
 
 | 状態 | 記録するもの | 結果 |
 |---|---|---|
-| AC / 通常 | warm capture・待機CPU・physical・SoC電力の基準 | fixtureとidle基準は実測済み、実captureは未実施 |
+| AC / 通常 | warm capture・待機CPU・physical・SoC電力の基準 | fixtureとidle基準、ACで実capture20件を確認済み。今回SoC電力は未測定 |
 | batteryへ切替、ACへ復帰 | OS通知時刻・製品policy変化・新着保存・backfill再開・取りこぼし | 製品接続の採否待ち |
 | 低電力をON/OFF | 同上。変更はユーザー実施 | 製品接続の採否待ち |
 | 同じ負荷を加えた高負荷条件 | 負荷内容・thermalState・P90・STT内訳・保存/索引件数 | 制御した実機試験は未実施 |
