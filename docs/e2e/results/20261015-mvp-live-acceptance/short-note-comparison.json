@@ -1,0 +1,179 @@
+{
+  "datasetKind" : "synthetic",
+  "evaluations" : [
+    {
+      "development" : [
+
+      ],
+      "evaluated" : 0,
+      "holdout" : [
+
+      ],
+      "missingStoredProbabilities" : 2,
+      "name" : "stored",
+      "probabilitySource" : "stored; original question\/model provenance may be unknown"
+    },
+    {
+      "development" : [
+        {
+          "accuracy" : 0.5,
+          "classified" : 2,
+          "confusion" : {
+            "todo" : {
+              "note" : 1,
+              "todo" : 1
+            }
+          },
+          "correct" : 1,
+          "coverage" : 1,
+          "goldCounts" : {
+            "todo" : 2
+          },
+          "samples" : 2,
+          "threshold" : 0.5
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 1,
+          "confusion" : {
+            "todo" : {
+              "todo" : 1,
+              "unclassified" : 1
+            }
+          },
+          "correct" : 1,
+          "coverage" : 0.5,
+          "goldCounts" : {
+            "todo" : 2
+          },
+          "samples" : 2,
+          "threshold" : 0.6
+        },
+        {
+          "classified" : 0,
+          "confusion" : {
+            "todo" : {
+              "unclassified" : 2
+            }
+          },
+          "correct" : 0,
+          "coverage" : 0,
+          "goldCounts" : {
+            "todo" : 2
+          },
+          "samples" : 2,
+          "threshold" : 0.7
+        },
+        {
+          "classified" : 0,
+          "confusion" : {
+            "todo" : {
+              "unclassified" : 2
+            }
+          },
+          "correct" : 0,
+          "coverage" : 0,
+          "goldCounts" : {
+            "todo" : 2
+          },
+          "samples" : 2,
+          "threshold" : 0.8
+        }
+      ],
+      "evaluated" : 2,
+      "holdout" : [
+
+      ],
+      "missingStoredProbabilities" : 0,
+      "name" : "product",
+      "probabilitySource" : "recomputed",
+      "questionSHA256" : "615d5c0d612ba9332553843e2fd50651de29e7abc944b0d34dbe8292021d66ec"
+    },
+    {
+      "development" : [
+        {
+          "accuracy" : 1,
+          "classified" : 2,
+          "confusion" : {
+            "todo" : {
+              "todo" : 2
+            }
+          },
+          "correct" : 2,
+          "coverage" : 1,
+          "goldCounts" : {
+            "todo" : 2
+          },
+          "samples" : 2,
+          "threshold" : 0.5
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 2,
+          "confusion" : {
+            "todo" : {
+              "todo" : 2
+            }
+          },
+          "correct" : 2,
+          "coverage" : 1,
+          "goldCounts" : {
+            "todo" : 2
+          },
+          "samples" : 2,
+          "threshold" : 0.6
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 2,
+          "confusion" : {
+            "todo" : {
+              "todo" : 2
+            }
+          },
+          "correct" : 2,
+          "coverage" : 1,
+          "goldCounts" : {
+            "todo" : 2
+          },
+          "samples" : 2,
+          "threshold" : 0.7
+        },
+        {
+          "accuracy" : 1,
+          "classified" : 2,
+          "confusion" : {
+            "todo" : {
+              "todo" : 2
+            }
+          },
+          "correct" : 2,
+          "coverage" : 1,
+          "goldCounts" : {
+            "todo" : 2
+          },
+          "samples" : 2,
+          "threshold" : 0.8
+        }
+      ],
+      "evaluated" : 2,
+      "holdout" : [
+
+      ],
+      "missingStoredProbabilities" : 0,
+      "name" : "japanese-description-v1",
+      "probabilitySource" : "recomputed",
+      "questionSHA256" : "df41ef59b432c17bab2397be3f94004cf5c63faa582dc363261a461f83dbbdf3"
+    }
+  ],
+  "labelCountSufficient" : false,
+  "labeledRecords" : 2,
+  "modelConfigSHA256" : "6dd813ace4df523c552090c96594194ea4576997877f8d29d83c1a79fd68592b",
+  "modelIdentifier" : "LiquidAI\/d1-3B@051bcc4+mlx-q8",
+  "modelWeightsSHA256" : "ca84ed9cea3b235affc90405788783e0a157314b18726a0dbb73190d684fda7c",
+  "preprocessingMaxCharacters" : 600,
+  "schemaVersion" : 1,
+  "split" : "input order: first 80% development, last 20% holdout; DB order captured_at\/id; fewer than 5: development only",
+  "status" : "evaluation_only; adoption\/reprocessing requires reviewed evidence",
+  "totalRecords" : 2
+}

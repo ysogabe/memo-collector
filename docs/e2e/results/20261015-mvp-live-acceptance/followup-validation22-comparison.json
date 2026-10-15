@@ -1,0 +1,145 @@
+{
+  "datasetKind" : "synthetic",
+  "evaluations" : [
+    {
+      "development" : [
+
+      ],
+      "evaluated" : 0,
+      "holdout" : [
+
+      ],
+      "missingStoredProbabilities" : 22,
+      "name" : "stored",
+      "probabilitySource" : "stored; original question\/model provenance may be unknown"
+    },
+    {
+      "development" : [
+        {
+          "accuracy" : 1,
+          "classified" : 11,
+          "confusion" : {
+            "code" : {
+              "code" : 5
+            },
+            "research" : {
+              "research" : 2,
+              "unclassified" : 2
+            },
+            "schedule" : {
+              "schedule" : 3,
+              "unclassified" : 1
+            },
+            "todo" : {
+              "todo" : 1,
+              "unclassified" : 4
+            }
+          },
+          "correct" : 11,
+          "coverage" : 0.6111111111111112,
+          "goldCounts" : {
+            "code" : 5,
+            "research" : 4,
+            "schedule" : 4,
+            "todo" : 5
+          },
+          "samples" : 18,
+          "threshold" : 0.7
+        }
+      ],
+      "evaluated" : 22,
+      "holdout" : [
+        {
+          "accuracy" : 1,
+          "classified" : 2,
+          "confusion" : {
+            "note" : {
+              "note" : 2,
+              "unclassified" : 2
+            }
+          },
+          "correct" : 2,
+          "coverage" : 0.5,
+          "goldCounts" : {
+            "note" : 4
+          },
+          "samples" : 4,
+          "threshold" : 0.7
+        }
+      ],
+      "missingStoredProbabilities" : 0,
+      "name" : "product",
+      "probabilitySource" : "recomputed",
+      "questionSHA256" : "615d5c0d612ba9332553843e2fd50651de29e7abc944b0d34dbe8292021d66ec"
+    },
+    {
+      "development" : [
+        {
+          "accuracy" : 1,
+          "classified" : 10,
+          "confusion" : {
+            "code" : {
+              "code" : 3,
+              "unclassified" : 2
+            },
+            "research" : {
+              "research" : 2,
+              "unclassified" : 2
+            },
+            "schedule" : {
+              "schedule" : 4
+            },
+            "todo" : {
+              "todo" : 1,
+              "unclassified" : 4
+            }
+          },
+          "correct" : 10,
+          "coverage" : 0.5555555555555556,
+          "goldCounts" : {
+            "code" : 5,
+            "research" : 4,
+            "schedule" : 4,
+            "todo" : 5
+          },
+          "samples" : 18,
+          "threshold" : 0.7
+        }
+      ],
+      "evaluated" : 22,
+      "holdout" : [
+        {
+          "accuracy" : 1,
+          "classified" : 3,
+          "confusion" : {
+            "note" : {
+              "note" : 3,
+              "unclassified" : 1
+            }
+          },
+          "correct" : 3,
+          "coverage" : 0.75,
+          "goldCounts" : {
+            "note" : 4
+          },
+          "samples" : 4,
+          "threshold" : 0.7
+        }
+      ],
+      "missingStoredProbabilities" : 0,
+      "name" : "explicit-followup-en-v2",
+      "probabilitySource" : "recomputed",
+      "questionSHA256" : "111be3bfeb0ac067c8fb8aa0c8bbddab087b75cb285de1b70fe68ac1f12d5eec"
+    }
+  ],
+  "labelCountSufficient" : false,
+  "labeledRecords" : 22,
+  "modelConfigSHA256" : "6dd813ace4df523c552090c96594194ea4576997877f8d29d83c1a79fd68592b",
+  "modelIdentifier" : "LiquidAI\/d1-3B@051bcc4+mlx-q8",
+  "modelWeightsSHA256" : "ca84ed9cea3b235affc90405788783e0a157314b18726a0dbb73190d684fda7c",
+  "preprocessingMaxCharacters" : 600,
+  "schemaVersion" : 1,
+  "split" : "input order: first 80% development, last 20% holdout; DB order captured_at\/id; fewer than 5: development only",
+  "status" : "evaluation_only; adoption\/reprocessing requires reviewed evidence",
+  "totalRecords" : 22
+}

@@ -9,8 +9,8 @@ public enum Intent: String, Codable, CaseIterable, Sendable, Hashable, CodingKey
     case note
     case schedule
 
-    /// これ未満の確信度は「未分類」（intent = nil）として保存する。0.7 ちょうどは分類済み。
-    public static let confidenceThreshold: Double = 0.7
+    /// これ未満の確信度は「未分類」（intent = nil）として保存する。0.6 ちょうどは分類済み。
+    public static let confidenceThreshold: Double = 0.6
 }
 
 /// 確率分布から保存すべき意図を決める純粋関数。

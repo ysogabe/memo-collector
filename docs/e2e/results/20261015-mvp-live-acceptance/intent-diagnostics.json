@@ -1,0 +1,20 @@
+{
+  "measuredSamples": 20,
+  "distinctTranscripts": 2,
+  "assignedIntents": 0,
+  "unclassified": 20,
+  "threshold": 0.7,
+  "topScoreGroups": [
+    {
+      "predictedTop": "todo",
+      "confidence": 0.6068,
+      "count": 19
+    },
+    {
+      "predictedTop": "note",
+      "confidence": 0.5749,
+      "count": 1
+    }
+  ],
+  "interpretation": "Intent inference completed and probabilities were saved, but no automatic labels were accepted. This is not a passed classification-quality check."
+}

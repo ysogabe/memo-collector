@@ -1,0 +1,11 @@
+{
+  "descriptions": {
+    "code": "Ask a coding agent to write, fix, refactor or test source code",
+    "note": "Just a remark or reference to remember; no action requested",
+    "research": "Ask an AI agent to investigate, look up, survey or compare information",
+    "schedule": "An appointment or meeting at a specific date and time",
+    "todo": "A personal to-do the user will do themselves (buy, reply, check, update, read)"
+  },
+  "instructions": "The user pressed a hotkey while looking at their screen and spoke this short voice note. What kind of follow-up does the note ask for? 日本語の短いメモや助詞が省略された文でも、明示された行動を優先してください。後で読む・確認する・返信するはユーザー自身の作業(todo)です。行動を求めない感想や参照用の情報だけをnoteにしてください。",
+  "name": "explicit-followup-bilingual-v2"
+}

@@ -1,0 +1,11 @@
+{
+  "descriptions": {
+    "code": "Ask a coding agent to write, fix, refactor or test source code",
+    "note": "Just a remark or reference to remember; no action requested",
+    "research": "Ask an AI agent to investigate, look up, survey or compare information",
+    "schedule": "An appointment or meeting at a specific date and time",
+    "todo": "A personal to-do the user will do themselves (buy, reply, check, update, read)"
+  },
+  "instructions": "The user pressed a hotkey while looking at their screen and spoke this short voice note. What kind of follow-up does the note ask for? Classify the requested action even when the Japanese note is short or omits particles. Reading or checking something later is a personal todo. Choose note only when no action is requested; do not treat an explicit future action as just a bookmark.",
+  "name": "explicit-followup-en-v2"
+}

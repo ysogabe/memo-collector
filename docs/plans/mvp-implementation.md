@@ -55,7 +55,7 @@ scripts/check.sh                      # 全 QA コマンドの入口
 Wave 0 がこの骨子で `CCCore` を実装し、確定したシグネチャは **`Packages/ContextCaptureKit/Sources/CCCore/` のソースが正典**（特に `Protocols.swift`）。Wave 0 での確定事項: プロトコル名は `Embedder`（MLXNN.Embedding との衝突回避）、`AudioRecording` は `start() async throws` / `stop()` / `cancel()` / `levels()`、Swift 名 `guardInfo` / `handoffs`（JSON キーは PRD どおり）、マスク版は `<id>-masked.<ext>`、`CC_DATA_DIR` を変えてもモデル位置は動かない、`RecordStore.count(_:)` と `InboxFilter` / `SearchHit` / `AttachmentKind` / `ModelSlot` を追加。
 
 - `ContextRecord`: PRD §7 のフィールド（id は ULID 文字列、captured_at、app{name,bundleID}、window{title,frame}、url、extra[String:String]、screenshotPath / maskedScreenshotPath / audioPath（相対パス）、annotation{text, sttEngine, edited}、triage{intent, intentConfidence, mentionsDatetime, datetimeProbability, model}?、guard{status: pending|clear|needs_review|masked, findings[{kind, bbox(正規化 0–1・左上原点)}]}、handoffs[{to, at, via}]、notes[{author, text, at}]、status: inbox|done|archived）
-- `Intent`: `todo / research / code / note / schedule`。確信度 < 0.7 は `intent = nil`（未分類）として保存し、確率は残す
+- `Intent`: `todo / research / code / note / schedule`。確信度 < 0.6 は `intent = nil`（未分類）として保存し、確率は残す
 - プロトコル（すべて `Sendable`、async）
   - `ContextCapturing.captureFrontmost() async -> CaptureContext`（**失敗しない**。取れなかった項目は nil）
   - `AudioRecording.start() throws` / `stop() async throws -> RecordedAudio{samples16kMono:[Float], duration, fileURL?}`
@@ -184,3 +184,9 @@ scripts/check.sh            # 以下を順に実行し、1 つでも落ちたら
 - [x] W7 修正後の単独起動での実機確認（2026-10-11 11:05）: 押下→録音開始 46〜71ms、一時停止は正常。解放→保存は 1.45 秒（録音 1.9 秒）と 6.68 秒（録音 5.8 秒、STT 6.59 秒。トリアージの取り合いは無し）。同じ記録が 2 回トリアージされる重複を発見
 - [x] Wave 9 stt-latency（`capture saved` に sttBreakdown を出す。温度フォールバック説は不支持・アイドル後の低電力化説は反証。有力はエンコーダ（ANE）の混雑で 3〜4 倍に膨らむ現象＝フォールバック 0 で STT 5 秒を実測。設定は変更せず。トリアージの重複防止）
 - [ ] 実機で再確認（遅い 1 件が出たら sttBreakdown で原因を確定）
+
+## 2026-10-15 MVP受け入れ
+
+M3 24GiBでユーザーが実キー・マイク・Safariを使い、HUD/保存通知/注釈/スクショ/URLを確認。連続10組20件の保存失敗0、押下→録音開始P90 81ms（最大141ms）、解放→保存P90 1525ms。通知・操作の異常なしをユーザーが確認した。採用基準70%では20件すべて未分類だったが、未分類を減らすため60%を採用して #1 を閉じることをユーザーが明示した。保存済み確率への適用結果はtodo19件・未分類1件で、記録の書換えや20件の独立した品質評価を意味しない。
+
+[受け入れ結果・未確認項目](../research/mvp-acceptance-20261015.md)。意図の多様な実データ評価・既存記録の再処理は #2、helper/OS電源policyは #10で継続する。追加のマスク操作・ベクトル検索・OS異常系などの手動確認はチェック表に残し、未実施を合格にしない。M1/16GBの実測や全負荷条件の速度保証とは扱わない。

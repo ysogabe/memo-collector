@@ -1,0 +1,57 @@
+{
+  "oldThreshold": 0.7,
+  "adoptedThreshold": 0.6,
+  "questionChanged": false,
+  "existingRecordsRewritten": false,
+  "source": "prepared d1 q8, product question; existing authored fixtures reused for regression, not fresh manual gold",
+  "regressions": [
+    {
+      "report": "threshold-dev30.json",
+      "byThreshold": [
+        {
+          "threshold": 0.7,
+          "samples": 30,
+          "classified": 24,
+          "correct": 21,
+          "coverage": 0.8,
+          "accuracyAmongClassified": 0.875
+        },
+        {
+          "threshold": 0.6,
+          "samples": 30,
+          "classified": 26,
+          "correct": 23,
+          "coverage": 0.8666666666666667,
+          "accuracyAmongClassified": 0.8846153846153846
+        }
+      ]
+    },
+    {
+      "report": "threshold-validation22.json",
+      "byThreshold": [
+        {
+          "threshold": 0.7,
+          "samples": 22,
+          "classified": 13,
+          "correct": 13,
+          "coverage": 0.5909090909090909,
+          "accuracyAmongClassified": 1.0
+        },
+        {
+          "threshold": 0.6,
+          "samples": 22,
+          "classified": 17,
+          "correct": 17,
+          "coverage": 0.7727272727272727,
+          "accuracyAmongClassified": 1.0
+        }
+      ]
+    }
+  ],
+  "measured20WhatIf": {
+    "todo": 19,
+    "unclassified": 1,
+    "distinctTranscripts": 2,
+    "isAccuracyEstimate": false
+  }
+}
