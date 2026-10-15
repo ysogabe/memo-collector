@@ -52,3 +52,41 @@ M3 24GiB / macOS 27.0.1 / d1 MLX q8。[30件の合成データ集計](fixture-co
 ## 2026-10-15の採用基準変更
 
 ユーザー判断で製品の既定しきい値を0.7から0.6へ変更した。実マイク20件の保存済み確率ではtodo19件・未分類1件となる（2表記の反復であり、独立した20件の精度評価ではない）。質問文の候補は未採用。新規推論・再分類に適用し、既存DBの意図や手動ラベルは一括更新しない。#2の30〜50件の多様な手動正解による品質評価・既存記録の再処理は継続する。[採否と回帰比較](../../docs/research/mvp-acceptance-20261015.md)。上記の0.7の比較値は変更前の結果として保持する。
+
+## 既存の自動意図だけを再推論する保守CLI
+
+`cc-models reprocess-intents` は既定で読み取り専用のpreview。既存の `ContextCapture.sqlite` を検査し、全件数・手動件数・再推論対象数・現在の意図件数だけを出す。ID・注釈・URL・添付パスは出力しない。DBの新規作成・migration・添付参照・モデル読込・ダウンロードを行わない。`--data-root` と `--models-root` で対象を明示できる。省略時は `CC_DATA_DIR` / `CC_MODELS_DIR` と通常の既定値を使う。別名のSQLiteを対象として自動作成することはない。
+
+```bash
+"$bin/cc-models" reprocess-intents --data-root /path/to/data \
+  --dry-run --output /tmp/intent-preview-new.json
+```
+
+再推論対象は、自動triageが既にある・注釈が空でない・公式開発fixtureではない記録。手動 `model == "user"`、未処理、空注釈は件数を分けて除く。対象の保存済み5クラス確率から、0.7/0.6それぞれの分類件数と分類が変わる件数も出す。これは同じ保存済み分布に対するしきい値の比較であり、正解ラベルを使うaccuracyではない。確率の欠落・不正分布はそれぞれ別件数とする。今回の再推論結果との一致も保証しない。
+
+実際に更新する場合は、録音を終え、ContextCaptureアプリを終了してから実行する。外部CLIのd1とアプリの録音/STTの間では、アプリ内のcapture pauseは共有されない。これは録音中に実行しない保守コマンドであり、自動バックグラウンド処理用ではない。
+
+```bash
+# アプリ終了後。全出力先は既存ファイルと重ならない新しい名前にする。
+"$bin/cc-models" reprocess-intents --data-root /path/to/data \
+  --models-root /path/to/models --apply \
+  --backup /path/to/private-backups/before-intents-20261015.sqlite \
+  --output /tmp/intent-applied-new.json
+# 終了コードとJSONのstatus・failed・skippedを確認後、アプリを再起動する。
+```
+
+`--apply` と `--backup` は両方必要。事前に準備済みd1のmanifest/checksumと読込を検証し、不足モデルは取得せず失敗する。更新前にGRDBのSQLite backup APIでWALのcommit済みデータを含む整合バックアップを作り、`quick_check` を確認する。バックアップは新規ファイルのみ、権限0600。親ディレクトリは事前に用意する。バックアップ・集計出力はデータ/モデル領域や互いの出力先を保護し、既存ファイルを上書きしない。
+
+更新は既存の `TriageQueue.reprocess(id:steps:[.intent])` を使い、製品の質問文と0.6基準でd1を再推論する。STT・guard・indexは実行しない。32件以下のbatchでイベントを購読するので、256件bufferの超過で結果件数を取りこぼさない。手動意図は処理開始時と書込時に保護し、推論中の注釈変更は結果を捨てる。削除や推論失敗でも元の意図を壊さない。保存は最新行を読むIMMEDIATE transaction内で、`triage` と検索用の `intent` / `has_triage` だけを書き換える。未知のJSONフィールド、その他の記録内容、schema・input version・generation・jobs・現在のvectorは保持する。
+
+レポートは `succeeded`、理由別の `skipped`、`failed`、結果が変化した `changedResults`、意図ラベル自体が変化した `changedClassifications` を区別する。`succeeded` は書込成功件数なので、同じ分類に再推論された件数も含む。推論失敗・未準備・注釈変更などで対象が完了しなければ `partial_failure` と終了コード2を返す。処理中の手動変更・削除は安全な除外として報告する。
+
+この保守CLIの追加や再処理の成功は、意図分類の実データ品質評価の完了を意味しない。多様な30〜50件の本人手動正解とholdout比較は未達のため、#2は閉じない。質問文の候補も引き続き未採用。
+
+合成データだけでの契約テスト:
+
+```bash
+swift test --package-path Packages/ContextCaptureKit --filter 'IntentMaintenanceTests|IntentOnlyReprocessingTests'
+CC_INTENT_EVAL_BINARY="$bin/cc-models" python3 -m unittest discover \
+  -s scripts/tests -p test_intent_reprocessing_cli.py
+```
