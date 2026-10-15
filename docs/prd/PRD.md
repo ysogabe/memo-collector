@@ -1,4 +1,4 @@
-# PRD: Context Capture（仮称）
+# PRD: Context Capture
 
 | 項目 | 内容 |
 |---|---|
@@ -9,7 +9,7 @@
 | 根拠データ | [PoC レポート](../poc/poc-report.md) |
 | LP | [`lp/index.html`](../../lp/index.html) |
 
-> 製品名「Context Capture」は元会話で使われた呼び名をそのまま使った仮称。
+> 正式な製品名は「Context Capture」。
 
 ---
 
@@ -263,7 +263,7 @@
 
 ## 14. 未決事項
 
-1. 製品名（仮称のまま MVP を作る）
+1. ~~製品名~~ → Context Capture に決定（2026-10-15）
 2. ~~STT の最終選定~~ → WhisperKit large-v3-turbo に決定（2026-10-10）。語彙プロンプトが効かない件は実装中に調査
 3. ~~d1-3B を Swift アプリからどう呼ぶか~~ → MLX Swift 8bit に決定（2026-10-10）
 6. d1 の LFM Open License v1.0 §5（年商 1,000 万米ドル以上の法人の商用利用は許諾外）が利用者側の法人に及ぶかの法務確認
