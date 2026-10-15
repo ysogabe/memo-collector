@@ -1,6 +1,6 @@
 # memo-collector — Context Capture（仮称）
 
-今見ている画面に、声でひと言メモを貼る macOS アプリの構想・検証リポジトリ。
+今見ている画面に、声でひと言メモを貼る 開発中の macOS アプリと、その検証リポジトリ。
 ホットキーを押して話して離すだけで、スクショ・アプリ・ウインドウ・URL・自分の一言を 1 件の記録として Mac の中に残し、あとで Hermes / Claude Code に渡す。
 
 ## 構成
@@ -17,7 +17,7 @@ memo-collector/
 │       └── poc-report.md                # 結果と判定、モデル別の採否
 ├── lp/                                  # ランディングページ（静的 HTML、FAQ 込み）
 │   ├── index.html
-│   └── assets/  style.css / demo.js / 画面モック画像
+│   └── assets/  style.css / 実アプリの UI 画像 / 出典
 └── poc/                                 # ローカルモデル検証（Python 3.12 + uv）
     ├── fixtures/  dataset.json / holdout.json / 画面モック / 合成音声
     ├── scripts/   exp01〜exp06 と ocr.swift
@@ -33,7 +33,8 @@ python3 -m http.server 8791 --bind 127.0.0.1
 open http://127.0.0.1:8791/lp/
 ```
 
-ヒーローのボタンを長押し（または Space キーを押し続ける）すると、撮影 → 録音 → 保存 → Inbox 追加の流れを試せる。
+実アプリの Inbox・詳細・検索・要確認・設定をサンプル記録で紹介。画像をクリックすると原寸で開く。
+画像の再出力手順は [`docs/lp-maintenance.md`](docs/lp-maintenance.md)。
 
 ## PoC を再現する
 
