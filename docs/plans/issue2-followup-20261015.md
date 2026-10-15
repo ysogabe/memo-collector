@@ -17,6 +17,8 @@
 - [x] 実装・合成テスト（package60 / CLI21、実d1合成smoke成功）
 - [x] readonly実データ評価（15件・手動0件、needs_manual_labels）
 - [ ] 安全な実データ再処理・再起動
-- [ ] 独立レビュー・PR・Issue更新
+- [x] 独立レビュー・PR #28・Issue更新
 
 実装: `codex/2-intent-followup` / 専用worktree。#10は別worktreeで進め、通常データと設定を使うアプリは安定版のまま維持する。
+
+privateコピー上の15件は実d1で再推論成功（分類変更2、未分類9）。全他テーブルと非triage JSONの保全を確認。通常DBへの反映はユーザーの手動確認を待つ。検証準備のSQLite版差によるWAL初回読取とDELETE正規化も検証記録へ残した。
