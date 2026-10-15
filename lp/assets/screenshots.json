@@ -1,0 +1,30 @@
+{
+  "capturedOn": "2026-10-15",
+  "appVersion": "0.1.0",
+  "sourceCommit": "00e95ef315c530105156cebba5933eaa5f0f711b",
+  "sourceMergeCommit": "2bc6ff0",
+  "method": "Release ContextCapture --fake --render-snapshots <output-directory>; SnapshotRenderer renders the actual SwiftUI/AppKit views in NSWindow, then exports their pixels without image modification.",
+  "data": "Authored FakeData sample records; fixed sample clock 2026-10-08 23:30. Embedded captured-page images and tokens are synthetic. No personal database, microphone or screen content was used. Search results are sample-mode UI, not a model benchmark.",
+  "files": [
+    {
+      "file": "app-inbox.png",
+      "sha256": "f4204e0276862fccb65efc3a18d0ad33660a1b42e9e1c86e8781f1e98a0fd721"
+    },
+    {
+      "file": "app-detail.png",
+      "sha256": "7d27c3012e94b8f5a1060ea194b842f1ce9cd525a00ab4abd16556db0acadf28"
+    },
+    {
+      "file": "app-inbox-search.png",
+      "sha256": "aed4bee4dcdc078e2949b5ed1ae3ae7fe739824cc0853bc30c75153129b634d0"
+    },
+    {
+      "file": "app-detail-needs-review.png",
+      "sha256": "8f77463e43fb0fc1564fd26999d14a89a563367d40f772009614e79c4be54d3b"
+    },
+    {
+      "file": "app-settings.png",
+      "sha256": "c78f690c9024bbcc0218f0220cbed3de3b8fd16e9def763d304a9c26e6879158"
+    }
+  ]
+}

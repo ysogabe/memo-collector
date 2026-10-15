@@ -4,295 +4,208 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Context Capture｜見ている画面に、声でメモを貼る Mac アプリ</title>
-<meta name="description" content="ホットキーを押して話すだけ。スクショ・アプリ・URL・あなたの一言を1件の記録として Mac の中に残し、Claude Code や自作エージェントにそのまま渡せます。">
+<meta name="description" content="ホットキーを押して話すだけ。スクショ・アプリ・URL・あなたの一言を Mac に保存。Inbox で検索・手直しして、Claude Code や自作エージェントに MCP で渡せる macOS アプリです。">
+<meta name="theme-color" content="#f2f4f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-
+<a class="skip-link" href="#top">本文へ移動</a>
 <header class="site-header">
   <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Context Capture</a>
   <nav aria-label="ページ内">
-    <a href="#record">残るもの</a>
+    <a href="#record">アプリの画面</a>
     <a href="#handoff">エージェント連携</a>
     <a href="#privacy">プライバシー</a>
     <a href="#faq">よくある質問</a>
   </nav>
-  <a class="btn btn-small" href="#beta">ベータに申し込む</a>
+  <a class="btn btn-small" href="https://github.com/ysogabe/memo-collector">GitHub を見る</a>
 </header>
-
 <main id="top">
-
-  <!-- Hero: 押して話すと記録が Inbox に落ちる体験そのものを見せる -->
-  <section class="hero">
+  <section class="hero" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <h1><span>見ている画面に、</span><span>声でメモを貼る。</span></h1>
-      <p class="lead">
-        <kbd>⌥</kbd><kbd>Space</kbd> を押して、ひと言話して、離すだけ。
-        いま開いているウインドウのスクショ、アプリ名、URL、あなたの一言が 1 件の記録になって Mac の中に残ります。
-        何をするかは、あとで Claude Code や自作のエージェントに任せられます。
-      </p>
+      <p class="eyebrow">macOS アプリ · 開発版</p>
+      <h1 id="hero-title"><span>見ている画面に、</span><span>声でメモを貼る。</span></h1>
+      <p class="lead"><kbd>⌥</kbd><kbd>Space</kbd> を押して、ひと言話して、離すだけ。いま開いているウインドウのスクショ、アプリ名、URL、あなたの一言が 1 件の記録になって Mac に残ります。</p>
+      <p class="hero-follow">あとから Inbox で探して、手直しして、Claude Code や自作エージェントに渡せます。</p>
       <div class="hero-actions">
-        <a class="btn" href="#beta">ベータに申し込む</a>
+        <a class="btn" href="#record">実際のアプリ画面を見る</a>
         <span class="req">Apple Silicon Mac・macOS 15 以降</span>
       </div>
     </div>
-
-    <div class="demo" id="demo">
-      <div class="desk">
-        <div class="win" id="demo-win">
-          <div class="win-bar"><i></i><i></i><i></i><span id="demo-title">Support streaming events · Issue #128</span></div>
-          <img id="demo-shot" src="assets/s01.jpg" alt="GitHub の issue ページを見ている画面" width="1440" height="900">
-          <div class="frame" aria-hidden="true"></div>
-        </div>
-        <div class="hud" id="demo-hud" aria-hidden="true">
-          <span class="mic-dot"></span>
-          <span class="hud-wave"><i></i><i></i><i></i><i></i><i></i></span>
-          <span class="hud-text" id="demo-hud-text">話してください</span>
-        </div>
-        <div class="toast" id="demo-toast" role="status" aria-live="polite"></div>
-      </div>
-
-      <div class="demo-control">
-        <button class="hold" id="demo-hold" type="button" aria-pressed="false" aria-describedby="demo-hint">
-          <kbd>⌥</kbd><kbd>Space</kbd><span>押したまま</span>
-        </button>
-        <p class="hint" id="demo-hint">ボタンを長押し（または Space キーを押し続ける）で、録音から保存までを試せます。</p>
-      </div>
-
-      <ol class="inbox" id="demo-inbox" aria-label="デモの Context Inbox"></ol>
-    </div>
+    <figure class="hero-screen">
+      <a class="screenshot-link" href="screens.html#inbox" aria-label="Context Inbox の画面を原寸で開く">
+        <img class="app-screen" src="assets/app-inbox.png" alt="Context Inbox の実画面。記録を日付順に並べ、検索欄と todo・research・code などの絞り込みを表示" width="780" height="600" fetchpriority="high">
+      </a>
+      <figcaption>実アプリの Inbox。画像を開くと原寸で確認できます。</figcaption>
+      <p class="sample-note">以下は 2026-10-15 時点のアプリ本体から出力した UI 画像です。表示する記録・添付画面・トークンは紹介用のサンプルです。</p>
+    </figure>
   </section>
 
-  <!-- 1 件の記録 -->
-  <section class="record" id="record">
+  <section class="record" id="record" aria-labelledby="record-title">
     <div class="section-head">
-      <h2>1 回押すと、これだけ残ります</h2>
-      <p>入力時に分類も期限も聞きません。あとから読み返したとき、何を見て何を思ったのかが分かる情報だけを自動で集めます。</p>
+      <h2 id="record-title">1 回押すと、これだけ残ります</h2>
+      <p>入力時に分類も期限も聞きません。何を見て何を思ったのかが、画面・URL・注釈をまとめた 1 件の記録として残ります。</p>
     </div>
-
-    <div class="anatomy">
-      <figure class="anatomy-shot">
-        <img src="assets/s03.jpg" alt="VS Code で adapter.ts を開き、型エラーが出ている画面" width="1440" height="900" loading="lazy">
-        <figcaption>押した瞬間の前面ウインドウ 1 枚</figcaption>
-      </figure>
-      <dl class="anatomy-fields">
-        <div><dt>時刻</dt><dd>2026-10-08 22:48</dd></div>
-        <div><dt>アプリ</dt><dd>Visual Studio Code</dd></div>
-        <div><dt>ウインドウ</dt><dd>adapter.ts — mach-runtime</dd></div>
-        <div><dt>URL</dt><dd class="muted">なし（ブラウザのときだけ取得）</dd></div>
-        <div class="voice"><dt>あなたの一言</dt><dd>「ここで null になる理由を調べて直しておいて」</dd></div>
-        <div class="auto"><dt>あとから自動で</dt><dd><span class="tag">code</span> 意図の推定 ・ 検索用の索引 ・ 秘密情報のチェック</dd></div>
-      </dl>
-    </div>
-
     <ol class="steps" aria-label="使い方">
-      <li><b>押す</b><span>そのときの画面とアプリ情報を記録し、録音を始めます。</span></li>
-      <li><b>話す</b><span>思ったことをそのまま。「あとで」「これ」で通じます。</span></li>
-      <li><b>離す</b><span>約 1.5 秒で文字起こしして保存。5 秒以内なら取り消せます。</span></li>
+      <li><b>押す</b><span>前面ウインドウとアプリ情報を取り、マイクの録音を始めます。</span></li>
+      <li><b>話す</b><span>思ったことを、その場でひと言。固有名詞は設定の辞書で補えます。</span></li>
+      <li><b>離す</b><span>文字起こしを保存して通知。5 秒以内なら取り消せます。分類・秘密情報の確認・検索索引は保存後に進みます。</span></li>
     </ol>
+    <div class="scene">
+      <a class="screenshot-link" href="screens.html#detail" aria-label="記録の詳細画面を原寸で開く">
+        <img class="app-screen" src="assets/app-detail.png" alt="実アプリの詳細画面。添付画面、アプリ、ウインドウ、URL、撮影時刻、編集できる注釈、意図、エージェントのメモを表示" width="720" height="900" loading="lazy">
+      </a>
+      <div>
+        <h3>画面も、一言も、あとから読める</h3>
+        <p class="quote">「画像トークン数を減らしたときの精度の比較。あとで詳しく調べる」</p>
+        <p>元の URL とウインドウ名が残るので、考えた場所へ戻れます。文字起こしと意図ラベルは詳細画面で修正でき、エージェントが追記した調査メモも同じ記録で読めます。</p>
+        <p class="note">Markdown でのコピー、完了、削除も詳細画面から操作できます。</p>
+      </div>
+    </div>
+    <div class="scene" id="search">
+      <a class="screenshot-link" href="screens.html#inbox-search" aria-label="Inbox の検索画面を原寸で開く">
+        <img class="app-screen" src="assets/app-inbox-search.png" alt="実アプリの検索 UI。「ビデオ会議の画面」と入力したサンプルの検索結果に zoom.us の記録を表示" width="780" height="460" loading="lazy">
+      </a>
+      <div>
+        <h3>話した内容と、画面の見た目で探す</h3>
+        <p class="quote">「ビデオ会議の画面」</p>
+        <p>注釈とスクショを組み合わせて索引を作り、自然な文で検索できます。意図や「要確認」での絞り込みも可能です。検索モデルの準備中は文字の一致で探し、現在の検索状態を画面に表示します。</p>
+      </div>
+    </div>
+    <div class="scene">
+      <a class="screenshot-link" href="screens.html#settings" aria-label="アプリの設定画面を原寸で開く">
+        <img class="app-screen" src="assets/app-settings.png" alt="実アプリの設定画面。録音キー、スクショ除外アプリ、固有名詞辞書、音声とスクショの保持期間、画像トークン数を表示" width="560" height="820" loading="lazy">
+      </a>
+      <div>
+        <h3>使う言葉と、残す範囲を自分で決める</h3>
+        <p>録音のキー、固有名詞の辞書、スクショを撮らないアプリ、音声とスクショの保持期間を設定できます。</p>
+        <p class="note">検索の画像トークン数を変更すると索引を再構築します。再構築中も旧索引を保持し、準備ができた世代へ切り替えます。</p>
+      </div>
+    </div>
+    <p class="note">連続して記録するときは保存を優先します。分類や索引の更新は録音が落ち着いてから進むため、直後は「推定中」や検索準備中になる場合があります。</p>
   </section>
 
-  <!-- 場面 -->
-  <section class="scenes">
+  <section class="handoff" id="handoff" aria-labelledby="handoff-title">
     <div class="section-head">
-      <h2>作業を止めずに、その場で</h2>
-    </div>
-    <div class="scene">
-      <img src="assets/s01.jpg" alt="" width="1440" height="900" loading="lazy">
-      <div>
-        <h3>読んでいるとき</h3>
-        <p class="quote">「これ Hermes のアダプタに使えそう。あとで実装方法を調べる」</p>
-        <p>URL ごと残るので、エージェントが元のページを開いて続きを調べられます。</p>
-      </div>
-    </div>
-    <div class="scene">
-      <img src="assets/s02.jpg" alt="" width="1440" height="900" loading="lazy">
-      <div>
-        <h3>会議の最中に</h3>
-        <p class="quote">「今の API 移行の話、認証設計にも関係する。あとで確認」</p>
-        <p>会議アプリ側がミュートでも、Context Capture はあなたの声を録れます。残すのはあなたの一言と画面だけで、会議の音声は録りません。</p>
-      </div>
-    </div>
-    <div class="scene">
-      <img src="assets/s04.jpg" alt="" width="1440" height="900" loading="lazy">
-      <div>
-        <h3>資料や論文を読みながら</h3>
-        <p class="quote">「この図、実装資料に使えそう」</p>
-        <p>あとで「収束のグラフが載ってた論文」と探せば、注釈を付け忘れた画面も見た目から見つかります。</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- エージェント連携 -->
-  <section class="handoff" id="handoff">
-    <div class="section-head">
-      <h2>判断と実行は、エージェントに</h2>
-      <p>Context Capture はタスク管理をしません。溜まった記録をローカルの MCP サーバーとして公開するので、Claude Code や Hermes から読んで、そのまま作業に移れます。</p>
+      <h2 id="handoff-title">判断と実行は、エージェントに</h2>
+      <p>記録をローカルの MCP サーバーで公開します。Claude Code や Hermes から一覧・検索・詳細を読み、調査や実装につなげられます。</p>
     </div>
     <div class="handoff-grid">
-      <pre class="terminal" aria-label="Claude Code での利用例"><code><span class="t-prompt">&gt;</span> 今日 Context Capture に入れた code の件を片付けて
+      <pre class="terminal" aria-label="MCP ツールの呼び出し例"><code><span class="t-prompt">&gt;</span> code の記録を確認して、修正案を出して
 
-<span class="t-tool">● context-capture.list_inbox(intent="code", since="today")</span>
-  3 件: adapter.ts の null / 型エラー / #128 のストリーミング対応
+<span class="t-tool">list_inbox</span>({"intent":"code","limit":10})
+  → 未処理の記録と、注釈・URL・意図を取得
 
-<span class="t-tool">● context-capture.get_capture("01JABC…")</span>
-  VS Code · adapter.ts — mach-runtime · 22:48
-  「ここで null になる理由を調べて直しておいて」
+<span class="t-tool">get_capture</span>({"id":"記録のID","include_image":true})
+  → 詳細と、秘密情報のチェックが済んだ画像を取得
 
-  lookup() が未登録のプラグインで undefined を返すのが原因です。
-  修正案を出します…</code></pre>
+<span class="t-tool">add_note</span>({"id":"記録のID","text":"原因と修正案…"})
+  → 調査した内容を、元の記録に追記</code></pre>
       <dl class="tools">
         <div><dt><code>list_inbox</code></dt><dd>未処理の記録を意図や期間で絞って一覧</dd></div>
         <div><dt><code>search_captures</code></dt><dd>自然文で検索（画面の見た目も対象）</dd></div>
-        <div><dt><code>get_capture</code></dt><dd>1 件の詳細とスクショ</dd></div>
+        <div><dt><code>get_capture</code></dt><dd>1 件の詳細と、受け渡し可能な画像を取得</dd></div>
         <div><dt><code>add_note</code></dt><dd>調べた結果やリンクを記録に追記</dd></div>
-        <div><dt><code>mark_done</code> / <code>archive</code></dt><dd>片付いた記録を閉じる</dd></div>
+        <div><dt><code>mark_done</code> / <code>archive</code></dt><dd>記録を完了・アーカイブにする</dd></div>
       </dl>
     </div>
-    <p class="note">エージェントは記録を削除できません。読み取りと状態の更新だけを許可しています。</p>
+    <p class="note">上記は呼び出し方の例です。エージェントからの削除ツールはありません。<a href="https://github.com/ysogabe/memo-collector/blob/main/docs/manual-tests/mcp.md">MCP の接続手順</a></p>
   </section>
 
-  <!-- プライバシー -->
-  <section class="privacy" id="privacy">
+  <section class="privacy" id="privacy" aria-labelledby="privacy-title">
     <div class="section-head">
-      <h2>手元から出しません</h2>
-      <p>文字起こしも、意図の推定も、検索も、すべてこの Mac の中で動きます。外に出るのは、あなたがエージェントに渡したときだけです。</p>
+      <h2 id="privacy-title">記録の処理は、この Mac で</h2>
+      <p>文字起こし、意図の推定、検索、秘密情報のチェックはローカルで動きます。MCP でエージェントに渡した内容の送信先は、そのエージェントの設定に従います。</p>
     </div>
     <div class="guard">
       <figure class="guard-shot">
-        <div class="guard-frame">
-          <img src="assets/s11.jpg" alt="ターミナルに GitHub のトークンが表示されている画面" width="1440" height="900" loading="lazy">
-          <span class="guard-box" style="top: 21.5%; left: 15.2%" aria-hidden="true"></span>
-          <span class="guard-box" style="top: 26.5%; left: 10.6%" aria-hidden="true"></span>
-        </div>
-        <figcaption>トークンが写った画面には「要確認」が付きます</figcaption>
+        <a class="screenshot-link" href="screens.html#detail-needs-review" aria-label="秘密情報の確認画面を原寸で開く">
+          <img class="app-screen" src="assets/app-detail-needs-review.png" alt="実アプリの要確認画面。サンプルの GitHub トークンを赤枠で示し、確認済みとマスク画像の選択ボタンを表示" width="720" height="860" loading="lazy">
+        </a>
+        <figcaption>「要確認」の詳細画面。表示中のトークンはダミーです。</figcaption>
       </figure>
       <div>
-        <h3>写ってはいけないものに気づきます</h3>
-        <p>保存したスクショを Mac 上で読み取り、API キー、アクセストークン、表示中のパスワードを見つけると「要確認」を付けます。要確認の画像は、あなたが確認してマスクするまでエージェントに渡りません。</p>
-        <p>パスワード管理アプリや銀行アプリなど、指定したアプリが前面にあるときはスクショ自体を撮りません。</p>
+        <h3>画像を渡す前に確認できる</h3>
+        <p>スクショを Mac 上で読み取り、API キーやトークンなどのパターンを見つけると「要確認」を付けます。検出箇所を確認して元画像の共有を許可するか、マスクした画像を使うかを選べます。</p>
+        <p>チェック中・要確認の画像は MCP に渡しません。文字の検出には限界があるため、共有前に内容を確認してください。注釈や URL などのテキストは、画像とは別に MCP に返ります。</p>
+        <p>1Password などの指定アプリでは、スクショ自体を撮らずに注釈とアプリ名を残します。</p>
       </div>
     </div>
-    <table class="perms">
-      <caption>使う権限と理由</caption>
-      <thead><tr><th scope="col">権限</th><th scope="col">何に使うか</th><th scope="col">許可しないと</th></tr></thead>
-      <tbody>
-        <tr><td>マイク</td><td>押している間だけ、あなたの声を録る</td><td>使えません</td></tr>
-        <tr><td>画面収録</td><td>前面ウインドウを 1 枚だけ撮る（動画は撮りません）</td><td>スクショなしで保存します</td></tr>
-        <tr><td>アクセシビリティ</td><td>ホットキーと、ウインドウのタイトル取得</td><td>アプリ名だけ保存します</td></tr>
-        <tr><td>オートメーション</td><td>ブラウザの URL 取得</td><td>URL なしで保存します</td></tr>
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="perms">
+        <caption>使う権限と理由</caption>
+        <thead><tr><th scope="col">権限</th><th scope="col">何に使うか</th><th scope="col">許可しないと</th></tr></thead>
+        <tbody>
+          <tr><td>マイク</td><td>キーを押している間のマイク入力を録音</td><td>音声を録音できません</td></tr>
+          <tr><td>画面収録</td><td>前面ウインドウを 1 枚撮影</td><td>スクショなしで保存します</td></tr>
+          <tr><td>アクセシビリティ</td><td>録音キーとウインドウタイトルの取得</td><td>録音キーの登録が制限される場合があります。タイトルは取れません</td></tr>
+          <tr><td>オートメーション</td><td>対応ブラウザの URL 取得</td><td>URL なしで保存します</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
-  <!-- モデル -->
-  <section class="models">
+  <section class="models" aria-labelledby="models-title">
     <div class="section-head">
-      <h2>Apple Silicon の中で動くモデル</h2>
-      <p>M3 / 24GB の MacBook で、日本語の注釈を使って事前検証した数字です。</p>
+      <h2 id="models-title">Apple Silicon で、実装と検証を進めています</h2>
+      <p>M3・24GB での結果です。録音から保存、検索、意図の推定を実装し、現在は実利用での受け入れ確認を進めています。</p>
     </div>
-    <table class="spec">
-      <thead><tr><th scope="col">役割</th><th scope="col">モデル</th><th scope="col">検証結果</th></tr></thead>
-      <tbody>
-        <tr><td>文字起こし</td><td>Whisper large-v3-turbo</td><td>1 件 1.3 秒（Apple Neural Engine で実行）。意図の推定と索引は保存後に裏で行います</td></tr>
-        <tr><td>意図の推定</td><td>LiquidAI d1-3B</td><td>未見の注釈 22 件中 21 件を正しく分類、1 件 1 秒未満</td></tr>
-        <tr><td>検索</td><td>Google EmbeddingGemma 2</td><td>上位 3 件に正解が入る割合 93%（注釈とスクショを合わせて索引）</td></tr>
-        <tr><td>秘密情報のチェック</td><td>Apple Vision の文字認識</td><td>ダミーのキーやトークンを含む 4 画面すべて検出、誤検知 0</td></tr>
-      </tbody>
-    </table>
-    <p class="note">検証は合成音声と画面モックで行ったものです。実際の話し方や画面では数字が変わります。<a href="../docs/poc/poc-report.md">検証レポート</a></p>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th scope="col">役割</th><th scope="col">現在の実装</th><th scope="col">検証結果・状態</th></tr></thead>
+        <tbody>
+          <tr><td>文字起こし・保存</td><td>Whisper large-v3-turbo<br>CPU + Neural Engine を利用する構成</td><td>保存の P90 は 1.67〜1.74 秒（3 回の連続記録比較）。30 音声で文字誤り率 7.72%</td></tr>
+          <tr><td>意図の推定</td><td>LiquidAI d1-3B<br>MLX・保存後に非同期処理</td><td>ラベルの手直しに対応。実利用の手動正解データを集めて精度を評価する段階</td></tr>
+          <tr><td>検索</td><td>EmbeddingGemma 2・Core ML<br>注釈とスクショの索引</td><td>テキストのみの日本語評価で Recall@3 は 95.6%。索引の世代管理・再構築と品質の回帰評価を追加</td></tr>
+          <tr><td>秘密情報のチェック</td><td>Apple Vision OCR とパターン検出</td><td>検出箇所の確認・画像マスク・MCP への画像受け渡し制御を実装</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">保存速度はモデルの準備・初回推論を除いた合成音声の再生試験で、実マイク・キー操作・通知描画の測定ではありません。検索は合成 48 記録・正解あり 80 クエリの評価用データで、画像検索を含まない値です。話し方、画面、負荷によって結果は変わります。</p>
+    <p class="note"><a href="https://github.com/ysogabe/memo-collector/blob/main/docs/research/capture-stability-20261015.md">保存速度の検証</a> · <a href="https://github.com/ysogabe/memo-collector/blob/main/docs/research/search-regression-ci.md">日本語検索の評価</a> · <a href="https://github.com/ysogabe/memo-collector/issues">開発状況と残る確認項目</a></p>
   </section>
 
-  <!-- FAQ -->
-  <section class="faq" id="faq">
-    <div class="section-head"><h2>よくある質問</h2></div>
+  <section class="faq" id="faq" aria-labelledby="faq-title">
+    <div class="section-head"><h2 id="faq-title">よくある質問</h2></div>
     <div class="faq-list">
-      <details>
-        <summary>タスク管理アプリとは何が違いますか？</summary>
-        <p>Context Capture は記録を残す入口だけを担います。プロジェクト、タグ、優先度、期限の入力欄はありません。整理や実行は、あとから Claude Code やエージェントに任せる前提です。入力に 3 秒以上かからないことを最優先にしています。</p>
-      </details>
-      <details>
-        <summary>音声やスクショはどこかに送信されますか？</summary>
-        <p>送信しません。文字起こし、意図の推定、検索、秘密情報のチェックはすべて Mac の中で動きます。通信するのは、初回にモデルをダウンロードするときだけです。記録がエージェントに渡るのは、あなたが MCP 経由で読ませたときだけです。</p>
-      </details>
-      <details>
-        <summary>どの Mac で使えますか？</summary>
-        <p>Apple Silicon（M1 以降）の Mac と macOS 15 以降が必要です。メモリは 16GB 以上をおすすめします。意図の推定に使うモデルは使うときだけ読み込み、しばらく使わなければ解放します。Intel Mac と Windows には対応していません。</p>
-      </details>
-      <details>
-        <summary>ディスクはどれくらい使いますか？</summary>
-        <p>モデルが合わせて約 5〜6GB です。記録 1 件あたりはスクショ（WebP）が 100〜300KB 程度、テキストはごくわずかです。音声は既定で 7 日後に削除し、文字起こしだけを残します。</p>
-      </details>
-      <details>
-        <summary>オンライン会議の最中に使えますか？相手に聞こえませんか？</summary>
-        <p>使えます。macOS では Zoom・Teams・Meet と同じマイクを同時に使えるので、会議アプリ側をミュートにしたまま Context Capture にだけ話しかけられます。ミュートを解除したまま話すと、その声は相手にも聞こえます。</p>
-      </details>
-      <details>
-        <summary>会議の音声も録音されますか？</summary>
-        <p>録音しません。残すのは、あなたが押している間のあなたの声と、画面のスクショだけです。参加者の同意が関わるため、会議音声の取り込みは今のところ予定していません。</p>
-      </details>
-      <details>
-        <summary>パスワードや API キーが写っていたらどうなりますか？</summary>
-        <p>保存後に画面の文字を Mac 上で読み取り、キーやトークン、表示中のパスワードを見つけると「要確認」を付けます。要確認の画像は、確認してマスクするまでエージェントに渡しません。パスワード管理アプリなど、スクショを撮らないアプリも指定できます。</p>
-      </details>
-      <details>
-        <summary>URL はどのブラウザで取れますか？</summary>
-        <p>Safari、Google Chrome、Arc、Microsoft Edge に対応予定です。それ以外のアプリでは URL なしで、スクショとウインドウのタイトルを保存します。URL が取れなくても記録は必ず残ります。</p>
-      </details>
-      <details>
-        <summary>日本語の聞き取りはどのくらい正確ですか？専門用語は？</summary>
-        <p>検証では文字の誤り率が 7% 程度でした。製品名や社内用語のような固有名詞は間違えやすいので、よく使う言葉を辞書に登録できるようにします。保存後に文字起こしを手で直すこともできます。</p>
-      </details>
-      <details>
-        <summary>「意図」とは何ですか？間違っていたら？</summary>
-        <p>一言の内容から、自分でやること・調べてほしいこと・コードの修正・メモ・予定のどれに近いかを推定したラベルです。自信がないときは「未分類」のままにします。ラベルはいつでも付け替えられ、エージェントが記録を絞り込むときに使います。</p>
-      </details>
-      <details>
-        <summary>Claude Code や Hermes とはどうつなぎますか？</summary>
-        <p>Context Capture がローカルの MCP サーバーになります。Claude Code の MCP 設定に追加すれば、一覧、検索、詳細の取得、追記、完了の 6 つのツールが使えるようになります。記録の削除はエージェントからはできません。</p>
-      </details>
-      <details>
-        <summary>オフラインでも使えますか？</summary>
-        <p>使えます。初回にモデルをダウンロードしたあとは、ネットワークなしで録音から検索まで動きます。</p>
-      </details>
-      <details>
-        <summary>料金はかかりますか？</summary>
-        <p>ベータ期間中は無料です。正式版の価格は、ベータの利用状況を見て決めます。</p>
-      </details>
+      <details><summary>どの Mac で使えますか？</summary><p>Apple Silicon と macOS 15 以降が対象です。開発・実測には M3・24GB を使っています。メモリ 16GB を推奨する設計ですが、M1・16GB を含む各構成での受け入れ確認はこれからです。</p></details>
+      <details><summary>音声やスクショはどこかに送信されますか？</summary><p>アプリの文字起こし・分類・検索では外部に送信しません。モデルの初回取得には通信が必要です。MCP を通してエージェントに読ませた記録は、そのエージェントが利用するサービスへ送られる場合があります。</p></details>
+      <details><summary>ディスクはどれくらい使いますか？</summary><p>変換後のモデルは合計約 5.3GB。初回は約 8GB の取得と変換があるため、一時的に約 13GB の空きが必要です。記録の容量は画面や音声の長さで変わります。スクショは HEIC（利用できない場合は PNG）、音声は既定で 7 日後に削除し、文字起こしは残します。</p></details>
+      <details><summary>オンライン会議の最中にも使えますか？</summary><p>マイク入力を記録するため、会議アプリをミュートにしたまま使うことを想定しています。Context Capture は会議アプリのシステム音声を取り込みませんが、スピーカーの声や周囲の音がマイクに入れば一緒に録音されます。会議アプリごとの同時利用は実機で確認を進めています。</p></details>
+      <details><summary>URL はどのブラウザで取れますか？</summary><p>Safari、Google Chrome、Arc、Microsoft Edge 向けの取得処理があります。オートメーションの許可が必要です。URL を取得できなくても、ほかの情報と注釈で記録を残します。</p></details>
+      <details><summary>日本語の聞き間違いや、意図の誤りは直せますか？</summary><p>詳細画面で注釈を書き直し、意図ラベルを付け替えられます。設定の固有名詞辞書で、製品名や社内用語も補えます。確信度が足りない記録は「未分類」になります。手動で選んだ意図は自動推定で上書きしません。</p></details>
+      <details><summary>記録がすぐ検索に出てこないことはありますか？</summary><p>あります。保存の後に秘密情報のチェック、意図の推定、索引の更新を進めるため、連続して録音すると整理が後回しになります。モデル準備中や索引再構築中も検索状態を表示し、必要に応じて文字の一致で探せます。</p></details>
+      <details><summary>Claude Code や Hermes とはどうつなぎますか？</summary><p>付属のローカル MCP サーバーをエージェントの設定に登録します。一覧、検索、詳細、追記、完了、アーカイブの 6 ツールがあります。接続方法は <a href="https://github.com/ysogabe/memo-collector/blob/main/docs/manual-tests/mcp.md">MCP の手順</a>に記載しています。</p></details>
+      <details><summary>オフラインでも使えますか？</summary><p>モデルの取得・変換・初回最適化が済めば、アプリの録音から検索までローカルで動きます。接続先のエージェントがオフラインで使えるかは、その構成によります。</p></details>
+      <details><summary>今すぐダウンロードできますか？</summary><p>現在はソースとビルド手順を公開する開発段階です。一般向けに署名・公証した配布版はまだ用意していません。配布状況は GitHub の Releases で案内します。</p></details>
     </div>
   </section>
-
-  <section class="beta" id="beta">
-    <h2>ベータ版を待っている方へ</h2>
-    <p>最初のベータは、Apple Silicon の Mac で日本語を使う開発者向けに少人数で配布します。</p>
-    <form class="beta-form" onsubmit="event.preventDefault(); this.querySelector('output').textContent = '申し込みを受け付けました。配布の準備ができたらメールでお知らせします。';">
-      <label for="email">メールアドレス</label>
-      <div class="beta-row">
-        <input id="email" type="email" required autocomplete="email" placeholder="you@example.com">
-        <button class="btn" type="submit">ベータに申し込む</button>
-      </div>
-      <output aria-live="polite"></output>
-    </form>
+  <section class="beta" id="development" aria-labelledby="development-title">
+    <h2 id="development-title">開発状況を GitHub で</h2>
+    <p>ソースコード、ビルド手順、調査レポートを公開しています。実利用での動作確認と改善を進め、配布に向けて準備しています。</p>
+    <div class="hero-actions">
+      <a class="btn" href="https://github.com/ysogabe/memo-collector">ソースと手順を見る</a>
+      <a href="https://github.com/ysogabe/memo-collector/releases">配布状況を見る</a>
+    </div>
   </section>
 </main>
-
 <footer class="site-footer">
-  <p>Context Capture（仮称）は構想段階のプロダクトです。画面はすべてモックで、表示されているキーやトークンはダミーです。</p>
+  <p>Context Capture（仮称）· 開発版 0.1.0 · ページ更新 2026-10-15。画面は実アプリの UI、表示データと添付画面はサンプルです。<a href="assets/screenshots.json">画像の出典</a></p>
 </footer>
-
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "Context Capture",
-  "operatingSystem": "macOS 15+",
+  "operatingSystem": "macOS 15+ (Apple Silicon)",
   "applicationCategory": "ProductivityApplication",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
+  "softwareVersion": "0.1.0",
+  "url": "https://ysogabe.github.io/memo-collector/",
+  "sameAs": "https://github.com/ysogabe/memo-collector"
 }
 </script>
-<script src="assets/demo.js"></script>
 </body>
 </html>
