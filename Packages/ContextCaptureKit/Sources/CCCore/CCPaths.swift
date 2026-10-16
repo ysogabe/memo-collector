@@ -1,9 +1,31 @@
 import Foundation
 
+/// アプリのビルド種別に対応する保存領域。CLI は既定で通常利用側を使う。
+public enum CCStorageProfile: Sendable, Equatable {
+    case production
+    case development
+
+    public static let developmentBundleIdentifier = "dev.ysogabe.ContextCapture.development"
+
+    public static func forBundleIdentifier(_ identifier: String?) -> CCStorageProfile {
+        identifier == developmentBundleIdentifier ? .development : .production
+    }
+
+    public static var current: CCStorageProfile {
+        forBundleIdentifier(Bundle.main.bundleIdentifier)
+    }
+
+    public var directoryName: String {
+        self == .development ? "ContextCapture-Development" : "ContextCapture"
+    }
+}
+
 /// 保存先の解決（計画書 §2）。
 /// - データ: 既定 `~/Library/Application Support/ContextCapture/`、環境変数 `CC_DATA_DIR` で上書き
 /// - モデル: 既定 `~/Library/Application Support/ContextCapture/Models/`、環境変数 `CC_MODELS_DIR` で上書き
 ///   （`CC_DATA_DIR` を変えてもモデルの既定位置は動かない。テストで一時データ置き場と実モデルを併用するため）
+/// - Debug アプリは `ContextCapture-Development/` に DB・キャプチャ・モデルを分離する。
+///   判定はアプリの Bundle ID に基づく。SwiftPM の Debug CLI が個人データの場所を勝手に変えないため。
 public struct CCPaths: Sendable, Equatable {
     public static let dataDirEnvironmentKey = "CC_DATA_DIR"
     public static let modelsDirEnvironmentKey = "CC_MODELS_DIR"
@@ -27,10 +49,12 @@ public struct CCPaths: Sendable, Equatable {
     /// 環境変数と既定値から解決する。空文字の環境変数は未設定とみなす。`~` は展開し、相対パスはカレントディレクトリ基準。
     public static func resolve(
         environment: [String: String] = ProcessInfo.processInfo.environment,
-        homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser
+        homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
+        profile: CCStorageProfile = .current
     ) -> CCPaths {
         let defaultRoot = homeDirectory
-            .appendingPathComponent("Library/Application Support/ContextCapture", isDirectory: true)
+            .appendingPathComponent("Library/Application Support", isDirectory: true)
+            .appendingPathComponent(profile.directoryName, isDirectory: true)
         let data = directoryURL(environment[dataDirEnvironmentKey]) ?? defaultRoot
         let models = directoryURL(environment[modelsDirEnvironmentKey])
             ?? defaultRoot.appendingPathComponent("Models", isDirectory: true)

@@ -20,3 +20,6 @@ build/
 spikes/runtime/models/
 spikes/runtime/swift/*/Packages/
 spikes/dev-models/
+
+# Local release artifacts (never commit signed packages or private staging data)
+dist/

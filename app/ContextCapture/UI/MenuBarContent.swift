@@ -1,3 +1,4 @@
+import CCCore
 import SwiftUI
 
 /// メニューバーのアイコンと未処理件数（F-01）。録音中はアイコンを変える。
@@ -7,6 +8,7 @@ struct MenuBarLabel: View {
     var body: some View {
         HStack(spacing: 3) {
             Image(systemName: model.isRecording ? "mic.circle.fill" : "camera.viewfinder")
+            if CCStorageProfile.current == .development { Text("Dev") }
             if model.unprocessedCount > 0 {
                 Text("\(model.unprocessedCount)")
                     .monospacedDigit()
@@ -17,7 +19,7 @@ struct MenuBarLabel: View {
     }
 
     private var accessibilityText: String {
-        var s = "Context Capture"
+        var s = CCStorageProfile.current == .development ? "Context Capture Dev" : "Context Capture"
         if model.isRecording { s += "、録音中" }
         s += "、未処理 \(model.unprocessedCount) 件"
         return s
@@ -29,6 +31,10 @@ struct MenuBarContent: View {
     let model: AppModel
 
     var body: some View {
+        if CCStorageProfile.current == .development {
+            Text("Context Capture Dev").font(.headline)
+            Divider()
+        }
         Button("Inbox を開く") { model.windows.showInbox() }
             .keyboardShortcut("i")
         Text("今日の記録 \(model.todayCount) 件・未処理 \(model.unprocessedCount) 件")

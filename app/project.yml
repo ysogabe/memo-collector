@@ -1,5 +1,9 @@
 # XcodeGen の定義。`xcodegen generate` で ContextCapture.xcodeproj を作る（xcodeproj は生成物・git 管理外）。
 name: ContextCapture
+configs:
+  Debug: debug
+  DevelopmentRelease: release
+  Release: release
 options:
   bundleIdPrefix: dev.ysogabe
   deploymentTarget:
@@ -70,6 +74,16 @@ targets:
         ENABLE_USER_SCRIPT_SANDBOXING: YES
         COMBINE_HIDPI_IMAGES: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: dev.ysogabe.ContextCapture.development
+          CC_APP_DISPLAY_NAME: Context Capture Dev
+        DevelopmentRelease:
+          PRODUCT_BUNDLE_IDENTIFIER: dev.ysogabe.ContextCapture.development
+          CC_APP_DISPLAY_NAME: Context Capture Dev
+        Release:
+          PRODUCT_BUNDLE_IDENTIFIER: dev.ysogabe.ContextCapture
+          CC_APP_DISPLAY_NAME: Context Capture
   # AppCoordinator（状態機械・保存の流れ）と M2 / M3 の配線の単体テスト。アプリをホストにせず（起動時に本物のホットキー等を触らないため）、
   # 必要なソースだけをこのバンドルに直接コンパイルする。モデル・権限に触る部品はフェイク。
   #   cd app && xcodebuild -project ContextCapture.xcodeproj -scheme ContextCapture -derivedDataPath ../DerivedData test
@@ -135,3 +149,14 @@ schemes:
         - ContextCaptureTests
     archive:
       config: Release
+  # Release最適化で動作確認するときも通常利用データへ接続しない。
+  ContextCaptureDevelopment:
+    build:
+      targets:
+        ContextCapture: all
+    run:
+      config: DevelopmentRelease
+    test:
+      config: Debug
+      targets:
+        - ContextCaptureTests

@@ -16,6 +16,36 @@ final class CCPathsTests: XCTestCase {
         XCTAssertEqual(p.manifestURL(.d1).path, "/Users/tester/Library/Application Support/ContextCapture/Models/d1-3b-text-q8/manifest.json")
     }
 
+    func testDevelopmentProfileIsFullySeparate() {
+        let dev = CCPaths.resolve(environment: [:], homeDirectory: home, profile: .development)
+        let prod = CCPaths.resolve(environment: [:], homeDirectory: home, profile: .production)
+        XCTAssertEqual(dev.dataRoot.path, "/Users/tester/Library/Application Support/ContextCapture-Development")
+        XCTAssertEqual(dev.modelsRoot, dev.dataRoot.appendingPathComponent("Models", isDirectory: true))
+        XCTAssertNotEqual(dev.databaseURL, prod.databaseURL)
+        XCTAssertNotEqual(dev.capturesRoot, prod.capturesRoot)
+        XCTAssertNotEqual(dev.modelsRoot, prod.modelsRoot)
+    }
+
+    func testProfileUsesAppIdentityAndKeepsCLIOnProduction() {
+        XCTAssertEqual(CCStorageProfile.forBundleIdentifier("dev.ysogabe.ContextCapture.development"), .development)
+        XCTAssertEqual(CCStorageProfile.forBundleIdentifier("dev.ysogabe.ContextCapture"), .production)
+        XCTAssertEqual(CCStorageProfile.forBundleIdentifier(nil), .production)
+        XCTAssertEqual(CCStorageProfile.forBundleIdentifier("cc-mcp"), .production)
+    }
+
+    func testDevelopmentDataOverrideDoesNotShareProductionModels() {
+        let p = CCPaths.resolve(environment: ["CC_DATA_DIR": "/tmp/test-records"], homeDirectory: home, profile: .development)
+        XCTAssertEqual(p.dataRoot.path, "/tmp/test-records")
+        XCTAssertEqual(p.modelsRoot.path, "/Users/tester/Library/Application Support/ContextCapture-Development/Models")
+    }
+
+    func testExplicitDevelopmentOverridesStillWork() {
+        let p = CCPaths.resolve(environment: ["CC_DATA_DIR": "/tmp/test-records", "CC_MODELS_DIR": "/tmp/test-models"],
+                                homeDirectory: home, profile: .development)
+        XCTAssertEqual(p.dataRoot.path, "/tmp/test-records")
+        XCTAssertEqual(p.modelsRoot.path, "/tmp/test-models")
+    }
+
     func testEnvironmentOverrides() {
         let p = CCPaths.resolve(environment: ["CC_DATA_DIR": "/tmp/cc-data", "CC_MODELS_DIR": "/tmp/cc-models/"], homeDirectory: home)
         XCTAssertEqual(p.dataRoot.path, "/tmp/cc-data")
