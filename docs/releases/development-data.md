@@ -63,4 +63,4 @@ CCPathsTests 12件（うち分離の回帰テスト4件）を実行。
 本物の個人DB・キャプチャ・設定には読み書きしていない。
 
 XcodeGenで生成したプロジェクトと `xcodebuild -showBuildSettings` でも3構成のBundle ID・表示名を確認。
-Debugは `-Onone`、DevelopmentReleaseとReleaseは `-O`。この変更後のアプリ全体の再ビルド・起動は未実施。
+Debugは `-Onone`、DevelopmentReleaseとReleaseは `-O`。変更後のDebugアプリのビルドとアプリ単体テストも成功。生成されたInfo.plistで開発用のアプリID・表示名を確認した。個人データを使ったアプリ起動は行っていない。
