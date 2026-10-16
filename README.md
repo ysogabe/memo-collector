@@ -49,6 +49,21 @@ Xcode で `ContextCapture` ターゲットの **Signing & Capabilities** を開�
 
 初回起動では、案内に従ってマイク・画面収録・アクセシビリティの権限とモデルを準備します。対応ブラウザから URL を取得するときは、オートメーションの許可も求められます。準備後、記録したい画面で `⌥Space` を押したまま話し、離すと保存されます。
 
+## DMG パッケージ
+
+Applications へドラッグしてインストールする DMG は、次のコマンドで作成できます。
+
+```sh
+python3 scripts/release.py --preview
+```
+
+これは手元確認用の未公証パッケージです。Developer ID 署名・公証付きの作成方法は
+[配布手順](docs/releases/distribution.md)、保存先と App Store 申請を想定した残課題は
+[配布監査](docs/releases/release-audit-20261016.md) を参照してください。
+
+開発での動作確認は、[開発版と通常利用版のデータ分離](docs/releases/development-data.md) に従ってください。
+Debug版は通常利用データと別のDB・キャプチャ・モデル・設定を使います。
+
 ## エージェントとの連携
 
 付属の `cc-mcp` をビルドし、利用するエージェントの MCP 設定に登録します。

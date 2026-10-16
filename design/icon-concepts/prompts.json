@@ -1,0 +1,35 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "transparent_background": false,
+  "concepts": [
+    {
+      "file": "01-voice-window.png",
+      "prompt": "Use case: logo-brand. Create ONE premium macOS application icon concept for Context Capture, a local app that captures the current screen with a spoken annotation. A luminous ivory window frame with four bold capture corners enclosing a compact five-bar voice waveform. Deep cobalt blue rounded-square tile, subtle cyan edge light. The waveform is the unmistakable hero. Screen capture plus voice annotation, simple, memorable. Composition: one centered app icon, square canvas, rounded-square tile occupies approximately 88% of canvas, equal margins. Background outside tile is plain pale neutral gray. Front-on orthographic view. Professional native macOS icon craft with subtle depth and soft highlights, sharp silhouette, extremely legible at 32 and 64 pixels. Strong hierarchy and generous negative space. No text, no letters, no numbers, no watermark, no brand logos, no microphone illustration, no desktop or device mockup, no extra icons, no ornamental sparkles. Output one icon only."
+    },
+    {
+      "file": "02-voice-note.png",
+      "prompt": "Use case: logo-brand. Create ONE premium macOS application icon concept for Context Capture, a local app that captures the current screen with a spoken annotation. A single warm ivory paper note with one softly folded corner, carrying a bold coral-red five-bar voice waveform, seated on a softly rounded apricot-orange square tile. Minimal dimensional paper craft, friendly and calm. Voice note attached to context. Composition: one centered app icon, square canvas, rounded-square tile occupies approximately 88% of canvas, equal margins. Background outside tile is plain pale neutral gray. Front-on orthographic view. Professional native macOS icon craft with subtle depth and soft highlights, sharp silhouette, extremely legible at 32 and 64 pixels. Strong hierarchy and generous negative space. No text, no letters, no numbers, no watermark, no brand logos, no microphone illustration, no desktop or device mockup, no extra icons, no ornamental sparkles. Output one icon only."
+    },
+    {
+      "file": "03-context-layers.png",
+      "prompt": "Use case: logo-brand. Create ONE premium macOS application icon concept for Context Capture, a local app that captures the current screen with a spoken annotation. Two slightly offset translucent glass window cards on a deep violet rounded-square tile. The foremost card carries a single bold white speech bubble containing a tiny three-bar audio waveform. Clean broad shapes, lavender rim lighting, restrained polished glass depth. Captured context and annotation. Composition: one centered app icon, square canvas, rounded-square tile occupies approximately 88% of canvas, equal margins. Background outside tile is plain pale neutral gray. Front-on orthographic view. Professional native macOS icon craft with subtle depth and soft highlights, sharp silhouette, extremely legible at 32 and 64 pixels. Strong hierarchy and generous negative space. No text, no letters, no numbers, no watermark, no brand logos, no microphone illustration, no desktop or device mockup, no extra icons, no ornamental sparkles. Output one icon only."
+    },
+    {
+      "file": "04-capture-orbit.png",
+      "prompt": "Use case: logo-brand. Create ONE premium macOS application icon concept for Context Capture, a local app that captures the current screen with a spoken annotation. A single thick teal circular capture ring with a small intentional gap at upper right, enclosing a bold ivory audio waveform. A small orange recording dot precisely fills the gap. A dark midnight navy rounded-square tile. Graphic, striking, refined, a memorable emblem rather than a busy UI. Composition: one centered app icon, square canvas, rounded-square tile occupies approximately 88% of canvas, equal margins. Background outside tile is plain pale neutral gray. Front-on orthographic view. Professional native macOS icon craft with subtle depth and soft highlights, sharp silhouette, extremely legible at 32 and 64 pixels. Strong hierarchy and generous negative space. No text, no letters, no numbers, no watermark, no brand logos, no microphone illustration, no desktop or device mockup, no extra icons, no ornamental sparkles. Output one icon only."
+    },
+    {
+      "file": "05-speech-viewfinder.png",
+      "prompt": "Use case: logo-brand. Create ONE premium macOS application icon concept for Context Capture, a local app that captures the current screen with a spoken annotation. An ivory rounded speech bubble whose outline incorporates four bold viewfinder corner brackets, enclosing three short mint-green audio bars. Soft jade green rounded-square tile, subtle ceramic-like depth. The bubble and capture frame read as one distinctive unified symbol. Calm, trustworthy personal productivity app. Composition: one centered app icon, square canvas, rounded-square tile occupies approximately 88% of canvas, equal margins. Background outside tile is plain pale neutral gray. Front-on orthographic view. Professional native macOS icon craft with subtle depth and soft highlights, sharp silhouette, extremely legible at 32 and 64 pixels. Strong hierarchy and generous negative space. No text, no letters, no numbers, no watermark, no brand logos, no microphone illustration, no desktop or device mockup, no extra icons, no ornamental sparkles. Output one icon only."
+    }
+  ],
+  "selected": "05-speech-viewfinder",
+  "production": {
+    "file": "05-speech-viewfinder-transparent.png",
+    "master": "05-appicon-master.png",
+    "tool": "built-in image_gen.imagegen",
+    "transparent_background": true,
+    "prompt": "Re-render the approved green macOS icon shown in the reference as a clean final application icon. This is a fresh polished redraw, not a background extraction. Same design: forest-jade green rounded-square ceramic tile, large warm ivory speech bubble, four dark green viewfinder corner insets, three softly glowing green audio bars. Keep the exact visual identity, colors and proportions of the approved reference. A SINGLE isolated object. Rounded square outer boundary has impeccably smooth clean curves and long straight top edge. Center on transparent square canvas with equal 7 percent padding. All pixels outside the tile are fully transparent: no shadows outside the tile, no floating pixels, no particles, no texture outside, no ground plane. No lettering. Production ready icon, calm clean craftsmanship.",
+    "asset_preparation": "Clip to a rounded-square app icon boundary, resize master to 1024px, generate asset sizes with sips."
+  }
+}
