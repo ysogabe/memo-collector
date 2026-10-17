@@ -276,8 +276,16 @@ struct OnboardingView: View {
             // 題名が手順ごとに変わってもボタンの幅を変えない。フルキーボードアクセスが有効だと、
             // このボタンにフォーカスリングが付く。フォーカス中のボタンの幅が変わると、リングは
             // 古い幅のまま新しい位置に残り、ずれて（ときにウインドウの外へ）描かれる。
-            // 80pt は最も長い「使いはじめる」（約 72pt）より広い。
-            Button { vm.next() } label: { Text(nextTitle).frame(minWidth: 80) }
+            // 全手順の題名を見えない形で重ねて、最も長い題名の幅に揃える（文言や文字サイズが
+            // 変わっても追随する）。重ねた分は読み上げに出さず、いまの題名だけを読ませる。
+            Button { vm.next() } label: {
+                ZStack {
+                    ForEach(OnboardingViewModel.Step.allCases, id: \.rawValue) { step in
+                        Text(Self.nextTitle(for: step)).hidden().accessibilityHidden(true)
+                    }
+                    Text(Self.nextTitle(for: vm.step))
+                }
+            }
                 .buttonStyle(.borderedProminent)
                 .tint(Color.capture)
                 .disabled(!vm.canGoNext)
@@ -287,8 +295,8 @@ struct OnboardingView: View {
         .padding(.vertical, 12)
     }
 
-    private var nextTitle: String {
-        switch vm.step {
+    private static func nextTitle(for step: OnboardingViewModel.Step) -> String {
+        switch step {
         case .welcome: return "はじめる"
         case .permissions, .models: return "次へ"
         case .ready: return "使いはじめる"
