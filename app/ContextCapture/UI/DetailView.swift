@@ -221,8 +221,8 @@ struct DetailView: View {
             TextEditor(text: $vm.draftText)
                 .focused($annotationFocused)
                 .onKeyPress(.escape) {
-                    // 変換中の Esc は変換の取り消しなので IME に渡す。それ以外は編集を抜ける（次の Esc で戻る）。
-                    if NSApp.windows.contains(where: { ($0.firstResponder as? NSTextView)?.hasMarkedText() == true }) { return .ignored }
+                    // 変換中の Esc は変換の取り消しなので IME に渡す（キーは key window にだけ届く）。それ以外は編集を抜ける（次の Esc で戻る）。
+                    if (NSApp.keyWindow?.firstResponder as? NSTextView)?.hasMarkedText() == true { return .ignored }
                     annotationFocused = false
                     return .handled
                 }

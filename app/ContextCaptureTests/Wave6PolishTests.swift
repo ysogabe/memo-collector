@@ -316,7 +316,12 @@ final class DetailSaveTests: XCTestCase {
 /// 検索結果を固定で返すだけの検索（キーボード選択のテスト用）。
 private struct FixedSearch: SearchServing {
     var hits: [SearchHit]
-    func search(_ query: String, limit: Int) async throws -> [SearchHit] { hits }
+    /// true の間は検索が失敗する。
+    var failing = Box(false)
+    func search(_ query: String, limit: Int) async throws -> [SearchHit] {
+        if failing.get() { throw CocoaError(.fileReadUnknown) }
+        return hits
+    }
 }
 
 // Inbox のキーボード選択（検索欄の ↓ から一覧へ入るとき、未選択なら先頭を選ぶ）と、検索欄の Enter の振り分け。
@@ -331,11 +336,12 @@ final class InboxKeyboardSelectionTests: XCTestCase {
          makeWave6Record("c", at: -2 * day), makeWave6Record("d", at: -4 * day)]
     }
 
-    private func makeVM(records: [ContextRecord], hits: [SearchHit] = []) async throws -> InboxViewModel {
+    private func makeVM(records: [ContextRecord], hits: [SearchHit] = [],
+                        search: FixedSearch? = nil) async throws -> InboxViewModel {
         let store = TestStore()
         addTeardownBlock { try? FileManager.default.removeItem(at: store.root) }
         for r in records { try await store.insert(r) }
-        let vm = InboxViewModel(store: store, search: FixedSearch(hits: hits), now: { [now] in now })
+        let vm = InboxViewModel(store: store, search: search ?? FixedSearch(hits: hits), now: { [now] in now })
         await vm.load()
         return vm
     }
@@ -417,6 +423,20 @@ final class InboxKeyboardSelectionTests: XCTestCase {
         vm.selection = nil
         XCTAssertEqual(vm.submitAction(), .search)
         vm.selection = "gone"
+        XCTAssertEqual(vm.submitAction(), .search)
+    }
+
+    func testSubmitSearchesAgainWhenLastSearchFailed() async throws {
+        let records = makeRecords()
+        let search = FixedSearch(hits: [SearchHit(record: records[2], score: 0.9)])
+        let vm = try await makeVM(records: records, search: search)
+        vm.query = "会議"
+        await vm.runSearch()
+        XCTAssertEqual(vm.submitAction(), .open(records[2].id))
+        // 再検索（scope 切替など）が失敗すると一覧は隠れる。古い結果が残っていても開かない。
+        search.failing.set(true)
+        await vm.runSearch()
+        XCTAssertNotNil(vm.errorMessage)
         XCTAssertEqual(vm.submitAction(), .search)
     }
 

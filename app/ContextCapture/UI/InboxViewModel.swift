@@ -121,7 +121,8 @@ final class InboxViewModel {
     /// 検索欄の Enter。結果を出している語のまま（IME 確定の後にもう一度 Enter など）なら、検索し直さず選択中の記録を開く。
     func submitAction() -> InboxSubmitAction {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !q.isEmpty, q == searchedQuery, let s = selection, visibleRecords.contains(where: { $0.id == s }) {
+        // 検索に失敗して一覧が隠れているとき（古い結果が残っている）は開かない。
+        if errorMessage == nil, !isSearching, !q.isEmpty, q == searchedQuery, let s = selection, visibleRecords.contains(where: { $0.id == s }) {
             return .open(s)
         }
         return .search
