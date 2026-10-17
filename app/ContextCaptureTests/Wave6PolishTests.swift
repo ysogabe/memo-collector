@@ -440,6 +440,42 @@ final class InboxKeyboardSelectionTests: XCTestCase {
         XCTAssertEqual(vm.submitAction(), .search)
     }
 
+    // MARK: 一覧の表示条件
+
+    func testShowsListWhenRecordsExist() async throws {
+        let vm = try await makeVM(records: makeRecords())
+        XCTAssertTrue(vm.showsList)
+    }
+
+    func testShowsListIsFalseForEmptyStore() async throws {
+        let vm = try await makeVM(records: [])
+        XCTAssertTrue(vm.isEmpty)
+        XCTAssertFalse(vm.showsList)
+    }
+
+    func testShowsListIsFalseWhenSearchHasZeroHits() async throws {
+        let vm = try await makeVM(records: makeRecords(), hits: [])
+        vm.query = "会議"
+        await vm.runSearch()
+        XCTAssertNotNil(vm.searchResults)
+        XCTAssertTrue(vm.isEmpty)
+        XCTAssertFalse(vm.showsList)
+    }
+
+    func testShowsListIsFalseWhenSearchFailedEvenWithStaleResults() async throws {
+        let records = makeRecords()
+        let search = FixedSearch(hits: [SearchHit(record: records[2], score: 0.9)])
+        let vm = try await makeVM(records: records, search: search)
+        vm.query = "会議"
+        await vm.runSearch()
+        XCTAssertTrue(vm.showsList)
+        search.failing.set(true)
+        await vm.runSearch()
+        // 古い結果は残っているが一覧は隠れる。
+        XCTAssertFalse(vm.visibleRecords.isEmpty)
+        XCTAssertFalse(vm.showsList)
+    }
+
     func testSubmitWithEmptyQueryIsSearch() async throws {
         let vm = try await makeVM(records: makeRecords())
         vm.selection = vm.visibleRecords[0].id

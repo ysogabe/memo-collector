@@ -70,17 +70,25 @@ struct InboxView: View {
                     .onSubmit {
                         switch vm.submitAction() {
                         case let .open(id): open(id)
-                        case .search: Task { await vm.runSearch(); focus = .list }
+                        case .search:
+                            Task {
+                                await vm.runSearch()
+                                // 失敗・0 件で一覧が出ないときは検索欄に残し、そのまま再検索・打ち直しできるようにする。
+                                if vm.showsList { focus = .list }
+                            }
                         }
                     }
                     .onKeyPress(.escape) {
+                        // 変換中の Esc は変換の取り消しなので IME に渡す。
+                        guard !isComposingText() else { return .ignored }
                         guard !vm.query.isEmpty || vm.searchResults != nil else { return .ignored }
                         vm.clearSearch()
                         return .handled
                     }
                     .onKeyPress(.downArrow) {
-                        // ↓ で一覧へ。未選択なら先頭を選ぶ。
-                        guard !vm.visibleRecords.isEmpty else { return .ignored }
+                        // ↓ で一覧へ。未選択なら先頭を選ぶ。変換中は候補選択の ↓ なので IME に渡す。
+                        // 一覧が隠れているとき（検索失敗で古い結果が残る場合など）は動かさない。
+                        guard !isComposingText(), vm.showsList, !vm.visibleRecords.isEmpty else { return .ignored }
                         vm.selectFirstIfNeeded()
                         focus = .list
                         return .handled

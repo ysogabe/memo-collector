@@ -148,8 +148,9 @@ struct DetailView: View {
 
     /// Space / Enter（修飾キー無し）で拡大表示。画像が無いときは何もしない。
     private func openZoomFromKeyboard(_ press: KeyPress) -> KeyPress.Result {
-        // 注釈欄の編集中（文字入力・IME 変換中を含む）はキーを触らない。
-        if focus == .annotation || NSApp.keyWindow?.firstResponder is NSTextView { return .ignored }
+        // 詳細のルート自身にフォーカスがあるときだけ開く。注釈欄の編集中（IME 変換中を含む）や、
+        // Tab で子のボタン・Picker・リンクにフォーカスがあるときの Return はそのコントロールのものなので触らない。
+        guard focus == .root else { return .ignored }
         guard press.modifiers.isEmpty, let image = vm.image else { return .ignored }
         // 一覧で押しっぱなしにした Enter / Space のリピートで、詳細が出た瞬間に拡大が開かないよう、リピートは無視する。
         if press.phase == .repeat { return .handled }
@@ -240,7 +241,7 @@ struct DetailView: View {
                 .focused($focus, equals: .annotation)
                 .onKeyPress(.escape) {
                     // 変換中の Esc は変換の取り消しなので IME に渡す（キーは key window にだけ届く）。それ以外は編集を抜ける（次の Esc で戻る）。
-                    if (NSApp.keyWindow?.firstResponder as? NSTextView)?.hasMarkedText() == true { return .ignored }
+                    if isComposingText() { return .ignored }
                     focus = .root
                     return .handled
                 }

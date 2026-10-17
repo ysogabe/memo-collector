@@ -88,6 +88,9 @@ final class InboxViewModel {
 
     var isEmpty: Bool { hasLoaded && visibleRecords.isEmpty }
 
+    /// 一覧そのものを表示しているか（InboxView の content が list を出す条件）。エラー表示・空表示のときは false。
+    var showsList: Bool { errorMessage == nil && !isEmpty }
+
     func load() async {
         do {
             let records = try await store.list(scope.filter)
