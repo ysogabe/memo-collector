@@ -74,8 +74,9 @@ struct DetailView: View {
         .navigationSubtitle(DateText.full(vm.record.capturedAt))
         // ルートにフォーカスを置いておき、注釈欄に居ないときの Space / Enter で拡大表示を開く。
         // （⌘ 無しのキー割り当てだと、Picker やリンクの Space を奪うのでフォーカスで受ける）
+        // focusEffectDisabled は子孫にも効くので、ルート自身が持っているときだけ抑える（子のフォーカスリングは残す）。
         .focusable()
-        .focusEffectDisabled()
+        .focusEffectDisabled(focus == .root)
         .focused($focus, equals: .root)
         .onKeyPress(keys: [.space, .return], phases: [.down, .repeat]) { openZoomFromKeyboard($0) }
         .task {
