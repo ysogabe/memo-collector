@@ -131,7 +131,15 @@ final class AppModel {
             toast.hide()
             Task { await env.capture.retryTranscription(recordID: id) }
         case let .openSystemSettings(kind):
-            Task { await env.permissions.openSystemSettings(for: kind) }
+            Task {
+                // マイクが「未確認」ならシステム設定に行の無い（または署名の変わったアプリの古い許可が ON に見えるだけの）
+                // 状態なので、オンボーディングと同じくまずシステムのダイアログを出す。画面収録は未確認と拒否を区別できないので設定へ。
+                if kind == .microphone, await env.permissions.state(of: kind) == .notDetermined {
+                    await env.permissions.request(kind)
+                } else {
+                    await env.permissions.openSystemSettings(for: kind)
+                }
+            }
         }
     }
 }

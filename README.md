@@ -57,7 +57,7 @@ Applications へドラッグしてインストールする DMG は、次のコ�
 python3 scripts/release.py --preview
 ```
 
-これは手元確認用の未公証パッケージです。Developer ID 署名・公証付きの作成方法は
+これは Apple Development 証明書で署名した手元確認用の未公証パッケージです。Developer ID 署名・公証付きの作成方法は
 [配布手順](docs/releases/distribution.md)、保存先と App Store 申請を想定した残課題は
 [配布監査](docs/releases/release-audit-20261016.md) を参照してください。
 
