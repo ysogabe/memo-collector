@@ -15,8 +15,10 @@ python3 scripts/release.py --preview
 `dist/ContextCapture-<version>-<build>-arm64-PREVIEW.dmg` と SHA-256 を生成する。
 これは `app/project.yml` の Apple Development 証明書（Team）で署名した未公証の開発者確認用であり、
 一般向け配布版として公開しない。キーチェーンに Apple Development 証明書が必要（Xcode での通常ビルドと同じ）。
-designated requirement が「バンドル ID + Team の証明書」になるため、作り直しても、Xcode で Team 署名した
-同じバンドル ID のビルドと置き換えても、マイク・画面収録・アクセシビリティの許可が残る。
+designated requirement が「バンドル ID + Apple Development 証明書（leaf の Common Name を含む）」になるため、
+同じ証明書で署名している限り、作り直しても、Xcode で同じ証明書で署名した同じバンドル ID のビルドと置き換えても、
+マイク・画面収録・アクセシビリティの許可が残る。同じ Team でも別の証明書（別メンバー・証明書の更新）に替えると
+CN が変わり、再許可が必要になることがある。
 別 Mac の Gatekeeper 通過は保証しない。システムのセキュリティ設定を無効化する必要はない。
 
 証明書の無い Mac では `--preview --adhoc` で ad-hoc 署名にできる。ただし ad-hoc 署名の
