@@ -61,7 +61,7 @@ final class WindowRouter: NSObject, NSWindowDelegate {
         let size = NSSize(width: image.size.width * scale, height: image.size.height * scale)
         let root = ScreenshotView(image: image, findings: findings)
             .padding(8)
-            .onExitCommand { [weak self] in self?.zoom?.close() }
+            .background { EscapeToCloseButton { [weak self] in self?.zoom?.close() } }
         let w = makeWindow(title: title, size: NSSize(width: size.width + 16, height: size.height + 16), root: root, resizable: true)
         zoom = w
         present(w)

@@ -1,13 +1,18 @@
 import CCCore
 import SwiftUI
 
+/// キーボードフォーカスの置き場（検索欄か一覧）。
+private enum InboxFocus: Hashable {
+    case search
+    case list
+}
+
 /// Context Inbox（F-07, F-09 / F-10 の表示, F-11）。新しい順・日付で区切る。Enter / ダブルクリックで詳細。
 struct InboxView: View {
     let app: AppModel
     @Bindable var vm: InboxViewModel
     @State private var path: [String] = []
-    @FocusState private var searchFocused: Bool
-    @FocusState private var listFocused: Bool
+    @FocusState private var focus: InboxFocus?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -25,6 +30,14 @@ struct InboxView: View {
             .overlay(alignment: .bottom) { flash }
         }
         .task { await vm.load() }
+        .onChange(of: path) { _, new in
+            // 詳細から戻ったら一覧にフォーカスを戻す（pop 完了後に立てる）。
+            guard new.isEmpty else { return }
+            Task { @MainActor in
+                await Task.yield()
+                focus = .list
+            }
+        }
         .onChange(of: app.recordsRevision) { _, _ in Task { await vm.load() } }
         .onChange(of: vm.scope) { _, _ in
             Task {
@@ -53,11 +66,31 @@ struct InboxView: View {
                 TextField("話した内容や画面の見た目で探す（例: ビデオ会議の画面）", text: $vm.query)
                     .textFieldStyle(.plain)
                     .font(.system(size: 14))
-                    .focused($searchFocused)
-                    .onSubmit { Task { await vm.runSearch(); listFocused = true } }
+                    .focused($focus, equals: .search)
+                    .onSubmit {
+                        switch vm.submitAction() {
+                        case let .open(id): open(id)
+                        case .search:
+                            Task {
+                                await vm.runSearch()
+                                // 失敗・0 件で一覧が出ないときは検索欄に残し、そのまま再検索・打ち直しできるようにする。
+                                if vm.showsList { focus = .list }
+                            }
+                        }
+                    }
                     .onKeyPress(.escape) {
+                        // 変換中の Esc は変換の取り消しなので IME に渡す。
+                        guard !isComposingText() else { return .ignored }
                         guard !vm.query.isEmpty || vm.searchResults != nil else { return .ignored }
                         vm.clearSearch()
+                        return .handled
+                    }
+                    .onKeyPress(.downArrow) {
+                        // ↓ で一覧へ。未選択なら先頭を選ぶ。変換中は候補選択の ↓ なので IME に渡す。
+                        // 一覧が隠れているとき（検索失敗で古い結果が残る場合など）は動かさない。
+                        guard !isComposingText(), vm.showsList, !vm.visibleRecords.isEmpty else { return .ignored }
+                        vm.selectFirstIfNeeded()
+                        focus = .list
                         return .handled
                     }
                     .accessibilityLabel("検索")
@@ -73,7 +106,7 @@ struct InboxView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
             .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(searchFocused ? Color.capture : Color.primary.opacity(0.12)))
+            .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(focus == .search ? Color.capture : Color.primary.opacity(0.12)))
 
             HStack(spacing: 6) {
                 ForEach(InboxScope.allCases) { scope in
@@ -86,7 +119,7 @@ struct InboxView: View {
         .padding(.vertical, 12)
         .background {
             // ⌘F で検索欄へ。
-            Button("") { searchFocused = true }
+            Button("") { focus = .search }
                 .keyboardShortcut("f")
                 .frame(width: 0, height: 0)
                 .opacity(0)
@@ -137,7 +170,13 @@ struct InboxView: View {
             }
         }
         .listStyle(.inset)
-        .focused($listFocused)
+        .focused($focus, equals: .list)
+        .onKeyPress(.space) {
+            // Space でも開く（検索欄では打てるよう、List にだけ付ける）。
+            guard let id = vm.selection else { return .ignored }
+            open(id)
+            return .handled
+        }
         .contextMenu(forSelectionType: String.self) { ids in
             if let id = ids.first {
                 Button("詳細を開く") { open(id) }

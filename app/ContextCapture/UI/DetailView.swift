@@ -19,6 +19,10 @@ struct DetailContainer: View {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .background {
+            // 読み込み中・記録が無いときも Esc で戻れるように（詳細が出たら DetailView 側が受ける）。
+            if vm == nil { EscapeToCloseButton(action: close) }
+        }
         .task(id: recordID) {
             guard let r = try? await app.env.store.get(id: recordID) else { missing = true; return }
             let model = DetailViewModel(record: r, store: app.env.store, guardReview: app.env.guardReview,
@@ -31,12 +35,19 @@ struct DetailContainer: View {
     }
 }
 
+/// キーボードフォーカスの置き場（詳細のルートか注釈欄）。
+private enum DetailFocus: Hashable {
+    case root
+    case annotation
+}
+
 /// 詳細（F-08, F-09, F-10）。
 struct DetailView: View {
     let app: AppModel
     @Bindable var vm: DetailViewModel
     var close: () -> Void
     @State private var confirmDelete = false
+    @FocusState private var focus: DetailFocus?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -61,7 +72,24 @@ struct DetailView: View {
         }
         .navigationTitle(vm.record.app.name)
         .navigationSubtitle(DateText.full(vm.record.capturedAt))
+        // ルートにフォーカスを置いておき、注釈欄に居ないときの Space / Enter で拡大表示を開く。
+        // （⌘ 無しのキー割り当てだと、Picker やリンクの Space を奪うのでフォーカスで受ける）
+        // focusEffectDisabled は子孫にも効くので、ルート自身が持っているときだけ抑える（子のフォーカスリングは残す）。
+        .focusable()
+        .focusEffectDisabled(focus == .root)
+        .focused($focus, equals: .root)
+        .onKeyPress(keys: [.space, .return], phases: [.down, .repeat]) { openZoomFromKeyboard($0) }
+        .task {
+            // 表示後（push 完了後）にルートへフォーカスを立てる。
+            await Task.yield()
+            if focus == nil { focus = .root }
+        }
         .onChange(of: vm.isClosed) { _, closed in if closed { close() } }
+        .background {
+            // Esc で一覧へ戻る。注釈の編集中は 1 回目の Esc で編集を抜ける（下の TextEditor）ので、ここは無効にする。
+            // 削除の確認中はダイアログの「キャンセル」が Esc を受ける。
+            EscapeToCloseButton(disabled: focus == .annotation || confirmDelete, action: close)
+        }
         .onDisappear {
             // 編集したまま離れても失わない。
             if vm.isAnnotationChanged { Task { await vm.saveAnnotation() } }
@@ -114,11 +142,27 @@ struct DetailView: View {
 
     // MARK: スクショ
 
+    private func openZoom(_ image: NSImage) {
+        app.windows.showScreenshot(image, findings: vm.highlightedFindings, title: CaptureMessages.subtitle(vm.record))
+    }
+
+    /// Space / Enter（修飾キー無し）で拡大表示。画像が無いときは何もしない。
+    private func openZoomFromKeyboard(_ press: KeyPress) -> KeyPress.Result {
+        // 詳細のルート自身にフォーカスがあるときだけ開く。注釈欄の編集中（IME 変換中を含む）や、
+        // Tab で子のボタン・Picker・リンクにフォーカスがあるときの Return はそのコントロールのものなので触らない。
+        guard focus == .root else { return .ignored }
+        guard press.modifiers.isEmpty, let image = vm.image else { return .ignored }
+        // 一覧で押しっぱなしにした Enter / Space のリピートで、詳細が出た瞬間に拡大が開かないよう、リピートは無視する。
+        if press.phase == .repeat { return .handled }
+        openZoom(image)
+        return .handled
+    }
+
     @ViewBuilder
     private var screenshot: some View {
         if let image = vm.image {
             Button {
-                app.windows.showScreenshot(image, findings: vm.highlightedFindings, title: CaptureMessages.subtitle(vm.record))
+                openZoom(image)
             } label: {
                 ScreenshotView(image: image, findings: vm.highlightedFindings)
                     .frame(maxHeight: 360)
@@ -194,6 +238,13 @@ struct DetailView: View {
                 }
             }
             TextEditor(text: $vm.draftText)
+                .focused($focus, equals: .annotation)
+                .onKeyPress(.escape) {
+                    // 変換中の Esc は変換の取り消しなので IME に渡す（キーは key window にだけ届く）。それ以外は編集を抜ける（次の Esc で戻る）。
+                    if isComposingText() { return .ignored }
+                    focus = .root
+                    return .handled
+                }
                 .font(.system(size: 14))
                 .scrollContentBackground(.hidden)
                 .padding(6)

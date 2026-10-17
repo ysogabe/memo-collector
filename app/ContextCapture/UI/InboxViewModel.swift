@@ -39,6 +39,12 @@ struct InboxDaySection: Identifiable, Equatable {
     var records: [ContextRecord]
 }
 
+/// 検索欄で Enter を押したときの動作。
+enum InboxSubmitAction: Equatable {
+    case search
+    case open(String)
+}
+
 @Observable
 @MainActor
 final class InboxViewModel {
@@ -82,6 +88,9 @@ final class InboxViewModel {
 
     var isEmpty: Bool { hasLoaded && visibleRecords.isEmpty }
 
+    /// 一覧そのものを表示しているか（InboxView の content が list を出す条件）。エラー表示・空表示のときは false。
+    var showsList: Bool { errorMessage == nil && !isEmpty }
+
     func load() async {
         do {
             let records = try await store.list(scope.filter)
@@ -112,11 +121,29 @@ final class InboxViewModel {
         }
     }
 
+    /// 検索欄の Enter。結果を出している語のまま（IME 確定の後にもう一度 Enter など）なら、検索し直さず選択中の記録を開く。
+    func submitAction() -> InboxSubmitAction {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        // 検索に失敗して一覧が隠れているとき（古い結果が残っている）は開かない。
+        if errorMessage == nil, !isSearching, !q.isEmpty, q == searchedQuery, let s = selection, visibleRecords.contains(where: { $0.id == s }) {
+            return .open(s)
+        }
+        return .search
+    }
+
     func clearSearch() {
         query = ""
         searchResults = nil
         searchedQuery = nil
         searchNotice = nil
+    }
+
+    /// 未選択のときだけ先頭を選ぶ（検索欄の ↓ から一覧へ入るとき）。↑/↓ の移動は List（NSTableView）に任せる。
+    func selectFirstIfNeeded() {
+        guard let s = selection, visibleRecords.contains(where: { $0.id == s }) else {
+            selection = visibleRecords.first?.id
+            return
+        }
     }
 
     func record(id: String) -> ContextRecord? {
