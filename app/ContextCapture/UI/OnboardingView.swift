@@ -273,7 +273,11 @@ struct OnboardingView: View {
             if vm.step != .welcome {
                 Button("戻る") { vm.back() }
             }
-            Button(nextTitle) { vm.next() }
+            // 題名が手順ごとに変わってもボタンの幅を変えない。フルキーボードアクセスが有効だと、
+            // このボタンにフォーカスリングが付く。フォーカス中のボタンの幅が変わると、リングは
+            // 古い幅のまま新しい位置に残り、ずれて（ときにウインドウの外へ）描かれる。
+            // 80pt は最も長い「使いはじめる」（約 72pt）より広い。
+            Button { vm.next() } label: { Text(nextTitle).frame(minWidth: 80) }
                 .buttonStyle(.borderedProminent)
                 .tint(Color.capture)
                 .disabled(!vm.canGoNext)
