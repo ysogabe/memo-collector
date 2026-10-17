@@ -13,9 +13,28 @@ python3 scripts/release.py --preview
 ```
 
 `dist/ContextCapture-<version>-<build>-arm64-PREVIEW.dmg` と SHA-256 を生成する。
-これは ad-hoc 署名・未公証の開発者確認用であり、一般向け配布版として公開しない。
-既存の開発版と署名が異なるため、置き換えた場合は権限の再許可が必要になることがある。
+これは `app/project.yml` の Apple Development 証明書（Team）で署名した未公証の開発者確認用であり、
+一般向け配布版として公開しない。キーチェーンに Apple Development 証明書が必要（Xcode での通常ビルドと同じ）。
+designated requirement が「バンドル ID + Apple Development 証明書（leaf の Common Name を含む）」になるため、
+同じ証明書で署名している限り、作り直しても、Xcode で同じ証明書で署名した同じバンドル ID のビルドと置き換えても、
+マイク・画面収録・アクセシビリティの許可が残る。同じ Team でも別の証明書（別メンバー・証明書の更新）に替えると
+CN が変わり、再許可が必要になることがある。
 別 Mac の Gatekeeper 通過は保証しない。システムのセキュリティ設定を無効化する必要はない。
+
+証明書の無い Mac では `--preview --adhoc` で ad-hoc 署名にできる。ただし ad-hoc 署名の
+designated requirement はビルドごとに変わる cdhash になり、既存の許可と一致しない。
+システム設定では許可済みに見えるまま、アプリからは未許可（マイクは「未確認」）として扱われ、
+録音で「マイクを使えません」になる。ad-hoc 版を入れた・署名方式が変わった場合は、
+アプリを終了して次で許可を消し、起動し直して許可し直す。
+
+```sh
+tccutil reset Microphone dev.ysogabe.ContextCapture
+tccutil reset ScreenCapture dev.ysogabe.ContextCapture
+tccutil reset Accessibility dev.ysogabe.ContextCapture
+```
+
+`tccd` のログに `Failed to match existing code requirement` が出ていれば、この不一致が原因
+（`/usr/bin/log show --last 10m --predicate 'process == "tccd"'`。zsh では `log` が組み込みコマンドなのでフルパスで呼ぶ）。
 
 ## Developer ID 署名・公証付き
 

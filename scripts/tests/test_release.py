@@ -71,6 +71,23 @@ class PayloadTests(unittest.TestCase):
             release.check_payload(self.app)
 
 
+class SigningTests(unittest.TestCase):
+    def test_preview_keeps_project_team_signing_by_default(self):
+        # Ad-hoc signing pins the designated requirement to a per-build cdhash and breaks TCC grants.
+        args = release.signing_args(preview=True)
+        self.assertEqual(args, [])
+        self.assertNotIn('CODE_SIGN_IDENTITY=-', args)
+
+    def test_preview_adhoc_is_explicit(self):
+        self.assertEqual(release.signing_args(preview=True, adhoc=True),
+                         ['CODE_SIGN_IDENTITY=-', 'DEVELOPMENT_TEAM='])
+
+    def test_public_uses_developer_id_with_timestamp(self):
+        identity = 'Developer ID Application: Example (TEAMID)'
+        self.assertEqual(release.signing_args(preview=False, identity=identity),
+                         [f'CODE_SIGN_IDENTITY={identity}', 'OTHER_CODE_SIGN_FLAGS=--timestamp'])
+
+
 class NotarizationTests(unittest.TestCase):
     def test_accepted_status_is_required_even_if_command_exits_successfully(self):
         with patch.object(release, 'run', return_value=Mock(stdout='{}')):

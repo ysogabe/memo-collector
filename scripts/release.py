@@ -45,6 +45,20 @@ def check_payload(app):
     return info
 
 
+def signing_args(preview, identity=None, adhoc=False):
+    """xcodebuild overrides for code signing.
+
+    Preview keeps app/project.yml's Apple Development / Team signing so the designated
+    requirement (identifier + Team certificate) matches development builds. Ad-hoc
+    signatures are pinned to a cdhash that changes on every build, so macOS TCC no
+    longer matches existing microphone/screen/accessibility grants (shown as allowed in
+    System Settings but treated as not determined by the app). Ad-hoc is explicit opt-in.
+    """
+    if preview:
+        return ['CODE_SIGN_IDENTITY=-', 'DEVELOPMENT_TEAM='] if adhoc else []
+    return [f'CODE_SIGN_IDENTITY={identity}', 'OTHER_CODE_SIGN_FLAGS=--timestamp']
+
+
 def notarize(path, profile):
     result = run('xcrun', 'notarytool', 'submit', path, '--keychain-profile', profile,
                  '--wait', '--output-format', 'json', stdout=subprocess.PIPE, text=True)
@@ -56,7 +70,10 @@ def notarize(path, profile):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--preview', action='store_true',
-                        help='Ad-hoc signed local test DMG; not for public distribution')
+                        help='Apple Development signed local test DMG; not for public distribution')
+    parser.add_argument('--adhoc', action='store_true',
+                        help='With --preview, sign ad-hoc (no certificate). Permissions must be re-granted '
+                             'after every rebuild')
     parser.add_argument('--identity', default=os.environ.get('CC_RELEASE_IDENTITY'),
                         help='Full Developer ID Application certificate name')
     parser.add_argument('--notary-profile', default=os.environ.get('CC_NOTARY_PROFILE'),
@@ -67,6 +84,8 @@ def main():
         parser.error('Public DMG requires --identity and --notary-profile. Use --preview for local QA.')
     if args.preview and (args.identity or args.notary_profile):
         parser.error('--preview cannot be combined with signing/notarization credentials')
+    if args.adhoc and not args.preview:
+        parser.error('--adhoc is only valid with --preview')
     if not args.preview and not args.identity.startswith('Developer ID Application:'):
         parser.error('--identity must be a Developer ID Application identity')
     for tool in ('xcodegen', 'xcodebuild', 'hdiutil', 'codesign', 'ditto', 'lipo'):
@@ -82,8 +101,7 @@ def main():
         lock = ROOT / 'app/ContextCapture.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved'
         lock.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / 'Packages/ContextCaptureKit/Package.resolved', lock)
-        signing = ['CODE_SIGN_IDENTITY=-', 'DEVELOPMENT_TEAM='] if args.preview else [
-            f'CODE_SIGN_IDENTITY={args.identity}', 'OTHER_CODE_SIGN_FLAGS=--timestamp']
+        signing = signing_args(args.preview, args.identity, args.adhoc)
         run('xcodebuild', '-project', ROOT / 'app/ContextCapture.xcodeproj',
             '-scheme', 'ContextCapture', '-configuration', 'Release',
             '-derivedDataPath', work / 'build', '-destination', 'generic/platform=macOS',
