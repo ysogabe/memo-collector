@@ -19,6 +19,10 @@ struct DetailContainer: View {
                 ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .background {
+            // 読み込み中・記録が無いときも Esc で戻れるように（詳細が出たら DetailView 側が受ける）。
+            if vm == nil { EscapeToCloseButton(action: close) }
+        }
         .task(id: recordID) {
             guard let r = try? await app.env.store.get(id: recordID) else { missing = true; return }
             let model = DetailViewModel(record: r, store: app.env.store, guardReview: app.env.guardReview,
@@ -31,12 +35,28 @@ struct DetailContainer: View {
     }
 }
 
+/// Esc で閉じるための不可視ボタン。フォーカスがどこにあっても効くようキー割り当てで受ける（⌘F と同じ流儀）。
+private struct EscapeToCloseButton: View {
+    var disabled = false
+    let action: () -> Void
+
+    var body: some View {
+        Button("", action: action)
+            .keyboardShortcut(.cancelAction)
+            .disabled(disabled)
+            .frame(width: 0, height: 0)
+            .opacity(0)
+            .accessibilityHidden(true)
+    }
+}
+
 /// 詳細（F-08, F-09, F-10）。
 struct DetailView: View {
     let app: AppModel
     @Bindable var vm: DetailViewModel
     var close: () -> Void
     @State private var confirmDelete = false
+    @FocusState private var annotationFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -62,6 +82,11 @@ struct DetailView: View {
         .navigationTitle(vm.record.app.name)
         .navigationSubtitle(DateText.full(vm.record.capturedAt))
         .onChange(of: vm.isClosed) { _, closed in if closed { close() } }
+        .background {
+            // Esc で一覧へ戻る。注釈の編集中は 1 回目の Esc で編集を抜ける（下の TextEditor）ので、ここは無効にする。
+            // 削除の確認中はダイアログの「キャンセル」が Esc を受ける。
+            EscapeToCloseButton(disabled: annotationFocused || confirmDelete, action: close)
+        }
         .onDisappear {
             // 編集したまま離れても失わない。
             if vm.isAnnotationChanged { Task { await vm.saveAnnotation() } }
@@ -194,6 +219,13 @@ struct DetailView: View {
                 }
             }
             TextEditor(text: $vm.draftText)
+                .focused($annotationFocused)
+                .onKeyPress(.escape) {
+                    // 変換中の Esc は変換の取り消しなので IME に渡す。それ以外は編集を抜ける（次の Esc で戻る）。
+                    if NSApp.windows.contains(where: { ($0.firstResponder as? NSTextView)?.hasMarkedText() == true }) { return .ignored }
+                    annotationFocused = false
+                    return .handled
+                }
                 .font(.system(size: 14))
                 .scrollContentBackground(.hidden)
                 .padding(6)

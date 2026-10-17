@@ -313,6 +313,121 @@ final class DetailSaveTests: XCTestCase {
     }
 }
 
+/// 検索結果を固定で返すだけの検索（キーボード選択のテスト用）。
+private struct FixedSearch: SearchServing {
+    var hits: [SearchHit]
+    func search(_ query: String, limit: Int) async throws -> [SearchHit] { hits }
+}
+
+// Inbox のキーボード選択（検索欄の ↓ から一覧へ入るとき、未選択なら先頭を選ぶ）と、検索欄の Enter の振り分け。
+@MainActor
+final class InboxKeyboardSelectionTests: XCTestCase {
+    private let day: TimeInterval = 86_400
+    private let now = Date(timeIntervalSince1970: 1_791_000_000 + 10)
+
+    /// 新しい順に a, b（今日）、c（2 日前）、d（4 日前）。日付セクションは 3 つ。
+    private func makeRecords() -> [ContextRecord] {
+        [makeWave6Record("a", at: 0), makeWave6Record("b", at: -60),
+         makeWave6Record("c", at: -2 * day), makeWave6Record("d", at: -4 * day)]
+    }
+
+    private func makeVM(records: [ContextRecord], hits: [SearchHit] = []) async throws -> InboxViewModel {
+        let store = TestStore()
+        addTeardownBlock { try? FileManager.default.removeItem(at: store.root) }
+        for r in records { try await store.insert(r) }
+        let vm = InboxViewModel(store: store, search: FixedSearch(hits: hits), now: { [now] in now })
+        await vm.load()
+        return vm
+    }
+
+    func testSelectFirstIfNeededPicksFirstWhenNothingSelected() async throws {
+        let vm = try await makeVM(records: makeRecords())
+        let rows = vm.visibleRecords
+        XCTAssertEqual(rows.count, 4)
+        XCTAssertEqual(vm.sections.count, 3)
+        XCTAssertNil(vm.selection)
+        vm.selectFirstIfNeeded()
+        XCTAssertEqual(vm.selection, rows[0].id)
+    }
+
+    func testStaleSelectionFallsBackToFirst() async throws {
+        let vm = try await makeVM(records: makeRecords())
+        vm.selection = "gone"
+        vm.selectFirstIfNeeded()
+        XCTAssertEqual(vm.selection, vm.visibleRecords[0].id)
+    }
+
+    func testEmptyListKeepsNoSelection() async throws {
+        let vm = try await makeVM(records: [])
+        vm.selectFirstIfNeeded()
+        XCTAssertNil(vm.selection)
+    }
+
+    func testSelectFirstIfNeededKeepsExistingSelection() async throws {
+        let vm = try await makeVM(records: makeRecords())
+        let rows = vm.visibleRecords
+        vm.selectFirstIfNeeded()
+        XCTAssertEqual(vm.selection, rows[0].id)
+        vm.selection = rows[2].id
+        vm.selectFirstIfNeeded()
+        XCTAssertEqual(vm.selection, rows[2].id)
+    }
+
+    func testSelectFirstIfNeededUsesSearchResultsOrder() async throws {
+        let records = makeRecords()
+        // 検索結果は c, a の順（スコア順）。先頭は一覧の先頭ではなく、この順の先頭。
+        let hits = [SearchHit(record: records[2], score: 0.9), SearchHit(record: records[0], score: 0.5)]
+        let vm = try await makeVM(records: records, hits: hits)
+        vm.query = "x"
+        await vm.runSearch()
+        vm.selection = nil
+        vm.selectFirstIfNeeded()
+        XCTAssertEqual(vm.selection, records[2].id)
+    }
+
+    // MARK: 検索欄の Enter
+
+    func testSubmitSearchesWhenNothingSearchedYet() async throws {
+        let vm = try await makeVM(records: makeRecords())
+        vm.selection = vm.visibleRecords[0].id
+        vm.query = "会議"
+        XCTAssertEqual(vm.submitAction(), .search)
+    }
+
+    func testSubmitOpensSelectionWhenQueryIsAlreadySearched() async throws {
+        let records = makeRecords()
+        let hits = [SearchHit(record: records[2], score: 0.9), SearchHit(record: records[0], score: 0.5)]
+        let vm = try await makeVM(records: records, hits: hits)
+        vm.query = "  会議 "
+        await vm.runSearch()
+        XCTAssertEqual(vm.submitAction(), .open(records[2].id))
+        vm.selection = records[0].id
+        XCTAssertEqual(vm.submitAction(), .open(records[0].id))
+    }
+
+    func testSubmitSearchesAgainWhenQueryChangedOrSelectionMissing() async throws {
+        let records = makeRecords()
+        let hits = [SearchHit(record: records[2], score: 0.9)]
+        let vm = try await makeVM(records: records, hits: hits)
+        vm.query = "会議"
+        await vm.runSearch()
+        vm.query = "会議 資料"
+        XCTAssertEqual(vm.submitAction(), .search)
+        vm.query = "会議"
+        vm.selection = nil
+        XCTAssertEqual(vm.submitAction(), .search)
+        vm.selection = "gone"
+        XCTAssertEqual(vm.submitAction(), .search)
+    }
+
+    func testSubmitWithEmptyQueryIsSearch() async throws {
+        let vm = try await makeVM(records: makeRecords())
+        vm.selection = vm.visibleRecords[0].id
+        vm.query = "   "
+        XCTAssertEqual(vm.submitAction(), .search)
+    }
+}
+
 private func eventually(timeout: TimeInterval = 2, _ condition: @escaping () async -> Bool) async -> Bool {
     let deadline = Date().addingTimeInterval(timeout)
     while Date() < deadline {
